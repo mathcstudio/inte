@@ -34,7 +34,7 @@ const TEACHER_RULES = `당신은 고등학교 2학년 '미적분Ⅰ'에서 정�
 
 /* ---------------- 진입점 ---------------- */
 function doGet() {
-  return json_({ ok: true, service: 'defint1', aiEnabled: aiEnabled_(), golfOpen: golfOpen_() });
+  return json_({ ok: true, service: 'defint1', aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_() });
 }
 
 function doPost(e) {
@@ -50,7 +50,7 @@ function doPost(e) {
 
 const ACTIONS = {
   /* 학생용 */
-  status: () => ({ aiEnabled: aiEnabled_(), golfOpen: golfOpen_() }),
+  status: () => ({ aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_() }),
   studentLogin: req => studentLogin_(req),
   log:    req => { logAnswer_(req); return {}; },
   golf:   req => { logGolf_(req); return {}; },
@@ -74,6 +74,7 @@ function getModel_() { return props_().getProperty('MODEL') || DEFAULTS.model; }
 function getNum_(name, def) { const v = Number(props_().getProperty(name)); return v > 0 ? v : def; }
 function aiEnabled_() { return !!getKey_() && props_().getProperty('AI_ENABLED') !== 'false'; }
 function golfOpen_() { return props_().getProperty('GOLF_OPEN') === 'true'; } // 단계 통과 없이 골프 열기
+function escapeMode_() { return props_().getProperty('ESCAPE_MODE') === 'true'; } // 방탈출 모드
 
 function config_() {
   const key = getKey_();
@@ -90,6 +91,7 @@ function config_() {
     mustChangePin: !props_().getProperty('PIN_HASH'),
     sheetUrl: sheetUrl,
     golfOpen: golfOpen_(),
+    escapeMode: escapeMode_(),
   };
 }
 
@@ -100,6 +102,7 @@ function saveConfig_(req) {
   if (typeof req.model === 'string' && /^[a-z0-9.\-]+$/i.test(req.model)) p.setProperty('MODEL', req.model);
   if (typeof req.aiEnabled === 'boolean') p.setProperty('AI_ENABLED', String(req.aiEnabled));
   if (typeof req.golfOpen === 'boolean') p.setProperty('GOLF_OPEN', String(req.golfOpen));
+  if (typeof req.escapeMode === 'boolean') p.setProperty('ESCAPE_MODE', String(req.escapeMode));
   if (Number(req.perMinute) > 0) p.setProperty('PER_MINUTE', String(Math.min(300, Math.floor(req.perMinute))));
   if (Number(req.perDay) > 0) p.setProperty('PER_DAY', String(Math.min(20000, Math.floor(req.perDay))));
   if (typeof req.newPin === 'string' && req.newPin) {

@@ -142,6 +142,67 @@ input[type=range]{height:30px;accent-color:var(--blue)}
 .gate-note{font-size:12px;color:#94a3b8;line-height:1.5;margin-top:14px}
 #whoChip{background:#4c1d95}
 
+/* ==================== 방탈출 모드: 정적분 연구소 탈출 ==================== */
+#escTimer,#escBar{display:none}
+body.escape{background:radial-gradient(ellipse at 20% 0%,#1e1b4b 0%,#0b1020 55%,#05070f 100%);color:#e5e7eb}
+body.escape header{background:#05070f;border-bottom:1px solid #312e81}
+body.escape header .sub{color:#fbbf24;opacity:.9}
+body.escape #escTimer{display:inline-block;background:#422006;color:#fde68a;font-variant-numeric:tabular-nums}
+body.escape main>section.card{background:linear-gradient(180deg,#111827,#0f172a);border:1px solid #334155;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+body.escape .story,body.escape .mtitle,body.escape .legend,body.escape .ctrl label,body.escape .small,body.escape .hintline{color:#cbd5e1}
+body.escape .ctrl label b,body.escape .mtitle{color:#f8fafc}
+body.escape .story b{color:#fde68a}
+body.escape .story .tip{background:#1f2937;color:#fde68a;border:1px dashed #a16207}
+body.escape .chip{background:#1e293b;color:#e2e8f0} body.escape .chip .k{color:#94a3b8}
+body.escape .chip.locked .v{color:#64748b}
+body.escape .fbox{background:#1e293b;border-color:#334155;color:#e2e8f0}
+body.escape canvas{border-color:#475569}
+body.escape select,body.escape .opt{background:#f8fafc;color:#111827}
+body.escape .chat{background:#0f172a!important;border-color:#334155!important;color:#e5e7eb}
+/* 질문 상자 = 연구원의 쪽지(밝게 유지) */
+body.escape .qbox{background:#fdf6e3;border:2px solid #a16207;color:#422006;box-shadow:inset 0 0 0 4px #fef3c7}
+body.escape .qbox .q{color:#422006}
+body.escape .qbox input[type=text]{font-family:"Consolas","Courier New",monospace;font-size:22px;letter-spacing:3px;text-align:center;background:#111827;color:#fde68a;border:3px solid #a16207;border-radius:12px}
+body.escape .qbox textarea{background:#fffbeb;border-color:#d97706}
+body.escape .qbox .hintline{color:#78350f}
+body.escape .qbox button#submitBtn{background:#b45309}
+body.escape .fb.good{background:#052e16;color:#bbf7d0;border-left-color:#22c55e}
+body.escape .fb.bad{background:#2a1205;color:#fed7aa;border-left-color:#f97316}
+body.escape .fb.info{background:#1e1b4b;color:#ddd6fe;border-left-color:#a78bfa}
+@keyframes escShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.esc-shake{animation:escShake .45s}
+@keyframes escUnlock{0%{transform:scale(.6) rotate(-15deg);opacity:0}60%{transform:scale(1.25) rotate(8deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+.esc-lock{display:inline-block;font-size:30px;animation:escUnlock .6s ease-out;vertical-align:middle;margin-right:6px}
+/* 방 진행 표시 */
+.rooms{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.room{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:6px 4px;text-align:center;color:#cbd5e1;font-size:11.5px;line-height:1.3}
+.room .ri{font-size:22px;display:block}
+.room.cur{border-color:#fbbf24;box-shadow:0 0 0 2px rgba(251,191,36,.35);color:#fde68a}
+.room.done{border-color:#16a34a}
+.room.lock{opacity:.45}
+.room .rd{display:flex;justify-content:center;gap:3px;margin-top:4px;flex-wrap:wrap}
+.room .rd span{width:15px;height:15px;border-radius:50%;background:#334155;font-size:9px;line-height:15px;color:#cbd5e1;cursor:pointer}
+.room .rd span.y{background:#16a34a;color:#fff} .room .rd span.c{outline:2px solid #fbbf24}
+#escBar{background:#0b1220;border:1px solid #334155;border-radius:12px;padding:8px 12px;margin-bottom:10px;font-size:13.5px;color:#cbd5e1;align-items:center;gap:10px;flex-wrap:wrap}
+body.escape #escBar{display:flex}
+#escBar .keys span{font-size:18px;filter:grayscale(1) opacity(.35)} #escBar .keys span.got{filter:none}
+.esc-flavor{background:#0b1220;border-left:3px solid #fbbf24;color:#fde68a;padding:6px 10px;border-radius:6px;margin-bottom:8px;font-size:14px}
+.dial{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.dial span{width:54px;height:64px;border-radius:10px;background:#111827;border:3px solid #a16207;color:#fde68a;font:700 26px "Consolas",monospace;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -8px 12px rgba(0,0,0,.5)}
+.vault{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.vault span{background:#111827;border:1px solid #a16207;color:#fde68a;border-radius:8px;padding:4px 10px;font-size:13px}
+/* 방 입장 카드 · 탈출 증명서 */
+.esc-over{position:fixed;inset:0;z-index:48;background:rgba(2,6,23,.82);display:none;align-items:center;justify-content:center;padding:16px}
+.esc-over.show{display:flex}
+.esc-card{background:linear-gradient(180deg,#1e1b4b,#0f172a);border:2px solid #a16207;border-radius:18px;max-width:440px;width:100%;padding:26px 24px;color:#e5e7eb;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+.esc-card .big{font-size:52px;margin-bottom:4px}
+.esc-card h2{margin:4px 0 10px;color:#fde68a}
+.esc-card p{line-height:1.7;font-size:15px;color:#cbd5e1}
+.esc-card button{background:#b45309;font-size:16px;padding:11px 22px;margin:4px}
+.cert{background:#fdf6e3;color:#422006;border:6px double #a16207;border-radius:10px;padding:18px;margin:10px 0;text-align:left;font-size:15px;line-height:1.9}
+.cert h3{text-align:center;margin:0 0 8px;font-size:20px;letter-spacing:4px}
+@media (max-width:700px){ .rooms{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px} .room{font-size:10px;padding:4px 2px} .room .ri{font-size:18px} .room .rn{display:none} }
+
 /* ---- 관리자: 반별 학습 현황 ---- */
 .dash{position:fixed;inset:0;z-index:52;background:var(--bg);overflow-y:auto;display:none}
 .dash.show{display:block}
@@ -254,6 +315,7 @@ input[type=range]{height:30px;accent-color:var(--blue)}
   <div><h1 style="display:inline">∫ 정적분 탐구실</h1><span class="sub">미적분Ⅰ · 넓이로 정적분의 뜻을 찾아가요</span></div>
   <div class="hbtns">
     <span id="whoChip" class="badge" style="display:none"></span>
+    <span id="escTimer" class="badge" title="탈출에 걸린 시간 (제한 시간은 없어요)">⏱ 00:00</span>
     <button id="tourBtn" class="ghost" title="기능 안내를 다시 봐요">ⓘ 사용 안내</button>
     <button id="golfBtn" class="ghost" title="모든 탐구 단계를 마치면 열려요">🔒 보너스 게임</button>
     <span id="aiBadge" class="badge">AI 피드백 꺼짐</span>
@@ -352,6 +414,7 @@ input[type=range]{height:30px;accent-color:var(--blue)}
   </section>
   <!-- 오른쪽: 탐구 -->
   <section class="card">
+    <div id="escBar"></div>
     <div class="progress" id="prog"></div>
     <div id="mission"></div>
 
@@ -367,6 +430,9 @@ input[type=range]{height:30px;accent-color:var(--blue)}
 </main>
 
 <button id="jumpBtn" type="button">❓ 질문 보기</button>
+
+<!-- 방탈출 모드: 방 입장 카드 / 탈출 증명서 -->
+<div class="esc-over" id="escOver"><div class="esc-card" id="escCard"></div></div>
 
 <!-- 관리자: 반별 학습 현황 -->
 <div id="dash" class="dash">
@@ -487,6 +553,8 @@ input[type=range]{height:30px;accent-color:var(--blue)}
         <div class="row" style="margin:0;flex-wrap:nowrap"><select id="modelIn"></select><button class="ghost" id="modelLoad" style="white-space:nowrap">목록 불러오기</button></div>
         <div class="small" id="modelDesc" style="margin-top:4px"></div></div>
       <div class="field"><label><input type="checkbox" id="aiOn"> 학생에게 AI 피드백·AI 도우미 켜기</label></div>
+      <div class="field"><label><input type="checkbox" id="escapeMode"> 🔐 방탈출 모드 〈정적분 연구소 탈출〉</label>
+        <div class="small" style="margin-top:2px">같은 15단계를 방 5개로 꾸며 보여 줘요. 문항·채점·기록은 그대로이고, 탈출 시간은 기록만 해요(제한 없음).</div></div>
       <div class="field"><label><input type="checkbox" id="golfOpen"> ⛳ 보너스 게임(정적분 골프)을 단계 통과 없이 열기</label>
         <div class="small" style="margin-top:2px">켜면 모든 학생이 탐구 단계를 마치지 않아도 바로 골프를 할 수 있어요. (저장 후 학생 화면에 1~2분 안에 반영)</div></div>
       <div class="field"><label>사용량 제한 (반 전체 합계)</label>
@@ -1010,7 +1078,8 @@ $('golfBtn').onclick=()=>{
 };
 function renderProg(){
   updateGolfBtn();
-  const box=$('prog'); box.innerHTML='';
+  if(ESCAPE){ renderRooms(); renderEscBar(); return; }
+  const box=$('prog'); box.className='progress'; box.innerHTML='';
   MISSIONS.forEach((m,i)=>{
     const d=document.createElement('div'); d.className='dot'; d.textContent=i+1;
     const unlocked = i===0 || P.done.includes(i-1) || P.done.includes(i);
@@ -1071,12 +1140,14 @@ function loadMission(){
   bindQ(m);
   $('hintBtn').onclick=()=>{
     const hs=hintsOf(m);
-    if(hintsUsed<hs.length){ showFb('info','💡 힌트 '+(hintsUsed+1)+': '+hs[hintsUsed]); hintsUsed++; }
+    if(hintsUsed<hs.length){ showFb('info',hintWord()+' '+(hintsUsed+1)+': '+hs[hintsUsed]); hintsUsed++; if(ESCAPE){P.escClues=(P.escClues||0)+1; saveProg(); renderEscBar();} }
     else showFb('info','💡 힌트를 모두 봤어요. 그래프를 직접 움직여 보면서 한 번 더 생각해 볼까요?');
   };
   $('revealBtn').onclick=()=>{ showFb('info','📘 풀이: '+m.reveal+'<br><span class="small">풀이를 읽고 난 뒤, 자신의 말로 다시 답을 제출해 보세요.</span>'); record(m,'','풀이 열람',''); };
   $('submitBtn').onclick=()=>submit(m);
   $('nextBtn').onclick=()=>{ if(P.cur<MISSIONS.length-1){P.cur++;} else {P.cur=0;} saveProg(); loadMission(); };
+  if(ESCAPE) $('nextBtn').textContent=P.cur<MISSIONS.length-1?(roomOf(P.cur+1)!==roomOf(P.cur)?'🚪 다음 방으로 ▶':'다음 자물쇠 ▶'):'처음 방으로';
+  decorateEscape(m);
 }
 function showFb(kind,html){const fb=$('fb');fb.className='fb show '+kind;fb.innerHTML=html;}
 function parseNum(s){
@@ -1102,7 +1173,7 @@ function correct(m, answer, result, fbHtml){
     $('hintLine').textContent='이제 ②번 문항이에요. 구한 값을 그래프와 연결해 보세요.';
     return;
   }
-  showFb('good',(fbHtml?fbHtml+'<br><br>':'')+'✅ '+successOf(m)); solved(m);
+  showFb('good',(ESCAPE?'<span class="esc-lock">🔓</span>':'')+(fbHtml?fbHtml+'<br><br>':'')+'✅ '+successOf(m)); solved(m);
 }
 function solved(m){
   const first=!P.done.includes(P.cur);
@@ -1112,7 +1183,8 @@ function solved(m){
   refresh(); renderProg();
   $('nextBtn').style.display='inline-block'; $('revealBtn').style.display='none';
   $('hintLine').textContent='✅ 해결!';
-  if(allDone() && !GOLF_OPEN){
+  escOnSolved(first);
+  if(allDone() && !GOLF_OPEN && !ESCAPE){
     const fb=$('fb'); const d=document.createElement('div'); d.style.marginTop='10px';
     d.innerHTML='<b>🎁 보너스 게임이 열렸어요!</b> 배운 정적분으로 골프를 쳐 볼까요? <button style="background:#16a34a;margin-left:6px">⛳ 정적분 골프 시작</button>';
     d.querySelector('button').onclick=()=>openGolf(); fb.appendChild(d);
@@ -1121,7 +1193,8 @@ function solved(m){
 function wrong(m, msg){
   tries++;
   const hs=hintsOf(m), h=hs.length?hs[Math.min(tries-1,hs.length-1)]:'';
-  showFb('bad', msg + (h?'<br>💡 '+h:''));
+  showFb('bad', msg + (h?'<br>'+(ESCAPE?'📜 ':'💡 ')+h:''));
+  if(ESCAPE){ const qb=document.querySelector('.qbox'); qb.classList.remove('esc-shake'); void qb.offsetWidth; qb.classList.add('esc-shake'); }
   if(tries>=3) $('revealBtn').style.display='inline-block';
   $('hintLine').textContent=`시도 ${tries}번째 — 틀려도 괜찮아요. 생각을 고쳐 가는 게 배우는 과정이에요.`;
 }
@@ -1194,6 +1267,135 @@ function ruleJudge(m,txt){
     wrong(m,msg); record(m,txt,'미통과',msg);
   }
 }
+
+/* ====================== 방탈출 모드: 〈정적분 연구소 탈출〉 ======================
+   선생님이 관리자 화면에서 켜면(또는 주소 끝에 ?mode=escape) 같은 15단계를 '방 5개'로 보여 줘요.
+   문항·채점·기록은 그대로이고, 이야기·자물쇠 연출·열쇠 조각·탈출 시간만 더해져요. */
+let ESCAPE=false;
+const ESC_URL=/[?&]mode=escape\b/.test(location.search);
+const ROOMS=[
+  {icon:'🗺', name:'지도실',      ids:['pond1','pond2'],                 key:'📓', keyName:'연구 일지',
+   intro:'눈을 떠 보니 <b>정적분 연구소</b>. 문은 모두 잠겨 있다.<br>책상 위 연구원의 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.'},
+  {icon:'📐', name:'측량실',      ids:['rect2','approach'],              key:'🧩', keyName:'금고 번호 조각',
+   intro:'곡선으로 휘어진 벽이 있는 <b>측량실</b>.<br>공식이 없는 넓이를 재야 금고 번호 조각을 얻을 수 있다.'},
+  {icon:'🪞', name:'거울의 방',   ids:['sign','mix','dir','split','def'], key:'🔢', keyName:'다이얼 번호',
+   intro:'사방이 거울인 방. 이곳에서는 넓이에도 <b>방향과 부호</b>가 있다.<br>문에는 <b>4자리 다이얼 자물쇠</b>가 달려 있다.'},
+  {icon:'⚙', name:'기계실',      ids:['areafn','squeeze','ftc_text'],    key:'🔧', keyName:'기계 가동 열쇠',
+   intro:'거대한 <b>넓이 기계</b>가 멈춰 있다.<br>기계를 다시 움직여야 금고로 가는 길이 열린다.'},
+  {icon:'🔐', name:'마지막 금고', ids:['constC','calc','interp'],          key:'🗝', keyName:'출구 열쇠',
+   intro:'연구소 출구 앞을 가로막은 <b>마지막 금고</b>.<br>부정적분의 힘으로 열어야 탈출할 수 있다.'},
+];
+const ESC_FLAVOR={
+  pond1:'벽에 커다란 호수 지도가 걸려 있다. 탁자 위에는 크기가 다른 모눈 렌즈 4개.',
+  pond2:'연구 일지가 잠겨 있다. 표지에 적힌 질문에 답해야 열린다.',
+  rect2:'곡선 모양의 벽 앞에 직사각형 블록 두 개가 놓여 있다.',
+  approach:'번호 조각이 숨겨진 상자. 블록을 한없이 잘게 쪼개면 숫자가 떠오른다.',
+  sign:'첫 번째 다이얼. 거울에 비친 넓이는 음수로 보인다.',
+  mix:'두 번째 다이얼. 위와 아래의 넓이가 서로 맞서 있다.',
+  dir:'세 번째 다이얼. 거울 속에서는 길이 거꾸로 흐른다.',
+  split:'네 번째 다이얼. 끊어진 길을 이어 붙여라.',
+  def:'네 숫자가 맞춰지자 문 위에 글자가 떠오른다: "정적분이란 무엇인가?"',
+  areafn:'넓이 기계의 레버를 당겨 보자. x만큼 넓이가 쌓인다.',
+  squeeze:'두 톱니 m과 M이 맞물려야 기계가 돈다.',
+  ftc_text:'기계 가동 스위치. 원리를 기록해야 켜진다.',
+  constC:'금고의 첫 다이얼은 속임수다. C를 아무리 돌려도…?',
+  calc:'금고 두 번째 칸. 측량실에서 얻은 번호 조각의 정체는?',
+  interp:'마지막 문. 계산하고, 그 뜻을 말해야 열린다.',
+};
+const roomOf=i=>ROOMS.findIndex(r=>r.ids.includes(MISSIONS[i].id));
+const roomIdx=r=>ROOMS[r].ids.map(idxOf);
+const roomDone=r=>roomIdx(r).every(i=>P.done.includes(i));
+const hintWord=()=>ESCAPE?'📜 연구원의 쪽지':'💡 힌트';
+function fmtTime(ms){const s=Math.floor((ms||0)/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return (h?h+':'+String(m).padStart(2,'0'):String(m).padStart(2,'0'))+':'+String(ss).padStart(2,'0');}
+
+function setEscape(on){
+  on=!!(on||ESC_URL);
+  const changed=on!==ESCAPE; ESCAPE=on;
+  document.body.classList.toggle('escape',on);
+  document.querySelector('header .sub').textContent=on?'🔐 방탈출 모드 · 정적분 연구소를 탈출하라!':'미적분Ⅰ · 넓이로 정적분의 뜻을 찾아가요';
+  $('golfBtn').dataset.esc=on?'1':'';
+  if(changed && ME){ renderProg(); loadMission(); }
+}
+function renderRooms(){
+  const box=$('prog'); box.className='rooms'; box.innerHTML='';
+  ROOMS.forEach((R,r)=>{
+    const idx=roomIdx(r), cur=idx.includes(P.cur), done=roomDone(r);
+    const open=idx.some(i=>i===0||P.done.includes(i-1)||P.done.includes(i));
+    const d=document.createElement('div'); d.className='room'+(cur?' cur':'')+(done?' done':'')+(open?'':' lock');
+    d.innerHTML=`<span class="ri">${open?R.icon:'🔒'}</span><span class="rn">${r+1}. ${R.name}</span><div class="rd">${idx.map(i=>{
+      const un=i===0||P.done.includes(i-1)||P.done.includes(i);
+      return `<span data-i="${i}" class="${P.done.includes(i)?'y':''} ${i===P.cur?'c':''}" title="${escapeHtml(MISSIONS[i].title)}" style="${un?'':'opacity:.4;cursor:not-allowed'}">${i+1}</span>`;}).join('')}</div>`;
+    box.appendChild(d);
+  });
+  box.querySelectorAll('.rd span').forEach(s=>s.onclick=()=>{const i=+s.dataset.i; if(i===0||P.done.includes(i-1)||P.done.includes(i)){P.cur=i;saveProg();loadMission();}});
+}
+function renderEscBar(){
+  if(!ESCAPE){ $('escBar').innerHTML=''; return; }
+  const r=roomOf(P.cur), got=ROOMS.map((R,k)=>roomDone(k));
+  $('escBar').innerHTML=`<b style="color:#fde68a">${ROOMS[r].icon} ${r+1}번 방 · ${ROOMS[r].name}</b>
+    <span class="keys" title="모은 열쇠 조각">🎒 ${ROOMS.map((R,k)=>`<span class="${got[k]?'got':''}" title="${R.keyName}">${R.key}</span>`).join('')}</span>
+    <span>📜 쪽지 ${P.escClues||0}장 사용</span>`;
+}
+/* 미션 화면에 방탈출 장식 더하기 (loadMission 끝에서 호출) */
+function decorateEscape(m){
+  renderEscBar();
+  if(!ESCAPE) return;
+  const fl=ESC_FLAVOR[m.id]; if(fl) $('mission').querySelector('.story').insertAdjacentHTML('beforebegin',`<div class="esc-flavor">🔦 ${fl}</div>`);
+  $('hintBtn').textContent='📜 연구원의 쪽지';
+  if(m.id==='def'){ // 거울의 방: 앞의 네 답이 다이얼 번호가 돼요
+    const dig=['sign','mix','dir','split'].map(id=>P.done.includes(idxOf(id))?({sign:'−2',mix:'0',dir:'−4',split:'6'})[id]:'?');
+    $('mission').querySelector('.story').insertAdjacentHTML('afterend',`<div class="dial">${dig.map(d=>`<span>${d}</span>`).join('')}</div><div class="small" style="text-align:center;margin-bottom:6px">다이얼이 맞춰졌다! 하지만 문은 아직 열리지 않는다…</div>`);
+  }
+  if(roomOf(P.cur)===4){ // 마지막 금고: 모은 조각 보여 주기
+    const pieces=[]; if(P.done.includes(idxOf('approach'))) pieces.push('🧩 번호 조각 ≈ 2.67');
+    if(roomDone(2)) pieces.push('🔢 다이얼 −2 · 0 · −4 · 6'); if(roomDone(3)) pieces.push('🔧 기계 가동 완료');
+    if(pieces.length) $('mission').querySelector('.story').insertAdjacentHTML('afterend',`<div class="vault">${pieces.map(p=>`<span>${p}</span>`).join('')}</div>`);
+  }
+  // 처음 들어온 방이면 입장 이야기를 보여 줘요
+  const r=roomOf(P.cur); P.escSeen=P.escSeen||[];
+  if(!P.escSeen.includes(r) && P.cur===roomIdx(r)[0]){
+    P.escSeen.push(r); saveProg();
+    showEscCard(`<div class="big">${ROOMS[r].icon}</div><h2>${r+1}번 방 · ${ROOMS[r].name}</h2><p>${ROOMS[r].intro}</p><button id="escGo">🚪 들어가기</button>`);
+    $('escGo').onclick=hideEscCard;
+  }
+}
+function showEscCard(html){ $('escCard').innerHTML=html; $('escOver').classList.add('show'); }
+function hideEscCard(){ $('escOver').classList.remove('show'); }
+/* 맞혔을 때: 자물쇠 열림 / 방을 다 풀면 열쇠 조각 / 모두 풀면 탈출 */
+function escOnSolved(firstTime){
+  if(!ESCAPE) return;
+  const r=roomOf(P.cur); renderEscBar();
+  if(firstTime && roomDone(r) && r<ROOMS.length-1){
+    setTimeout(()=>{ showEscCard(`<div class="big">${ROOMS[r].key}</div><h2>열쇠 조각 획득!</h2><p><b>${ROOMS[r].keyName}</b>을(를) 손에 넣었다.<br>${r+2}번 방 <b>${ROOMS[r+1].name}</b>으로 가는 문이 열렸다.</p><button id="escGo">다음 방으로 ▶</button>`);
+      $('escGo').onclick=()=>{ hideEscCard(); P.cur=roomIdx(r+1)[0]; saveProg(); loadMission(); }; },900);
+  }
+  if(firstTime && allDone()){
+    P.escDoneMs=P.escMs; saveProg();
+    logEvent({index:MISSIONS.length-1, title:'🎉 연구소 탈출', type:'방탈출', answer:'', result:'탈출',
+      feedback:`걸린 시간 ${fmtTime(P.escMs)}, 연구원의 쪽지 ${P.escClues||0}장 사용`, tries:'', hints:P.escClues||0});
+    setTimeout(showCert,900);
+  }
+}
+function showCert(){
+  const d=new Date(), who=ME?(ME.teacher?'선생님 (체험)':`${ME.sid} ${ME.name}`):'';
+  showEscCard(`<div class="big">🎉</div><h2>탈출 성공!</h2>
+    <div class="cert"><h3>탈 출 증 명 서</h3>
+      <div>이름 : <b>${escapeHtml(who)}</b></div>
+      <div>탈출 시간 : <b>${fmtTime(P.escDoneMs||P.escMs)}</b></div>
+      <div>사용한 쪽지 : <b>${P.escClues||0}장</b></div>
+      <div>모은 열쇠 : ${ROOMS.map(R=>R.key).join(' ')}</div>
+      <div style="margin-top:6px">위 사람은 넓이의 비밀을 밝혀 <b>정적분 연구소</b>를 탈출하였음을 증명합니다.</div>
+      <div style="text-align:right;font-size:13px">${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.</div></div>
+    <button id="escGolf">⛳ 보너스 방(골프)으로</button><button id="escClose" style="background:#334155">닫기</button>`);
+  $('escGolf').onclick=()=>{ hideEscCard(); openGolf(); };
+  $('escClose').onclick=hideEscCard;
+}
+/* 탈출 시간: 방탈출 모드에서 화면을 보고 있는 동안만 쌓여요 (제한 시간 없음) */
+setInterval(()=>{
+  if(!ESCAPE||!ME||document.visibilityState!=='visible'||allDone()||$('gate').classList.contains('hide')===false) { if(ESCAPE&&ME) $('escTimer').textContent='⏱ '+fmtTime(P.escDoneMs||P.escMs); return; }
+  P.escMs=(P.escMs||0)+1000; $('escTimer').textContent='⏱ '+fmtTime(P.escMs);
+  if(P.escMs%15000===0) saveProg();
+},1000);
 
 /* ====================== 학생 입장 · 기록 ====================== */
 const LOGQ='defint1_logq';
@@ -1310,7 +1512,7 @@ function updateBadge(){
 }
 async function refreshStatus(){
   if(!serverUrl()){AI_ON=false;updateBadge();return}
-  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; setEscape(!!j.escapeMode); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
   if(typeof updateGolfBtn==='function') updateGolfBtn();
   updateBadge();
 }
@@ -1388,7 +1590,7 @@ async function showCfg(){
     const c=await api('getConfig',{token:adminToken});
     $('keyState').innerHTML=c.hasKey?`<span style="color:var(--green)">● 저장됨 (끝자리 …${escapeHtml(c.keyTail)})</span>`:'<span style="color:var(--red)">● 아직 없음</span>';
     fillModels(BASE_MODELS, c.model);
-    $('aiOn').checked=c.aiEnabled; $('golfOpen').checked=!!c.golfOpen; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
+    $('aiOn').checked=c.aiEnabled; $('golfOpen').checked=!!c.golfOpen; $('escapeMode').checked=!!c.escapeMode; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
     $('usage').textContent=`오늘 사용: ${c.usedToday} / ${c.perDay}회`;
     $('pinWarn').style.display=c.mustChangePin?'block':'none';
     $('sheetInfo').innerHTML=c.sheetUrl
@@ -1417,7 +1619,7 @@ $('modelLoad').onclick=async()=>{
   }catch(e){ handleAdminErr(e); }
 };
 async function saveCfg(extra={}){
-  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked, golfOpen:$('golfOpen').checked,
+  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked, golfOpen:$('golfOpen').checked, escapeMode:$('escapeMode').checked,
     perMinute:Number($('perMin').value)||undefined, perDay:Number($('perDay').value)||undefined, ...extra};
   const k=$('keyIn').value.trim(); if(k) data.key=k;
   const np=$('newPin').value.trim(); if(np) data.newPin=np;
@@ -1483,7 +1685,8 @@ function renderDash(){
     <div class="kpi"><div class="k">학생 수</div><div class="v">${T}명</div></div>
     <div class="kpi"><div class="k">평균 완료 단계</div><div class="v">${avg.toFixed(1)} / ${N}</div></div>
     <div class="kpi"><div class="k">전체 단계 달성률</div><div class="v">${pct(stepCnt.reduce((a,b)=>a+b,0),T*N)}%</div></div>
-    <div class="kpi"><div class="k">모든 단계 완료</div><div class="v">${doneAll}명</div></div></div>`;
+    <div class="kpi"><div class="k">모든 단계 완료</div><div class="v">${doneAll}명</div></div>
+    <div class="kpi"><div class="k">🔐 연구소 탈출</div><div class="v">${new Set((DASH.answers||[]).filter(a=>a.result==='탈출'&&list.some(s=>s.sid===a.sid)).map(a=>a.sid)).size}명</div></div></div>`;
   if(!T){ $('dBody').innerHTML=h+'<div class="card">아직 기록된 학생이 없어요.</div>'; return; }
   // 전체 탭: 반별 비교표
   if(dashCls==='all' && classes.length){
@@ -1957,6 +2160,7 @@ window.addEventListener('resize',()=>{ if(started && $('golfApp').classList.cont
 window.addEventListener('resize',()=>{ clearTimeout(window._rz); window._rz=setTimeout(()=>refresh(),80); });
 /* ====================== 시작 ====================== */
 updateBadge();
+setEscape(false);   // 주소에 ?mode=escape가 있으면 바로 방탈출 모드
 refreshStatus();
 // 같은 브라우저 창에서 이미 입장했다면 이어서, 아니면 입장 화면부터
 (function(){ let me=null; try{me=JSON.parse(sessionStorage.getItem('defint1_me'))}catch(e){}
