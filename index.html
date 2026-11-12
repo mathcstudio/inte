@@ -262,6 +262,62 @@ body.escape #escBar{display:flex}
   #opening.slam .op-stage{animation:none}
 }
 
+/* ---- 방탈출 엔딩: 연구소 탈출 → 햇살 → 여유로운 골프 ---- */
+#ending{position:fixed;inset:0;z-index:71;overflow:hidden;background:#000;color:#0f172a;font-family:inherit}
+#ending .en-lab{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#1e293b 0%,#0b1020 55%,#000 100%);transition:opacity .8s}
+#ending .en-door{position:absolute;left:50%;top:50%;width:min(42vmin,260px);height:min(64vmin,400px);transform:translate(-50%,-58%);perspective:900px}
+#ending .en-light{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,#fffbeb 0%,#fde68a 35%,rgba(253,230,138,0) 70%);opacity:0;transition:opacity 1.4s}
+#ending .en-leaf{position:absolute;inset:0;background:linear-gradient(180deg,#334155,#1e293b);border:6px solid #0f172a;border-radius:6px 6px 0 0;
+  transform-origin:left center;transition:transform 1.6s cubic-bezier(.3,.7,.3,1);box-shadow:0 0 0 3px #475569}
+#ending .en-leaf .op-emblem{animation:none}
+#ending.open .en-leaf{transform:rotateY(-78deg)}
+#ending.open .en-light{opacity:1}
+#ending .en-pad{position:absolute;right:-18%;top:44%;width:22%;height:16%;background:#0f172a;border:2px solid #475569;border-radius:5px}
+#ending .en-pad i{position:absolute;left:50%;top:22%;width:9px;height:9px;margin-left:-4px;border-radius:50%;background:#f59e0b;box-shadow:0 0 10px #f59e0b}
+#ending.unlocked .en-pad i{background:#22c55e;box-shadow:0 0 12px #22c55e}
+#ending .en-flash{position:absolute;inset:0;background:#fffbeb;opacity:0;pointer-events:none;transition:opacity .7s}
+#ending.flash .en-flash{opacity:1}
+/* 골프장 */
+#ending .en-course{position:absolute;inset:0;opacity:0;transition:opacity 1s;background:linear-gradient(180deg,#7dd3fc 0%,#bae6fd 45%,#e0f2fe 62%)}
+#ending.course .en-course{opacity:1}
+#ending .en-sun{position:absolute;right:12%;top:9%;width:13vmin;height:13vmin;border-radius:50%;background:radial-gradient(circle,#fef9c3,#fde047 60%,#facc15);box-shadow:0 0 50px 18px rgba(253,224,71,.55);animation:enSun 6s ease-in-out infinite}
+@keyframes enSun{50%{box-shadow:0 0 70px 26px rgba(253,224,71,.65)}}
+#ending .en-cloud{position:absolute;height:5vmin;background:#fff;border-radius:999px;opacity:.95;animation:enCloud linear infinite}
+#ending .en-cloud:before,#ending .en-cloud:after{content:"";position:absolute;background:#fff;border-radius:50%}
+#ending .en-cloud:before{width:45%;height:160%;left:15%;bottom:20%} #ending .en-cloud:after{width:35%;height:130%;left:50%;bottom:25%}
+@keyframes enCloud{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+#ending .en-hill{position:absolute;left:-10%;right:-10%;border-radius:50% 50% 0 0}
+#ending .en-hill.h1{bottom:0;height:46%;background:linear-gradient(180deg,#86efac,#4ade80)}
+#ending .en-hill.h2{bottom:0;height:34%;left:-30%;right:30%;background:linear-gradient(180deg,#4ade80,#22c55e)}
+#ending .en-hill.h3{bottom:0;height:26%;left:35%;right:-25%;background:linear-gradient(180deg,#22c55e,#16a34a)}
+#ending .en-green{position:absolute;right:14%;bottom:20%;width:26vmin;height:6vmin;border-radius:50%;background:#bbf7d0;box-shadow:inset 0 -6px 10px rgba(22,101,52,.25)}
+#ending .en-hole{position:absolute;left:50%;top:40%;width:3.2vmin;height:1.3vmin;margin-left:-1.6vmin;border-radius:50%;background:#14532d}
+#ending .en-pole{position:absolute;left:50%;bottom:58%;width:.6vmin;height:16vmin;background:#f8fafc;margin-left:-.3vmin}
+#ending .en-flag{position:absolute;left:50%;bottom:calc(58% + 10.5vmin);width:7vmin;height:5vmin;background:#ef4444;clip-path:polygon(0 0,100% 50%,0 100%);transform-origin:left center;animation:enFlag 1.6s ease-in-out infinite}
+@keyframes enFlag{50%{transform:scaleX(.82) skewY(4deg)}}
+#ending .en-golfer{position:absolute;left:12%;bottom:15%;font-size:16vmin;line-height:1;transform-origin:60% 85%;filter:drop-shadow(0 6px 4px rgba(0,0,0,.15))}
+#ending.swing .en-golfer{animation:enSwing .9s ease-in-out}
+@keyframes enSwing{0%{transform:rotate(0)}35%{transform:rotate(-14deg)}60%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+#ending .en-ball{position:absolute;width:2.4vmin;height:2.4vmin;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);opacity:0}
+#ending svg.en-trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#ending .en-nice{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%) scale(.4);font-size:clamp(34px,8vw,72px);font-weight:900;color:#fff;
+  text-shadow:0 4px 0 #16a34a,0 8px 18px rgba(0,0,0,.25);opacity:0;transition:transform .5s cubic-bezier(.2,1.6,.4,1),opacity .4s;white-space:nowrap}
+#ending.nice .en-nice{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#ending .en-spark{position:absolute;width:10px;height:10px;border-radius:50%;opacity:0}
+#ending.nice .en-spark{animation:enSpark 1.1s ease-out forwards}
+@keyframes enSpark{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4)}}
+#ending .en-cap{position:absolute;left:50%;bottom:7vh;transform:translateX(-50%);width:min(92vw,640px);min-height:84px;padding:14px 20px;border-radius:14px;
+  background:rgba(2,6,23,.72);border:1px solid #334155;color:#f8fafc;font-size:clamp(16px,2.6vw,20px);line-height:1.7;text-align:center;transition:background .8s,color .8s}
+#ending.course .en-cap{background:rgba(255,255,255,.88);color:#14532d;border-color:#86efac;bottom:auto;top:6vh}
+#ending.course .en-nice{top:42%}
+#ending.course .en-skip{top:auto;bottom:14px}
+#ending .en-cap button{margin-top:8px;background:#16a34a;font-size:17px;padding:11px 24px;border-radius:12px}
+#ending .en-skip{position:absolute;right:14px;top:14px;z-index:3;background:rgba(15,23,42,.75);border:1px solid #475569;color:#e2e8f0;font-size:14px;padding:8px 14px;border-radius:999px}
+@media (prefers-reduced-motion: reduce){
+  #ending .en-sun,#ending .en-cloud,#ending .en-flag,#ending.swing .en-golfer,#ending.nice .en-spark{animation:none!important}
+  #ending .en-leaf{transition:none}
+}
+
 /* ---- 관리자: 반별 학습 현황 ---- */
 .dash{position:fixed;inset:0;z-index:52;background:var(--bg);overflow-y:auto;display:none}
 .dash.show{display:block}
@@ -1432,7 +1488,7 @@ function escOnSolved(firstTime){
     P.escDoneMs=P.escMs; saveProg();
     logEvent({index:MISSIONS.length-1, title:'🎉 연구소 탈출', type:'방탈출', answer:'', result:'탈출',
       feedback:`걸린 시간 ${fmtTime(P.escMs)}, 연구원의 쪽지 ${P.escClues||0}장 사용`, tries:'', hints:P.escClues||0});
-    setTimeout(showCert,900);
+    setTimeout(()=>playEnding(showCert),900);
   }
 }
 function showCert(){
@@ -1445,7 +1501,8 @@ function showCert(){
       <div>모은 열쇠 : ${ROOMS.map(R=>R.key).join(' ')}</div>
       <div style="margin-top:6px">위 사람은 넓이의 비밀을 밝혀 <b>정적분 연구소</b>를 탈출하였음을 증명합니다.</div>
       <div style="text-align:right;font-size:13px">${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.</div></div>
-    <button id="escGolf">⛳ 보너스 방(골프)으로</button><button id="escClose" style="background:#334155">닫기</button>`);
+    <button id="escGolf">⛳ 보너스 방(골프)으로</button><button id="escReplay" style="background:#4c1d95">🎬 탈출 장면 다시 보기</button><button id="escClose" style="background:#334155">닫기</button>`);
+  $('escReplay').onclick=()=>{ hideEscCard(); playEnding(showCert); };
   $('escGolf').onclick=()=>{ hideEscCard(); openGolf(); };
   $('escClose').onclick=hideEscCard;
 }
@@ -1507,6 +1564,65 @@ function playOpening(){
   at(17200,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다.`));
   at(19600,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
   el.querySelector('#opSkip').onclick=finish; el.querySelector('#opStart').onclick=finish;
+}
+
+/* ---------- 방탈출 엔딩: 마지막 자물쇠 → 문이 열리고 햇살 → 연구소 뒤 골프장에서 여유롭게 한 타 ---------- */
+function playEnding(onDone){
+  const old=document.getElementById('ending'); if(old){ if(old._stop) old._stop(); old.remove(); }
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const who=ME?(ME.teacher?'선생님':`${ME.name} 연구원`):'연구원';
+  const el=document.createElement('div'); el.id='ending';
+  el.innerHTML=`
+    <div class="en-course">
+      <div class="en-sun"></div>
+      ${[0,1,2].map(i=>`<div class="en-cloud" style="top:${8+i*9}%;width:${16+i*6}vmin;animation-duration:${38+i*14}s;animation-delay:${-i*13}s"></div>`).join('')}
+      <div class="en-hill h1"></div><div class="en-hill h2"></div><div class="en-hill h3"></div>
+      <div class="en-green"><div class="en-hole"></div><div class="en-pole"></div><div class="en-flag"></div></div>
+      <div class="en-golfer" aria-hidden="true">🏌️</div>
+      <svg class="en-trail"><path id="enTrail" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3" stroke-dasharray="6 7" d=""/></svg>
+      <div class="en-ball"></div>
+      <div class="en-nice">나이스 샷! ⛳</div>
+      ${[...Array(12)].map((_,i)=>{const a=i/12*Math.PI*2;return `<span class="en-spark" style="--dx:${Math.round(Math.cos(a)*90)}px;--dy:${Math.round(Math.sin(a)*70)}px;background:${['#fde047','#f472b6','#60a5fa','#34d399'][i%4]}"></span>`}).join('')}
+    </div>
+    <div class="en-lab">
+      <div class="en-light"></div>
+      <div class="en-door"><div class="en-leaf"><div class="op-emblem"><img src="${EMBLEM_SRC}" alt="곡정고등학교 교표"></div><div class="en-pad"><i></i></div></div></div>
+    </div>
+    <div class="en-flash"></div>
+    <div class="en-cap" id="enCap"></div>
+    <button class="en-skip" id="enSkip">건너뛰기 ▶▶</button>`;
+  document.body.appendChild(el);
+  const timers=[]; let raf=0;
+  const at=(ms,fn)=>timers.push(setTimeout(()=>{ if(el.isConnected) fn(); },reduce?ms*0.6:ms));
+  el._stop=()=>{ timers.forEach(clearTimeout); cancelAnimationFrame(raf); };
+  const say=html=>{ const c=el.querySelector('#enCap'); if(c) c.innerHTML=html; };
+  const finish=()=>{ el._stop(); el.style.transition='opacity .6s'; el.style.opacity='0'; setTimeout(()=>{ el.remove(); if(onDone) onDone(); },600); };
+  // 공이 포물선을 그리며 깃발까지 날아가요 (수학 연구소다운 마무리 😉)
+  const shoot=()=>{
+    const g=el.querySelector('.en-golfer').getBoundingClientRect(), h=el.querySelector('.en-hole').getBoundingClientRect();
+    const x0=g.left+g.width*0.62, y0=g.top+g.height*0.92, x1=h.left+h.width/2, y1=h.top+h.height/2, peak=Math.min(y0,y1)-innerHeight*0.32;
+    const ball=el.querySelector('.en-ball'), trail=el.querySelector('#enTrail'), dur=reduce?10:1700, t0=performance.now();
+    // y = 포물선(시작점·끝점·꼭짓점을 지나는 2차식)
+    const P=t=>{ const x=x0+(x1-x0)*t; const y=(1-t)*(1-t)*y0+2*(1-t)*t*(2*peak-(y0+y1)/2)+t*t*y1; return [x,y]; };
+    ball.style.opacity='1'; let d='';
+    const step=now=>{ const t=Math.min(1,(now-t0)/dur); const [x,y]=P(t); ball.style.left=(x-ball.offsetWidth/2)+'px'; ball.style.top=(y-ball.offsetHeight/2)+'px';
+      d+=(d?' L':'M')+x.toFixed(1)+' '+y.toFixed(1); trail.setAttribute('d',d);
+      if(t<1) raf=requestAnimationFrame(step); else { ball.style.transition='opacity .4s,transform .4s'; ball.style.transform='scale(.4)'; ball.style.opacity='0';
+        el.querySelectorAll('.en-spark').forEach(s=>{ s.style.left=(x1-5)+'px'; s.style.top=(y1-5)+'px'; }); el.classList.add('nice'); } };
+    raf=requestAnimationFrame(step);
+  };
+  say('🔐 마지막 금고 앞… 숫자를 맞추자');
+  at(900,  ()=>{ el.classList.add('unlocked'); say('<b>철컥—</b> 마지막 자물쇠가 열렸다!'); });
+  at(2600, ()=>{ el.classList.add('open'); say('문이 천천히 열리고, 밖에서 아침 햇살이 쏟아진다.'); });
+  at(4600, ()=>el.classList.add('flash'));
+  at(5400, ()=>{ el.querySelector('.en-lab').style.opacity='0'; el.classList.add('course'); el.classList.remove('flash');
+    say('🎉 <b>탈출 성공!</b> 연구소 뒤편에는 작은 골프장이 펼쳐져 있다.'); });
+  at(8400, ()=>{ say('오늘은 여유롭게 한 타 쳐 볼까? 🏌️'); el.classList.add('swing'); });
+  at(8900, shoot);
+  at(11800,()=>say(`넓이의 비밀을 밝혀낸 <b>${escapeHtml(who)}</b>, 정말 수고했어요! 😊`));
+  at(13600,()=>{ say(`넓이의 비밀을 밝혀낸 <b>${escapeHtml(who)}</b>, 정말 수고했어요! 😊<br><button id="enCert">📜 탈출 증명서 받기</button>`);
+    el.querySelector('#enCert').onclick=finish; el.querySelector('#enSkip').style.display='none'; });
+  el.querySelector('#enSkip').onclick=finish;
 }
 
 const ESC_TOUR=[
@@ -1616,7 +1732,8 @@ $('gTeacher').onclick=()=>$('adminBtn').onclick();
 $('exitBtn').onclick=()=>{
   if(!confirm('나가면 입장 화면으로 돌아가요. 지금까지의 기록은 저장돼 있어요. 나갈까요?')) return;
   try{ if(ME) sessionStorage.removeItem('defint1_op_'+ME.sid); }catch(e){}
-  const op=document.getElementById('opening'); if(op){ if(op._stop) op._stop(); op.remove(); } ESC_HOLD=false; ESC_PENDING=null; if(typeof hideEscCard==='function') hideEscCard(); Tour.end&&document.querySelector('.tour-card.show')&&Tour.end();
+  const op=document.getElementById('opening'); if(op){ if(op._stop) op._stop(); op.remove(); }
+  const en=document.getElementById('ending'); if(en){ if(en._stop) en._stop(); en.remove(); } ESC_HOLD=false; ESC_PENDING=null; if(typeof hideEscCard==='function') hideEscCard(); Tour.end&&document.querySelector('.tour-card.show')&&Tour.end();
   ME=null; OPENING_FOR=''; try{sessionStorage.removeItem('defint1_me')}catch(e){}
   if(typeof closeGolf==='function') closeGolf();
   showGate();
