@@ -22,7 +22,7 @@ const SHEETS = {
 };
 
 const TEACHER_RULES = `당신은 고등학교 2학년 '미적분Ⅰ'에서 정적분을 처음 배우는 학생을 돕는 친절한 한국어 수학 선생님입니다.
-학생은 수학 성취 수준이 보통 이하일 수 있습니다. 다음을 반드시 지키세요.
+학생은 정적분을 처음 배우거나, 설명을 한 번 듣고도 어려워하는 학생일 수 있습니다. 학생의 수준을 평가하거나 언급하지 말고, 다음을 반드시 지키세요.
 - 정답이나 완성된 설명을 통째로 알려주지 마세요. 학생이 스스로 생각하도록 질문 한 개 또는 작은 실마리 한 개만 주세요.
 - 쉬운 말과 짧은 문장을 쓰고, 2~4문장, 150자 내외로 답하세요. 마크다운 기호는 쓰지 마세요.
 - 학생 답에서 잘한 점을 먼저 구체적으로 칭찬하세요.
@@ -34,7 +34,7 @@ const TEACHER_RULES = `당신은 고등학교 2학년 '미적분Ⅰ'에서 정�
 
 /* ---------------- 진입점 ---------------- */
 function doGet() {
-  return json_({ ok: true, service: 'defint1', aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_() });
+  return json_(Object.assign({ ok: true, service: 'defint1' }, publicSettings_()));
 }
 
 function doPost(e) {
@@ -50,7 +50,7 @@ function doPost(e) {
 
 const ACTIONS = {
   /* 학생용 */
-  status: () => ({ aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_() }),
+  status: () => publicSettings_(),
   studentLogin: req => studentLogin_(req),
   log:    req => { logAnswer_(req); return {}; },
   golf:   req => { logGolf_(req); return {}; },
@@ -75,6 +75,9 @@ function getNum_(name, def) { const v = Number(props_().getProperty(name)); retu
 function aiEnabled_() { return !!getKey_() && props_().getProperty('AI_ENABLED') !== 'false'; }
 function golfOpen_() { return props_().getProperty('GOLF_OPEN') === 'true'; } // 단계 통과 없이 골프 열기
 function escapeMode_() { return props_().getProperty('ESCAPE_MODE') === 'true'; } // 방탈출 모드
+function courseMode_() { return props_().getProperty('COURSE_MODE') === 'short' ? 'short' : 'full'; } // 1차시 코스(short) / 전체 코스(full)
+function varyLocks_() { return props_().getProperty('VARY_LOCKS') === 'true'; } // 학생마다 다른 자물쇠 숫자
+function publicSettings_() { return { aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_(), courseMode: courseMode_(), varyLocks: varyLocks_() }; }
 
 function config_() {
   const key = getKey_();
@@ -92,6 +95,8 @@ function config_() {
     sheetUrl: sheetUrl,
     golfOpen: golfOpen_(),
     escapeMode: escapeMode_(),
+    courseMode: courseMode_(),
+    varyLocks: varyLocks_(),
   };
 }
 
@@ -103,6 +108,8 @@ function saveConfig_(req) {
   if (typeof req.aiEnabled === 'boolean') p.setProperty('AI_ENABLED', String(req.aiEnabled));
   if (typeof req.golfOpen === 'boolean') p.setProperty('GOLF_OPEN', String(req.golfOpen));
   if (typeof req.escapeMode === 'boolean') p.setProperty('ESCAPE_MODE', String(req.escapeMode));
+  if (req.courseMode === 'short' || req.courseMode === 'full') p.setProperty('COURSE_MODE', req.courseMode);
+  if (typeof req.varyLocks === 'boolean') p.setProperty('VARY_LOCKS', String(req.varyLocks));
   if (Number(req.perMinute) > 0) p.setProperty('PER_MINUTE', String(Math.min(300, Math.floor(req.perMinute))));
   if (Number(req.perDay) > 0) p.setProperty('PER_DAY', String(Math.min(20000, Math.floor(req.perDay))));
   if (typeof req.newPin === 'string' && req.newPin) {
