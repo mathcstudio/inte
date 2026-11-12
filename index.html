@@ -487,6 +487,8 @@ input[type=range]{height:30px;accent-color:var(--blue)}
         <div class="row" style="margin:0;flex-wrap:nowrap"><select id="modelIn"></select><button class="ghost" id="modelLoad" style="white-space:nowrap">목록 불러오기</button></div>
         <div class="small" id="modelDesc" style="margin-top:4px"></div></div>
       <div class="field"><label><input type="checkbox" id="aiOn"> 학생에게 AI 피드백·AI 도우미 켜기</label></div>
+      <div class="field"><label><input type="checkbox" id="golfOpen"> ⛳ 보너스 게임(정적분 골프)을 단계 통과 없이 열기</label>
+        <div class="small" style="margin-top:2px">켜면 모든 학생이 탐구 단계를 마치지 않아도 바로 골프를 할 수 있어요. (저장 후 학생 화면에 1~2분 안에 반영)</div></div>
       <div class="field"><label>사용량 제한 (반 전체 합계)</label>
         <div class="row" style="margin:0">1분에 <input type="text" id="perMin" inputmode="numeric" style="width:70px"> 회 · 하루 <input type="text" id="perDay" inputmode="numeric" style="width:80px"> 회</div>
         <div class="small" id="usage" style="margin-top:4px"></div></div>
@@ -993,7 +995,9 @@ function loadProg(){try{return JSON.parse(localStorage.getItem(progKey()))||{don
 function saveProg(){try{localStorage.setItem(progKey(),JSON.stringify(P))}catch(e){}}
 let tries=0, selOpt=null, hintsUsed=0;
 
-function golfUnlocked(){return MISSIONS.every((m,i)=>P.done.includes(i))}
+let GOLF_OPEN=false;   // 선생님이 관리자 화면에서 '단계 통과 없이 골프 열기'를 켜면 true
+function allDone(){return MISSIONS.every((m,i)=>P.done.includes(i))}
+function golfUnlocked(){return GOLF_OPEN || allDone()}
 function updateGolfBtn(){
   const on=golfUnlocked(), g=$('golfBtn');
   g.textContent=on?'⛳ 정적분 골프':'🔒 보너스 게임';
@@ -1108,7 +1112,7 @@ function solved(m){
   refresh(); renderProg();
   $('nextBtn').style.display='inline-block'; $('revealBtn').style.display='none';
   $('hintLine').textContent='✅ 해결!';
-  if(golfUnlocked()){
+  if(allDone() && !GOLF_OPEN){
     const fb=$('fb'); const d=document.createElement('div'); d.style.marginTop='10px';
     d.innerHTML='<b>🎁 보너스 게임이 열렸어요!</b> 배운 정적분으로 골프를 쳐 볼까요? <button style="background:#16a34a;margin-left:6px">⛳ 정적분 골프 시작</button>';
     d.querySelector('button').onclick=()=>openGolf(); fb.appendChild(d);
@@ -1218,6 +1222,7 @@ async function flushLogs(){
   } finally { flushing=false; }
 }
 setInterval(flushLogs,30000);
+setInterval(()=>{ if(ME && document.visibilityState==='visible') refreshStatus(); },90000); // 선생님 설정(AI·골프 열기) 변경을 1~2분 안에 반영
 window.addEventListener('online',flushLogs);
 
 /* 휴대폰: 그래프와 질문이 멀리 떨어져 있어서, 한 번에 오가는 버튼을 둬요 */
@@ -1304,7 +1309,8 @@ function updateBadge(){
 }
 async function refreshStatus(){
   if(!serverUrl()){AI_ON=false;updateBadge();return}
-  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  if(typeof updateGolfBtn==='function') updateGolfBtn();
   updateBadge();
 }
 async function aiJudge(m,txt){
@@ -1381,7 +1387,7 @@ async function showCfg(){
     const c=await api('getConfig',{token:adminToken});
     $('keyState').innerHTML=c.hasKey?`<span style="color:var(--green)">● 저장됨 (끝자리 …${escapeHtml(c.keyTail)})</span>`:'<span style="color:var(--red)">● 아직 없음</span>';
     fillModels(BASE_MODELS, c.model);
-    $('aiOn').checked=c.aiEnabled; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
+    $('aiOn').checked=c.aiEnabled; $('golfOpen').checked=!!c.golfOpen; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
     $('usage').textContent=`오늘 사용: ${c.usedToday} / ${c.perDay}회`;
     $('pinWarn').style.display=c.mustChangePin?'block':'none';
     $('sheetInfo').innerHTML=c.sheetUrl
@@ -1410,7 +1416,7 @@ $('modelLoad').onclick=async()=>{
   }catch(e){ handleAdminErr(e); }
 };
 async function saveCfg(extra={}){
-  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked,
+  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked, golfOpen:$('golfOpen').checked,
     perMinute:Number($('perMin').value)||undefined, perDay:Number($('perDay').value)||undefined, ...extra};
   const k=$('keyIn').value.trim(); if(k) data.key=k;
   const np=$('newPin').value.trim(); if(np) data.newPin=np;
