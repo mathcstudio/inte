@@ -203,6 +203,55 @@ body.escape #escBar{display:flex}
 .cert h3{text-align:center;margin:0 0 8px;font-size:20px;letter-spacing:4px}
 @media (max-width:700px){ .rooms{grid-template-columns:repeat(5,minmax(0,1fr));gap:3px} .room{font-size:10px;padding:4px 2px} .room .ri{font-size:18px} .room .rn{display:none} }
 
+/* ---- 방탈출 오프닝 (살짝 으스스하게, 무섭지 않게) ---- */
+#opening{position:fixed;inset:0;z-index:70;background:#000;overflow:hidden;color:#e5e7eb;font-family:inherit}
+#opening .op-scene{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#1e293b 0%,#0b1020 55%,#000 100%);opacity:0;transition:opacity 1.2s}
+#opening.on .op-scene{opacity:1}
+#opening .op-light{position:absolute;left:50%;top:-10vh;width:120vmin;height:90vmin;transform:translateX(-50%);
+  background:radial-gradient(ellipse at 50% 0%,rgba(226,232,240,.38),rgba(226,232,240,0) 65%);animation:opFlicker 3.2s infinite}
+#opening.dark .op-light{animation:none;opacity:0;transition:opacity .15s}
+#opening .op-emergency{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 10%,rgba(251,191,36,.20),rgba(0,0,0,0) 60%);opacity:0;transition:opacity 1.2s}
+#opening.dark .op-emergency{opacity:1;animation:opPulse 2.4s infinite}
+@keyframes opFlicker{0%,18%,22%,60%,64%,100%{opacity:1}20%,62%{opacity:.25}21%{opacity:.8}63%{opacity:.4}}
+@keyframes opPulse{0%,100%{opacity:.75}50%{opacity:1}}
+/* 연구소 문 */
+#opening .op-door{position:absolute;left:50%;top:50%;width:min(42vmin,260px);height:min(64vmin,400px);transform:translate(-50%,-58%);
+  background:linear-gradient(180deg,#334155,#1e293b);border:6px solid #0f172a;border-radius:6px 6px 0 0;box-shadow:0 0 0 3px #475569,0 30px 60px rgba(0,0,0,.7)}
+#opening .op-door:before{content:"";position:absolute;inset:12% 14% 52%;border:3px solid #475569;border-radius:4px}
+#opening .op-door:after{content:"";position:absolute;inset:56% 14% 8%;border:3px solid #475569;border-radius:4px}
+#opening .op-sign{position:absolute;left:50%;top:-16%;transform:translateX(-50%);white-space:nowrap;background:#e2e8f0;color:#0f172a;
+  font-weight:800;font-size:min(3.6vmin,18px);padding:6px 14px;border-radius:6px;border:2px solid #64748b;letter-spacing:1px}
+#opening .op-sign small{display:block;font-size:.65em;font-weight:600;color:#475569;letter-spacing:0}
+#opening .op-pad{position:absolute;right:-18%;top:44%;width:22%;height:16%;background:#0f172a;border:2px solid #475569;border-radius:5px}
+#opening .op-pad i{position:absolute;left:50%;top:22%;width:9px;height:9px;margin-left:-4px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
+#opening.locked .op-pad i{background:#f59e0b;box-shadow:0 0 10px #f59e0b;animation:opBlink .8s infinite}
+@keyframes opBlink{50%{opacity:.2}}
+#opening .op-knob{position:absolute;left:12%;top:52%;width:9%;height:4%;background:#94a3b8;border-radius:3px}
+#opening.slam .op-stage{animation:opSlam .5s}
+@keyframes opSlam{0%{transform:translate(0,0)}15%{transform:translate(-7px,3px)}35%{transform:translate(6px,-3px)}55%{transform:translate(-4px,2px)}75%{transform:translate(2px,-1px)}100%{transform:translate(0,0)}}
+#opening .op-stage{position:absolute;inset:0}
+/* 떠다니는 수학 기호와 먼지 */
+#opening .op-sym{position:absolute;color:rgba(165,180,252,.0);font-family:"Cambria Math","Times New Roman",serif;animation:opFloat linear infinite;pointer-events:none}
+@keyframes opFloat{0%{transform:translateY(10vh);opacity:0}15%{opacity:.35}85%{opacity:.25}100%{transform:translateY(-110vh);opacity:0}}
+#opening .op-sym{color:#a5b4fc}
+#opening .op-dust{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(226,232,240,.5);animation:opDust linear infinite}
+@keyframes opDust{0%{transform:translate(0,0);opacity:0}20%{opacity:.7}100%{transform:translate(30px,-60vh);opacity:0}}
+/* 자막과 제목 */
+#opening .op-cap{position:absolute;left:50%;bottom:9vh;transform:translateX(-50%);width:min(92vw,640px);min-height:92px;background:rgba(2,6,23,.78);
+  border:1px solid #334155;border-radius:14px;padding:16px 20px;font-size:clamp(16px,2.6vw,20px);line-height:1.7;text-align:center;color:#f1f5f9}
+#opening .op-cap .note{color:#fde68a}
+#opening .op-title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;opacity:0;pointer-events:none;transition:opacity 1s;background:rgba(0,0,0,.55)}
+#opening.title .op-title{opacity:1;pointer-events:auto}
+#opening .op-title h1{margin:0;font-size:clamp(30px,7vw,60px);color:#fde68a;letter-spacing:4px;text-shadow:0 0 18px rgba(251,191,36,.45);animation:opGlitch 2.8s infinite}
+@keyframes opGlitch{0%,92%,100%{transform:none;opacity:1}93%{transform:translateX(-3px) skewX(-6deg);opacity:.8}95%{transform:translateX(3px);opacity:.9}97%{transform:none;opacity:.7}}
+#opening .op-title p{margin:0;color:#cbd5e1;font-size:clamp(15px,2.4vw,19px)}
+#opening .op-title button{font-size:18px;padding:13px 30px;background:#b45309;border-radius:12px;margin-top:8px}
+#opening .op-skip{position:absolute;right:14px;top:14px;z-index:3;background:rgba(15,23,42,.8);border:1px solid #475569;color:#cbd5e1;font-size:14px;padding:8px 14px;border-radius:999px}
+@media (prefers-reduced-motion: reduce){
+  #opening .op-light,#opening .op-sym,#opening .op-dust,#opening.dark .op-emergency,#opening.locked .op-pad i,#opening .op-title h1{animation:none!important}
+  #opening.slam .op-stage{animation:none}
+}
+
 /* ---- 관리자: 반별 학습 현황 ---- */
 .dash{position:fixed;inset:0;z-index:52;background:var(--bg);overflow-y:auto;display:none}
 .dash.show{display:block}
@@ -1314,7 +1363,7 @@ function setEscape(on){
   document.body.classList.toggle('escape',on);
   document.querySelector('header .sub').textContent=on?'🔐 방탈출 모드 · 정적분 연구소를 탈출하라!':'미적분Ⅰ · 넓이로 정적분의 뜻을 찾아가요';
   $('golfBtn').dataset.esc=on?'1':'';
-  if(changed && ME){ renderProg(); loadMission(); }
+  if(changed && ME){ if(on && OPENING_FOR!==ME.sid) ESC_HOLD=true; renderProg(); loadMission(); if(on && OPENING_FOR!==ME.sid && $('gate').classList.contains('hide')) playOpening(); }
 }
 function renderRooms(){
   const box=$('prog'); box.className='rooms'; box.innerHTML='';
@@ -1355,8 +1404,8 @@ function decorateEscape(m){
   const r=roomOf(P.cur); P.escSeen=P.escSeen||[];
   if(!P.escSeen.includes(r) && P.cur===roomIdx(r)[0]){
     P.escSeen.push(r); saveProg();
-    showEscCard(`<div class="big">${ROOMS[r].icon}</div><h2>${r+1}번 방 · ${ROOMS[r].name}</h2><p>${ROOMS[r].intro}</p><button id="escGo">🚪 들어가기</button>`);
-    $('escGo').onclick=hideEscCard;
+    const showRoom=()=>{ showEscCard(`<div class="big">${ROOMS[r].icon}</div><h2>${r+1}번 방 · ${ROOMS[r].name}</h2><p>${ROOMS[r].intro}</p><button id="escGo">🚪 들어가기</button>`); $('escGo').onclick=hideEscCard; };
+    if(ESC_HOLD) ESC_PENDING=showRoom; else showRoom();
   }
 }
 function showEscCard(html){ $('escCard').innerHTML=html; $('escOver').classList.add('show'); }
@@ -1392,10 +1441,86 @@ function showCert(){
 }
 /* 탈출 시간: 방탈출 모드에서 화면을 보고 있는 동안만 쌓여요 (제한 시간 없음) */
 setInterval(()=>{
-  if(!ESCAPE||!ME||document.visibilityState!=='visible'||allDone()||$('gate').classList.contains('hide')===false) { if(ESCAPE&&ME) $('escTimer').textContent='⏱ '+fmtTime(P.escDoneMs||P.escMs); return; }
+  if(!ESCAPE||!ME||document.visibilityState!=='visible'||allDone()||document.getElementById('opening')||$('gate').classList.contains('hide')===false) { if(ESCAPE&&ME) $('escTimer').textContent='⏱ '+fmtTime(P.escDoneMs||P.escMs); return; }
   P.escMs=(P.escMs||0)+1000; $('escTimer').textContent='⏱ '+fmtTime(P.escMs);
   if(P.escMs%15000===0) saveProg();
 },1000);
+
+/* ---------- 방탈출 오프닝: 로그인하면 짧은 이야기 장면 (언제든 건너뛰기) ----------
+   분위기: 밤의 연구소, 깜빡이는 불빛, 닫히는 문, 비상등. 괴물·피·폭력 묘사는 없어요. 소리도 없어요. */
+let ESC_HOLD=false, ESC_PENDING=null, OPENING_FOR='';
+function releaseEscHold(){ ESC_HOLD=false; if(ESC_PENDING){ const f=ESC_PENDING; ESC_PENDING=null; f(); } }
+function afterOpening(){
+  if(!Tour.seen('escape') && ME) setTimeout(()=>Tour.start('escape',ESC_TOUR,'정적분 연구소',releaseEscHold),250);
+  else releaseEscHold();
+}
+function playOpening(){
+  if(!ME || document.getElementById('opening')) return;
+  OPENING_FOR=ME.sid;
+  const opKey='defint1_op_'+ME.sid; let seenNow=false; try{seenNow=sessionStorage.getItem(opKey)==='1'; sessionStorage.setItem(opKey,'1');}catch(e){}
+  if(seenNow){ ESC_HOLD=true; afterOpening(); return; }   // 새로고침일 때는 오프닝을 다시 보여 주지 않아요
+  ESC_HOLD=true;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const who=ME.teacher?'선생님':`${ME.name} 연구원`;
+  const el=document.createElement('div'); el.id='opening';
+  const syms=['∫','dx','f(x)','S(x)','Δx','F(b)','∫ₐᵇ','x²','S′(x)','m','M'];
+  el.innerHTML=`<div class="op-scene"></div><div class="op-light"></div><div class="op-emergency"></div>
+    <div class="op-stage">
+      ${[...Array(14)].map((_,i)=>`<span class="op-sym" style="left:${(i*7.3+3)%96}%;font-size:${16+(i*7)%22}px;animation-duration:${14+(i*3)%10}s;animation-delay:${-(i*1.7)}s">${syms[i%syms.length]}</span>`).join('')}
+      ${[...Array(18)].map((_,i)=>`<span class="op-dust" style="left:${(i*13+5)%100}%;top:${60+(i*11)%40}%;animation-duration:${6+(i%5)}s;animation-delay:${-(i*0.9)}s"></span>`).join('')}
+      <div class="op-door"><div class="op-sign">정적분 연구소<small>관계자 외 출입 금지</small></div><div class="op-pad"><i></i></div><div class="op-knob"></div></div>
+    </div>
+    <div class="op-cap" id="opCap"></div>
+    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><button id="opStart">🔦 탈출 시작</button></div>
+    <button class="op-skip" id="opSkip">건너뛰기 ▶▶</button>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('on'));
+  const timers=[]; let typing=null;
+  const at=(ms,fn)=>timers.push(setTimeout(()=>{ if(el.isConnected) fn(); },reduce?ms*0.6:ms));
+  el._stop=()=>{ timers.forEach(clearTimeout); clearInterval(typing); };
+  const say=(html)=>{ // 한 글자씩 나타나는 자막
+    clearInterval(typing); const cap=el.querySelector('#opCap'); if(!cap||!el.isConnected) return;
+    if(reduce){ cap.innerHTML=html; return; }
+    const tmp=document.createElement('div'); tmp.innerHTML=html; const full=tmp.textContent; let k=0;
+    cap.textContent=''; typing=setInterval(()=>{ k++; cap.textContent=full.slice(0,k); if(k>=full.length){ clearInterval(typing); cap.innerHTML=html; } },38);
+  };
+  const finish=()=>{ timers.forEach(clearTimeout); clearInterval(typing); el.style.transition='opacity .6s'; el.style.opacity='0';
+    setTimeout(()=>{ el.remove(); afterOpening(); },600); };
+  at(700,  ()=>say('밤 9시. 낮에 두고 온 노트를 찾으러 <b>정적분 연구소</b>에 들어왔다.'));
+  at(4000, ()=>say('조용한 복도… 형광등이 깜빡인다.'));
+  at(6600, ()=>{ say('그때— <b>쾅!</b> 등 뒤에서 문이 닫혔다.'); });
+  at(7300, ()=>{ el.classList.add('slam','dark','locked'); setTimeout(()=>el.classList.remove('slam'),600); });
+  at(9800, ()=>say('불이 꺼지고 비상등만 켜졌다. 문에는 처음 보는 <b>자물쇠</b>가 걸려 있다.'));
+  at(13400,()=>say('책상 위에 남겨진 쪽지 한 장. <span class="note">"넓이의 비밀을 풀어야 문이 열린다."</span>'));
+  at(17200,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다.`));
+  at(19600,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
+  el.querySelector('#opSkip').onclick=finish; el.querySelector('#opStart').onclick=finish;
+}
+
+const ESC_TOUR=[
+  {title:'정적분 연구소에 갇혔다! 🔦',
+   body:'방 5개의 자물쇠를 모두 풀어야 연구소를 탈출할 수 있어요.<br>어떻게 하는지 먼저 둘러볼게요. (키보드 ← → 키로도 넘길 수 있어요)'},
+  {el:'#prog', title:'연구소 지도 (방 5개)',
+   body:'지도실 → 측량실 → 거울의 방 → 기계실 → 마지막 금고 순서예요. 🔒는 아직 잠긴 방이에요.<br>방 안의 번호를 누르면 그 자물쇠로 갈 수 있어요.'},
+  {el:'#escBar', title:'지금 있는 방과 소지품',
+   body:'방을 하나 탈출할 때마다 🎒에 <b>열쇠 조각</b>이 모여요. 연구원의 쪽지를 몇 장 썼는지도 여기 보여요.'},
+  {el:'#escTimer', title:'탈출 시간',
+   body:'탈출에 걸린 시간이에요. <b>제한 시간은 없어요.</b> 천천히, 정확하게 생각해도 괜찮아요!'},
+  {el:'.esc-flavor', title:'🔦 단서',
+   body:'방마다 단서 문장이 있어요. 이 방에서 무엇을 해야 할지 알려 줘요.'},
+  {el:'#shapeCv', title:'연구 장치',
+   body:'장치(그림과 그래프)를 직접 움직여 보면서 자물쇠의 답을 찾아요.'},
+  {el:'#cv', title:'연구 장치',
+   body:'장치(그림과 그래프)를 직접 움직여 보면서 자물쇠의 답을 찾아요.'},
+  {el:'.qbox', title:'자물쇠',
+   body:'답을 넣고 <b>제출하기</b>를 누르면 자물쇠가 열려요 🔓. 틀리면 덜컹 흔들려요.<br>어떤 문은 <b>설명</b>을 써야 열려요.'},
+  {el:'#hintBtn', title:'📜 연구원의 쪽지',
+   body:'막히면 연구원이 남긴 쪽지(힌트)를 읽어 보세요. 3번 틀리면 풀이도 볼 수 있어요.'},
+  {el:'#golfBtn', title:'보너스 방',
+   body:'탈출하면 <b>탈출 증명서</b>를 받고, 보너스 방(정적분 골프)에 들어갈 수 있어요.'},
+  {el:'#tourBtn', title:'안내 다시 보기',
+   body:'이 안내는 <b>ⓘ 사용 안내</b> 버튼으로 다시 볼 수 있어요. 그럼, 탈출을 시작해 볼까요?'},
+];
 
 /* ====================== 학생 입장 · 기록 ====================== */
 const LOGQ='defint1_logq';
@@ -1454,6 +1579,7 @@ async function enter(sid,name,teacher){
   $('whoChip').style.display=''; $('whoChip').textContent=teacher?'👀 선생님 체험':`👤 ${sid} ${name}`;
   $('adminBtn').style.display=teacher?'':'none';   // 학생으로 들어오면 관리자 버튼을 숨겨요 (선생님 체험에서는 보임)
   P=loadProg(); if(P.cur>=MISSIONS.length) P.cur=0;
+  if(ESCAPE) ESC_HOLD=true;   // 오프닝·안내가 끝난 뒤에 방 입장 카드를 보여 줘요
   loadMission();
   if(!teacher && serverUrl()){
     try{
@@ -1463,7 +1589,8 @@ async function enter(sid,name,teacher){
       flushLogs();
     }catch(e){ console.warn('학생 기록 서버 연결 실패:',e.message); }
   }
-  if(!Tour.seen('main')) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) Tour.start('main',MAIN_TOUR,'정적분 탐구실'); },400);
+  if(ESCAPE) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) playOpening(); },150);
+  else if(!Tour.seen('main')) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) Tour.start('main',MAIN_TOUR,'정적분 탐구실'); },400);
 }
 $('gGo').onclick=()=>{
   const sid=$('gSid').value.trim().replace(/\s/g,''), name=$('gName').value.trim();
@@ -1476,7 +1603,9 @@ $('gSid').onkeydown=e=>{if(e.key==='Enter')$('gName').focus()};
 $('gTeacher').onclick=()=>$('adminBtn').onclick();
 $('exitBtn').onclick=()=>{
   if(!confirm('나가면 입장 화면으로 돌아가요. 지금까지의 기록은 저장돼 있어요. 나갈까요?')) return;
-  ME=null; try{sessionStorage.removeItem('defint1_me')}catch(e){}
+  try{ if(ME) sessionStorage.removeItem('defint1_op_'+ME.sid); }catch(e){}
+  const op=document.getElementById('opening'); if(op){ if(op._stop) op._stop(); op.remove(); } ESC_HOLD=false; ESC_PENDING=null; if(typeof hideEscCard==='function') hideEscCard(); Tour.end&&document.querySelector('.tour-card.show')&&Tour.end();
+  ME=null; OPENING_FOR=''; try{sessionStorage.removeItem('defint1_me')}catch(e){}
   if(typeof closeGolf==='function') closeGolf();
   showGate();
 };
@@ -1735,7 +1864,7 @@ $('dClose').onclick=()=>{ $('dash').classList.remove('show'); modal.classList.ad
 /* ====================== 사용 안내 투어 ======================
    처음 접속하면 자동으로 시작하고, 'ⓘ 사용 안내' 버튼으로 언제든 다시 볼 수 있어요. */
 const Tour=(function(){
-  let steps=[], i=0, key='', crumb='', els=null;
+  let steps=[], i=0, key='', crumb='', els=null, onEndCb=null;
   const store=k=>'defint1_tour_'+k;
   function seen(k){try{return localStorage.getItem(store(k))==='done'}catch(e){return false}}
   function mark(k){try{localStorage.setItem(store(k),'done')}catch(e){}}
@@ -1787,10 +1916,10 @@ const Tour=(function(){
     c.style.top=Math.min(Math.max(12,top),vh-ch-12)+'px';
   }
   function go(d){ const ni=i+d; if(ni<0) return; if(ni>=steps.length){end();return} i=ni; render(); }
-  function end(){ if(!els) return; [els.b,els.c].forEach(e=>e.classList.remove('show')); els.s.style.display='none'; mark(key); }
-  function start(k,list,label){
-    build(); key=k; crumb=label;
-    steps=list.filter(st=>!st.el||elOf(st)); if(!steps.length) return;
+  function end(){ if(!els) return; [els.b,els.c].forEach(e=>e.classList.remove('show')); els.s.style.display='none'; mark(key); const cb=onEndCb; onEndCb=null; if(cb) cb(); }
+  function start(k,list,label,cb){
+    build(); key=k; crumb=label; onEndCb=cb||null;
+    steps=list.filter(st=>!st.el||elOf(st)); if(!steps.length){ onEndCb=null; if(cb) cb(); return; }
     i=0; els.b.classList.add('show'); els.c.classList.add('show'); render();
   }
   return {start,seen,end};
@@ -1845,7 +1974,7 @@ const MAIN_TOUR=[
   {el:'#g_tour', title:'안내 다시 보기',
    body:'이 안내는 <b>ⓘ 안내</b> 버튼으로 다시 볼 수 있어요. 그럼 티샷하러 가 볼까요? 🏌️'},
 ];
-$('tourBtn').onclick=()=>Tour.start('main',MAIN_TOUR,'정적분 탐구실');
+$('tourBtn').onclick=()=> ESCAPE ? Tour.start('escape',ESC_TOUR,'정적분 연구소') : Tour.start('main',MAIN_TOUR,'정적분 탐구실');
 
 /* ====================== 보너스 게임: 정적분 골프 ====================== */
 (function(){
