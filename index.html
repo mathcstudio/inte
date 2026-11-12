@@ -1250,6 +1250,7 @@ async function enter(sid,name,teacher){
   try{sessionStorage.setItem('defint1_me',JSON.stringify(ME))}catch(e){}
   $('gate').classList.add('hide'); document.body.classList.add('in');
   $('whoChip').style.display=''; $('whoChip').textContent=teacher?'👀 선생님 체험':`👤 ${sid} ${name}`;
+  $('adminBtn').style.display=teacher?'':'none';   // 학생으로 들어오면 관리자 버튼을 숨겨요 (선생님 체험에서는 보임)
   P=loadProg(); if(P.cur>=MISSIONS.length) P.cur=0;
   loadMission();
   if(!teacher && serverUrl()){
