@@ -162,6 +162,17 @@ body.escape .fbox{background:#1e293b;border-color:#334155;color:#e2e8f0}
 body.escape canvas{border-color:#475569}
 body.escape select,body.escape .opt{background:#f8fafc;color:#111827}
 body.escape .chat{background:#0f172a!important;border-color:#334155!important;color:#e5e7eb}
+/* 방탈출 모드의 AI 대화창: 연구원 쪽지(밝은 종이) + 학생 말풍선(남색) — 글자 대비를 충분히 */
+body.escape .chat h3{color:#fde68a}
+body.escape .chat h3 .small{color:#cbd5e1}
+body.escape #chatLog{background:#0b1220;border:1px solid #1e293b;border-radius:10px;padding:8px}
+body.escape .msg.ai{background:#fdf6e3;color:#422006;border:1px solid #d6b77a}
+body.escape .msg.me{background:#312e81;color:#eef2ff;border:1px solid #4f46e5}
+body.escape #chatIn{background:#0b1220;color:#f1f5f9;border:1px solid #64748b}
+body.escape #chatIn::placeholder{color:#94a3b8}
+body.escape #chatIn:focus{outline:2px solid #fbbf24;outline-offset:1px;border-color:#a16207}
+body.escape #chatSend{background:#b45309;color:#fff}
+body.escape #chatSend:disabled{background:#57534e;color:#e7e5e4}
 /* 질문 상자 = 연구원의 쪽지(밝게 유지) */
 body.escape .qbox{background:#fdf6e3;border:2px solid #a16207;color:#422006;box-shadow:inset 0 0 0 4px #fef3c7}
 body.escape .qbox .q{color:#422006}
