@@ -262,6 +262,57 @@ body.escape #escBar{display:flex}
   #opening.slam .op-stage{animation:none}
 }
 
+/* ---- 오프닝 2막 구성: (A) 복도에서 열린 문으로 들어감 → (B) 연구실 안 ---- */
+#opening .opA,#opening .opB{position:absolute;inset:0;transition:opacity 1s,transform 1.4s cubic-bezier(.5,0,.7,1)}
+#opening .opB{opacity:0}
+#opening.inB .opA{opacity:0;transform:scale(2.6)}
+#opening.inB .opB{opacity:1}
+/* A: 복도의 문 (잠겨 있지 않음 → 열림) */
+#opening .opA .op-door{overflow:visible;background:transparent;border:none;box-shadow:none}
+#opening .opA .op-door:before,#opening .opA .op-door:after{display:none}
+#opening .opA .op-doorway{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#475569,#1e293b 70%);border:6px solid #0f172a;border-radius:6px 6px 0 0;box-shadow:0 0 0 3px #475569,0 30px 60px rgba(0,0,0,.7)}
+#opening .opA .op-leafA{position:absolute;inset:0;background:linear-gradient(180deg,#334155,#1e293b);border:6px solid #0f172a;border-radius:6px 6px 0 0;transform-origin:left center;transition:transform 1.6s cubic-bezier(.3,.7,.3,1)}
+#opening .opA .op-leafA:before{content:"";position:absolute;inset:12% 14% 52%;border:3px solid #475569;border-radius:4px}
+#opening .opA .op-leafA:after{content:"";position:absolute;inset:56% 14% 8%;border:3px solid #475569;border-radius:4px}
+#opening.openA .opA .op-leafA{transform:perspective(900px) rotateY(-72deg)}
+/* B: 연구실 안 */
+#opening .op-wall{position:absolute;inset:0 0 36% 0;background:linear-gradient(180deg,#1e293b,#111827)}
+#opening .op-floor{position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(180deg,#0f172a,#020617);border-top:2px solid #334155}
+#opening .op-board{position:absolute;left:56%;top:6%;width:min(46vmin,360px);height:min(24vmin,190px);transform:translateX(-50%);background:#0f2a1f;border:7px solid #78350f;border-radius:6px;
+  color:rgba(226,232,240,.38);font:600 min(2.6vmin,17px)/1.7 "Cambria Math","Times New Roman",serif;padding:3% 5%;box-shadow:inset 0 0 30px rgba(0,0,0,.5)}
+#opening .op-desk{position:absolute;left:58%;bottom:33%;width:min(48vmin,380px);height:min(3.4vmin,26px);transform:translateX(-50%);background:linear-gradient(180deg,#92400e,#78350f);border-radius:4px;box-shadow:0 8px 14px rgba(0,0,0,.5)}
+#opening .op-desk:before,#opening .op-desk:after{content:"";position:absolute;top:100%;width:6%;height:min(11vmin,86px);background:#57290a}
+#opening .op-desk:before{left:6%} #opening .op-desk:after{right:6%}
+#opening .op-book{position:absolute;left:44%;bottom:100%;width:min(11vmin,86px);height:min(2.6vmin,20px);background:linear-gradient(90deg,#4c1d95,#6d28d9);border-radius:3px 6px 6px 3px;
+  box-shadow:0 0 0 rgba(253,224,71,0);transition:transform .8s ease,box-shadow .8s}
+#opening .op-book:after{content:"";position:absolute;right:4%;top:18%;bottom:18%;width:70%;background:repeating-linear-gradient(90deg,#f1f5f9 0 2px,#cbd5e1 2px 4px);border-radius:2px;opacity:.7}
+#opening.glow .op-book{box-shadow:0 0 18px 6px rgba(253,224,71,.45)}
+#opening.lift .op-book{transform:translateY(-2.4vmin) rotate(-4deg)}
+#opening .op-slip{position:absolute;left:46%;bottom:100%;width:min(8vmin,60px);height:min(5vmin,40px);background:#fef3c7;border:1px solid #d97706;border-radius:2px;opacity:0;transform:translate(0,0) rotate(0);transition:all 1.4s cubic-bezier(.3,.7,.3,1)}
+#opening.slip .op-slip{opacity:1;transform:translate(-3vmin,6vmin) rotate(-18deg)}
+#opening .op-lamp{position:absolute;left:73%;bottom:100%;width:min(3vmin,24px);height:min(8vmin,62px);border-left:3px solid #64748b}
+#opening .op-lamp:before{content:"";position:absolute;left:-2px;top:-6px;width:min(6vmin,46px);height:min(3vmin,22px);background:#94a3b8;border-radius:50% 50% 0 0;transform:rotate(18deg)}
+/* B: 들어온 문(왼쪽) — 처음엔 열려 있고, 쾅 닫힌 뒤 스스로 잠겨요 */
+#opening .op-doorB{position:absolute;left:7%;bottom:36%;width:min(24vmin,180px);height:min(46vmin,330px);perspective:900px}
+#opening .op-frameB{position:absolute;inset:-6px;border:6px solid #0f172a;box-shadow:0 0 0 3px #475569;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#64748b,#334155)}
+#opening .op-leafB{position:absolute;inset:0;background:linear-gradient(180deg,#334155,#1e293b);border-radius:4px 4px 0 0;transform-origin:left center;transform:rotateY(-70deg);transition:transform .45s cubic-bezier(.6,0,.9,.6)}
+#opening .op-leafB .op-emblem{top:14%;width:52%}
+#opening.shut .op-leafB{transform:rotateY(0)}
+#opening .op-handle{position:absolute;right:10%;top:52%;width:16%;height:4%;background:#94a3b8;border-radius:3px;transform-origin:right center}
+#opening.rattle .op-handle{animation:opRattle .5s 3}
+@keyframes opRattle{0%,100%{transform:rotate(0)}30%{transform:rotate(-22deg)}60%{transform:rotate(6deg)}}
+#opening.rattle .op-leafB{animation:opDoorJiggle .5s 3}
+@keyframes opDoorJiggle{0%,100%{transform:rotateY(0)}30%{transform:rotateY(-3deg)}60%{transform:rotateY(1deg)}}
+#opening .op-padB{position:absolute;right:-30%;top:40%;width:24%;height:15%;background:#0f172a;border:2px solid #475569;border-radius:5px}
+#opening .op-padB i{position:absolute;left:50%;top:22%;width:9px;height:9px;margin-left:-4px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;transition:background .3s,box-shadow .3s}
+#opening.locked .op-padB i{background:#f59e0b;box-shadow:0 0 10px #f59e0b;animation:opBlink .8s infinite}
+#opening .op-bolt{position:absolute;right:-12%;top:48%;width:0;height:5%;background:linear-gradient(180deg,#e2e8f0,#94a3b8);border-radius:2px;transition:width .35s ease-in}
+#opening.locked .op-bolt{width:22%}
+#opening .op-click{position:absolute;left:calc(7% + min(24vmin,180px));bottom:calc(36% + min(30vmin,215px));color:#fde68a;font-weight:900;font-size:min(5vmin,34px);opacity:0;transform:scale(.5);transition:all .3s cubic-bezier(.2,1.6,.4,1);text-shadow:0 0 12px rgba(251,191,36,.6)}
+#opening.locked .op-click{opacity:1;transform:scale(1)}
+#opening.fadeclick .op-click{opacity:0;transition:opacity 1s}
+@media (prefers-reduced-motion: reduce){ #opening.rattle .op-handle,#opening.rattle .op-leafB{animation:none} #opening .op-leafB{transition:none} }
+
 /* ---- 방탈출 엔딩: 연구소 탈출 → 햇살 → 여유로운 골프 ---- */
 #ending{position:fixed;inset:0;z-index:71;overflow:hidden;background:#000;color:#0f172a;font-family:inherit}
 #ending .en-lab{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#1e293b 0%,#0b1020 55%,#000 100%);transition:opacity .8s}
@@ -1390,7 +1441,7 @@ let ESCAPE=false;
 const ESC_URL=/[?&]mode=escape\b/.test(location.search);
 const ROOMS=[
   {icon:'🗺', name:'지도실',      ids:['pond1','pond2'],                 key:'📓', keyName:'연구 일지',
-   intro:'눈을 떠 보니 <b>정적분 연구소</b>. 문은 모두 잠겨 있다.<br>책상 위 연구원의 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.'},
+   intro:'등 뒤의 문은 스스로 잠겨 꼼짝도 하지 않는다.<br>노트에서 떨어진 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>연구소 안쪽으로 들어가 보자. 첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.'},
   {icon:'📐', name:'측량실',      ids:['rect2','approach'],              key:'🧩', keyName:'금고 번호 조각',
    intro:'곡선으로 휘어진 벽이 있는 <b>측량실</b>.<br>공식이 없는 넓이를 재야 금고 번호 조각을 얻을 수 있다.'},
   {icon:'🪞', name:'거울의 방',   ids:['sign','mix','dir','split','def'], key:'🔢', keyName:'다이얼 번호',
@@ -1520,7 +1571,9 @@ const EMBLEM_SRC='data:image/webp;base64,UklGRgwnAABXRUJQVlA4WAoAAAAQAAAAuAAAuAA
 let ESC_HOLD=false, ESC_PENDING=null, OPENING_FOR='';
 function releaseEscHold(){ ESC_HOLD=false; if(ESC_PENDING){ const f=ESC_PENDING; ESC_PENDING=null; f(); } }
 function afterOpening(){
-  if(!Tour.seen('escape') && ME) setTimeout(()=>Tour.start('escape',ESC_TOUR,'정적분 연구소',releaseEscHold),250);
+  const sid=ME&&ME.sid;
+  if(!Tour.seen('escape') && ME) setTimeout(()=>{ // 그 사이 나가기·다른 학생 입장이 있었다면 안내를 띄우지 않아요
+    if(ME && ME.sid===sid && !document.getElementById('opening') && $('gate').classList.contains('hide')) Tour.start('escape',ESC_TOUR,'정적분 연구소',releaseEscHold); },250);
   else releaseEscHold();
 }
 function playOpening(){
@@ -1533,11 +1586,24 @@ function playOpening(){
   const who=ME.teacher?'선생님':`${ME.name} 연구원`;
   const el=document.createElement('div'); el.id='opening';
   const syms=['∫','dx','f(x)','S(x)','Δx','F(b)','∫ₐᵇ','x²','S′(x)','m','M'];
+  const emblem=`<div class="op-emblem"><img src="${EMBLEM_SRC}" alt="곡정고등학교 교표"></div>`;
   el.innerHTML=`<div class="op-scene"></div><div class="op-light"></div><div class="op-emergency"></div>
     <div class="op-stage">
+      <!-- (A) 복도: 잠겨 있지 않은 연구소 문 -->
+      <div class="opA">
+        <div class="op-door"><div class="op-doorway"></div><div class="op-leafA">${emblem}<div class="op-knob"></div></div>
+          <div class="op-sign">정적분 연구소<small>관계자 외 출입 금지</small></div><div class="op-pad"><i></i></div></div>
+      </div>
+      <!-- (B) 연구실 안: 칠판, 책상 위 노트, 들어온 문 -->
+      <div class="opB">
+        <div class="op-wall"></div><div class="op-floor"></div>
+        <div class="op-board">∫<sub>a</sub><sup>b</sup> f(x) dx = ?<br>S′(x) = f(x)<br>F(b) − F(a)</div>
+        <div class="op-desk"><div class="op-lamp"></div><div class="op-book"></div><div class="op-slip"></div></div>
+        <div class="op-doorB"><div class="op-frameB"></div><div class="op-leafB">${emblem}<div class="op-handle"></div></div><div class="op-padB"><i></i></div><div class="op-bolt"></div></div>
+        <div class="op-click">철컥!</div>
+      </div>
       ${[...Array(14)].map((_,i)=>`<span class="op-sym" style="left:${(i*7.3+3)%96}%;font-size:${16+(i*7)%22}px;animation-duration:${14+(i*3)%10}s;animation-delay:${-(i*1.7)}s">${syms[i%syms.length]}</span>`).join('')}
       ${[...Array(18)].map((_,i)=>`<span class="op-dust" style="left:${(i*13+5)%100}%;top:${60+(i*11)%40}%;animation-duration:${6+(i%5)}s;animation-delay:${-(i*0.9)}s"></span>`).join('')}
-      <div class="op-door"><div class="op-sign">정적분 연구소<small>관계자 외 출입 금지</small></div><div class="op-emblem"><img src="${EMBLEM_SRC}" alt="곡정고등학교 교표"></div><div class="op-pad"><i></i></div><div class="op-knob"></div></div>
     </div>
     <div class="op-cap" id="opCap"></div>
     <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><button id="opStart">🔦 탈출 시작</button></div>
@@ -1555,14 +1621,21 @@ function playOpening(){
   };
   const finish=()=>{ timers.forEach(clearTimeout); clearInterval(typing); el.style.transition='opacity .6s'; el.style.opacity='0';
     setTimeout(()=>{ el.remove(); afterOpening(); },600); };
-  at(700,  ()=>say('밤 9시. 낮에 두고 온 노트를 찾으러 <b>정적분 연구소</b>에 들어왔다.'));
-  at(4000, ()=>say('조용한 복도… 형광등이 깜빡인다.'));
-  at(6600, ()=>{ say('그때— <b>쾅!</b> 등 뒤에서 문이 닫혔다.'); });
-  at(7300, ()=>{ el.classList.add('slam','dark','locked'); setTimeout(()=>el.classList.remove('slam'),600); });
-  at(9800, ()=>say('불이 꺼지고 비상등만 켜졌다. 문에는 처음 보는 <b>자물쇠</b>가 걸려 있다.'));
-  at(13400,()=>say('책상 위에 남겨진 쪽지 한 장. <span class="note">"넓이의 비밀을 풀어야 문이 열린다."</span>'));
-  at(17200,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다.`));
-  at(19600,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
+  // (A) 복도 → 열린 문으로 들어가기
+  at(600,  ()=>say('밤 9시. 낮에 두고 온 노트를 찾으러 <b>정적분 연구소</b>에 왔다.'));
+  at(3600, ()=>{ say('다행히 문이 잠겨 있지 않다. 조심스럽게 안으로 들어가 본다.'); el.classList.add('openA'); });
+  at(6000, ()=>el.classList.add('inB'));
+  // (B) 연구실 안 → 노트를 집는 순간 문이 닫히고 스스로 잠김
+  at(7200, ()=>{ say('조용한 연구실… 책상 위에 내 노트가 보인다.'); el.classList.add('glow'); });
+  at(10000,()=>{ say('노트를 집어 드는 순간—'); el.classList.add('lift'); });
+  at(11400,()=>{ el.classList.add('shut','slam'); say('<b>쾅!</b> 등 뒤에서 문이 저절로 닫혔다.'); setTimeout(()=>el.classList.remove('slam'),600); });
+  at(12700,()=>{ el.classList.add('dark','locked'); el.classList.remove('glow');
+    say('<b>철컥—</b> 자물쇠가 스스로 잠겼다. 아무리 밀어도 문이 열리지 않는다!'); });
+  at(13600,()=>el.classList.add('rattle'));
+  at(15600,()=>{ el.classList.remove('rattle'); el.classList.add('fadeclick'); });
+  at(16600,()=>{ el.classList.add('slip'); say('노트 사이에서 쪽지 한 장이 떨어졌다. <span class="note">"넓이의 비밀을 풀어야 문이 열린다."</span>'); });
+  at(20600,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다.`));
+  at(23000,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
   el.querySelector('#opSkip').onclick=finish; el.querySelector('#opStart').onclick=finish;
 }
 
