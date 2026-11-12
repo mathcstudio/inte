@@ -562,6 +562,40 @@ function fitCanvas(c, ratio, fixedH, minH, maxH){
   if(c._w!==w||c._h!==h||c._dpr!==dpr){c._w=w;c._h=h;c._dpr=dpr;c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.height=h+'px';}
   c.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
 }
+/* 함수식 이름표를 곡선 바로 옆에 붙여요.
+   곡선 위 여러 지점 후보 중에서 (화면 안, x축·y축과 겹치지 않음, 곡선을 가리지 않음) 조건을 만족하는 첫 자리를 골라요. */
+function drawCurveLabel(c, text, f, o){
+  const {X,Y,xmin,xmax,L,R,T,B,W,H}=o, IX=px=>xmin+(px-L)/(W-L-R)*(xmax-xmin);
+  c.save();
+  let fs=16; c.font=`bold ${fs}px sans-serif`;
+  while(fs>12 && c.measureText(text).width+14 > (W-L-R)*0.55){ fs--; c.font=`bold ${fs}px sans-serif`; } // 좁은 그래프에서는 글자를 조금 줄여요
+  const pad=7, bw=c.measureText(text).width+pad*2, bh=fs+8, y0=Y(0), yAxis=(xmin<0&&xmax>0)?X(0):null, top=T+20;
+  const ok=(bx,by)=>{
+    if(bx<L+2||bx+bw>W-R-2||by<top||by+bh>H-B-2) return false;            // 그림 안쪽
+    if(y0>by-6&&y0<by+bh+6) return false;                                  // x축과 겹치지 않게
+    if(yAxis!==null&&yAxis>bx-6&&yAxis<bx+bw+6) return false;              // y축과 겹치지 않게
+    for(let k=0;k<=16;k++){ const px=bx-4+(bw+8)*k/16, py=Y(f(IX(px)));      // 곡선을 가리지 않게
+      if(isFinite(py)&&py>by-5&&py<by+bh+5) return false; }
+    return true;
+  };
+  let pos=null;
+  outer: for(const fr of [0.9,0.8,0.7,0.58,0.45,0.32,0.2,0.1]){
+    const x=xmin+(xmax-xmin)*fr, y=f(x); if(!isFinite(y)) continue;
+    const px=X(x), py=Y(y);
+    for(const [dx,dy] of [[-bw-8,-bh-10],[8,-bh-10],[-bw-8,12],[8,12],[-bw/2,-bh-16],[-bw/2,16]]){
+      if(ok(px+dx,py+dy)){ pos=[px+dx,py+dy]; break outer; } }
+  }
+  if(!pos){ // 마땅한 자리가 없으면 그림 오른쪽 위 구석
+    const cands=[[W-R-bw-4,top],[L+6,top],[W-R-bw-4,H-B-bh-4],[L+6,H-B-bh-4]];
+    pos=cands.find(([bx,by])=>!(y0>by-6&&y0<by+bh+6))||cands[0];
+  }
+  const [bx,by]=pos, r=8; c.canvas._lbl={bx,by,bw,bh,y0,yAxis,W,H,T,B};
+  c.beginPath(); c.moveTo(bx+r,by); c.lineTo(bx+bw-r,by); c.quadraticCurveTo(bx+bw,by,bx+bw,by+r); c.lineTo(bx+bw,by+bh-r);
+  c.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh); c.lineTo(bx+r,by+bh); c.quadraticCurveTo(bx,by+bh,bx,by+bh-r); c.lineTo(bx,by+r); c.quadraticCurveTo(bx,by,bx+r,by); c.closePath();
+  c.fillStyle='rgba(255,255,255,.92)'; c.fill(); c.strokeStyle='rgba(124,58,237,.45)'; c.lineWidth=1.2; c.stroke();
+  c.fillStyle='#6d28d9'; c.textAlign='left'; c.textBaseline='middle'; c.fillText(text,bx+pad,by+bh/2+1);
+  c.restore();
+}
 function niceStep(range){const r=range/8,p=Math.pow(10,Math.floor(Math.log10(r))),m=r/p;return (m<1.5?1:m<3?2:m<7?5:10)*p}
 function grid(X,Y,xmin,xmax,ymin,ymax,W,H,L,R,T,B){
   ctx.font='15px sans-serif'; ctx.lineWidth=1;
@@ -629,7 +663,7 @@ function draw(){
   [[S.a,'a'],[S.b,'b']].forEach(([x,t])=>{ctx.beginPath();ctx.moveTo(X(x),T);ctx.lineTo(X(x),H-B);ctx.stroke();
     ctx.fillStyle='#0f172a';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText(t,X(x),T+14);});
   ctx.setLineDash([]);
-  ctx.fillStyle='#7c3aed';ctx.font='bold 16px sans-serif';ctx.textAlign='right';ctx.fillText(FUNCS[S.fi].label,W-R-6,H-B-10);
+  drawCurveLabel(ctx,FUNCS[S.fi].label,f,{X,Y,xmin,xmax,L,R,T,B,W,H});
 }
 
 /* ====================== 넓이 함수 S(x) 활동 ======================
@@ -672,7 +706,7 @@ function drawArea(){
   ctx.fillStyle='#0f172a';ctx.font='bold 15px sans-serif';ctx.textAlign='center';
   ctx.fillText('x',X(st.x),H-B+34>H?H-4:H-B+34); if(st.dx>0.15) ctx.fillText('x+Δx',X(st.x+st.dx),H-4);
   if(st.x>0.4){ctx.fillStyle='#4c1d95';ctx.font='bold 17px sans-serif';ctx.fillText('S(x)',X(st.x/2),Y(f(st.x/2)/2)+6);}
-  ctx.fillStyle='#7c3aed';ctx.font='bold 15px sans-serif';ctx.textAlign='right';ctx.fillText(AFUNCS[S.af].label,W-R-4,H-B-8);
+  drawCurveLabel(ctx,AFUNCS[S.af].label,f,{X,Y,xmin,xmax,L,R,T,B,W,H});
 }
 function refreshArea(){
   const st=areaStats(); S.minDx=Math.min(S.minDx,st.dx);
@@ -1743,7 +1777,7 @@ function drawGraph(){
   ctx.strokeStyle='#7c3aed';ctx.lineWidth=3;ctx.beginPath();
   for(let i=0;i<=400;i++){const x=view.xmin+(view.xmax-view.xmin)*i/400,y=H.f(x); i?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y));}
   ctx.stroke();
-  ctx.fillStyle='#7c3aed';ctx.font='bold 17px sans-serif';ctx.textAlign='left';ctx.fillText(H.label,view.L+8,view.T+18);
+  drawCurveLabel(ctx,H.label,H.f,{X,Y,xmin:view.xmin,xmax:view.xmax,L:view.L,R:view.R,T:view.T,B:view.B,W,H:Hh});
   // 이전 샷 위치 (희미하게)
   ctx.setLineDash([3,4]);ctx.strokeStyle='rgba(15,23,42,.25)';ctx.lineWidth=1;
   shots.forEach(s=>{ctx.beginPath();ctx.moveTo(X(s.b),view.T);ctx.lineTo(X(s.b),Hh-view.B);ctx.stroke();});
@@ -1907,7 +1941,7 @@ $('g_code').textContent='#'+courseCode; $('g_bankSize').textContent=BANK_SIZE;
 let started=false;
 window.openGolf=function(){ $('golfApp').classList.add('show'); document.body.style.overflow='hidden';
   if(!started){started=true;loadHole();} else {drawGraph();drawCourse();}
-  if(!Tour.seen('golf')) setTimeout(()=>Tour.start('golf',GOLF_TOUR,'정적분 골프'),300); };
+  if(!Tour.seen('golf')) setTimeout(()=>{ if($('golfApp').classList.contains('show')) Tour.start('golf',GOLF_TOUR,'정적분 골프'); },300); };
 $('g_tour').onclick=()=>Tour.start('golf',GOLF_TOUR,'정적분 골프');
 window.closeGolf=function(){ $('golfApp').classList.remove('show'); document.body.style.overflow=''; };
 $('g_back').onclick=closeGolf;
