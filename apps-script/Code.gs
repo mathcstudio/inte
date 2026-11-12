@@ -64,6 +64,8 @@ const ACTIONS = {
   saveConfig: req => { auth_(req.token); return saveConfig_(req); },
   listModels: req => { auth_(req.token); return { models: listModels_() }; },
   report:     req => { auth_(req.token); return report_(); },
+  deleteStudents: req => { auth_(req.token); return deleteStudents_(req.sids); },
+  deleteAll:      req => { auth_(req.token); if (req.confirm !== '전체삭제') throw new Error('확인 문구가 맞지 않아요.'); return deleteAll_(); },
   test:       req => { auth_(req.token); return { text: gemini_([{ role: 'user', parts: [{ text: '"연결 성공"이라고만 답하세요.' }] }], '짧게 답하세요.', false) }; },
 };
 
@@ -289,6 +291,56 @@ function report_() {
       answer: v[6], result: v[7], feedback: v[8], tries: v[9], hints: v[10] }));
   }
   return out;
+}
+
+/* ---------------- 교사용: 학생 기록 삭제 ----------------
+ * 지정한 시트에서 조건에 맞는 학생 행을 지우고 나머지만 다시 써요. (머리글 행은 그대로) */
+function removeRows_(def, sidCol, shouldDelete) {
+  const sh = book_().getSheetByName(def.name);
+  if (!sh || sh.getLastRow() < 2) return 0;
+  const n = sh.getLastRow() - 1, cols = sh.getLastColumn();
+  const rng = sh.getRange(2, 1, n, cols);
+  const vals = rng.getValues(), disp = rng.getDisplayValues();
+  const keep = [];
+  let removed = 0;
+  for (let i = 0; i < n; i++) {
+    if (shouldDelete(String(disp[i][sidCol]).replace(/^'/, ''))) removed++;
+    else keep.push(vals[i]);
+  }
+  if (!removed) return 0;
+  rng.clearContent();
+  if (keep.length) {
+    sh.getRange(2, sidCol + 1, keep.length, 1).setNumberFormat('@'); // 학번은 글자로 유지
+    sh.getRange(2, 1, keep.length, cols).setValues(keep.map(r => r.map((v, c) => c === sidCol ? String(v) : v)));
+  }
+  return removed;
+}
+
+function deleteStudents_(sids) {
+  const list = (Array.isArray(sids) ? sids : []).map(s => String(s).trim()).filter(Boolean).slice(0, 1000);
+  if (!list.length) throw new Error('삭제할 학생을 골라 주세요.');
+  const set = {};
+  list.forEach(s => set[s] = true);
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    return {
+      progress: removeRows_(SHEETS.progress, 0, s => !!set[s]),
+      answers:  removeRows_(SHEETS.answers, 1, s => !!set[s]),
+      golf:     removeRows_(SHEETS.golf, 1, s => !!set[s]),
+      students: list.length,
+    };
+  } finally { lock.releaseLock(); }
+}
+
+function deleteAll_() {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try {
+    return {
+      progress: removeRows_(SHEETS.progress, 0, () => true),
+      answers:  removeRows_(SHEETS.answers, 1, () => true),
+      golf:     removeRows_(SHEETS.golf, 1, () => true),
+    };
+  } finally { lock.releaseLock(); }
 }
 
 /* ---------------- 사용량 제한 ---------------- */

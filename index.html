@@ -162,6 +162,12 @@ body.escape .fbox{background:#1e293b;border-color:#334155;color:#e2e8f0}
 body.escape canvas{border-color:#475569}
 body.escape select,body.escape .opt{background:#f8fafc;color:#111827}
 body.escape .chat{background:#0f172a!important;border-color:#334155!important;color:#e5e7eb}
+/* 방탈출 모드에서도 밝은 바탕 화면(입장 화면·관리자 창·반별 현황)은 진한 글자로 */
+body.escape .gate-card,body.escape .modal,body.escape .dash{color:#1f2937}
+body.escape .gate-card .lead,body.escape .gate-card label,body.escape .gate-card .small,
+body.escape .modal .small,body.escape .modal label,body.escape .dash .small,body.escape .dash .k{color:#4b5563}
+body.escape .gate-card .gate-note{color:#6b7280}
+body.escape .dash .card{background:#fff}
 /* 방탈출 모드의 AI 대화창: 연구원 쪽지(밝은 종이) + 학생 말풍선(남색) — 글자 대비를 충분히 */
 body.escape .chat h3{color:#fde68a}
 body.escape .chat h3 .small{color:#cbd5e1}
@@ -2121,7 +2127,7 @@ $('teacherPreview').onclick=()=>{ modal.classList.remove('show'); enter('T','선
 
 /* ====================== 관리자: 반별 학습 현황 ======================
    반 = 학번의 둘째·셋째 자리 (예: 20812 → 8반). 5자리가 아닌 학번은 '기타'로 묶어요. */
-let DASH=null, dashCls='all', dashStep='', dashSid='', dashLatest=true;
+let DASH=null, dashCls='all', dashStep='', dashSid='', dashLatest=true; const dashSel=new Set();
 const clsOf=sid=>/^\d{5}$/.test(String(sid))?String(parseInt(String(sid).substr(1,2),10)):'기타';
 const clsName=c=>c==='all'?'전체':(c==='기타'?'기타':c+'반');
 const pct=(a,b)=>b?Math.round(a/b*100):0;
@@ -2167,9 +2173,15 @@ function renderDash(){
   h+=`<div class="card"><h3>${clsName(dashCls)} · 단계별 달성률</h3><div class="bars">`+
     MISSIONS.map((m,i)=>{const p=pct(stepCnt[i],T);return `<span>${escapeHtml(m.title)}${isActive(i)?'':' <span class="small">(1차시 코스 생략)</span>'}</span><div class="bar"><i style="width:${p}%"></i></div><span><b>${p}%</b> (${stepCnt[i]}/${T}명)</span>`}).join('')+`</div></div>`;
   // 학생별 진행표
-  h+=`<div class="card"><h3>${clsName(dashCls)} · 학생별 진행</h3><div class="tblwrap"><table class="dtable"><tr><th>학번</th><th>이름</th><th class="c">완료</th><th>단계 (1→${N})</th><th>마지막 활동</th></tr>`+
-    list.map(s=>`<tr class="click" data-sid="${escapeHtml(s.sid)}" style="${s.sid===dashSid?'background:#ede9fe':''}"><td>${escapeHtml(s.sid)}</td><td>${escapeHtml(s.name)}</td><td class="c">${actDone(s)}/${NA}</td><td><div class="cells">${[...Array(N)].map((_,i)=>`<span class="${s.done.includes(i)?'y':''}" title="${i+1}단계"></span>`).join('')}</div></td><td class="small">${escapeHtml(s.last||'')}</td></tr>`).join('')+
-    `</table></div><p class="small" style="margin:6px 0 0">학생을 누르면 아래에 그 학생의 답변만 보여요.</p></div>`;
+  for(const s of [...dashSel]) if(!studs.some(x=>x.sid===s)) dashSel.delete(s);
+  const selHere=list.filter(s=>dashSel.has(s.sid)).length, allHere=list.length>0&&selHere===list.length;
+  h+=`<div class="card"><h3>${clsName(dashCls)} · 학생별 진행</h3>
+    <div class="row" style="margin:0 0 8px"><button class="ghost" id="dDelSel" ${dashSel.size?'':'disabled'} style="border-color:#f97316;color:#c2410c">🗑 선택한 학생 기록 삭제 (${dashSel.size}명)</button>
+      <button class="ghost" id="dDelAll" style="border-color:#dc2626;color:#b91c1c">⚠ 전체 학생 기록 삭제</button>
+      <span class="small">테스트 기록을 지울 때 쓰세요. 지운 기록은 되돌릴 수 없어요.</span></div>
+    <div class="tblwrap"><table class="dtable"><tr><th class="c"><input type="checkbox" id="dSelAll" title="이 목록 전체 선택" ${allHere?'checked':''}></th><th>학번</th><th>이름</th><th class="c">완료</th><th>단계 (1→${N})</th><th>마지막 활동</th></tr>`+
+    list.map(s=>`<tr class="click" data-sid="${escapeHtml(s.sid)}" style="${s.sid===dashSid?'background:#ede9fe':''}"><td class="c"><input type="checkbox" class="dSel" data-sid="${escapeHtml(s.sid)}" ${dashSel.has(s.sid)?'checked':''}></td><td>${escapeHtml(s.sid)}</td><td>${escapeHtml(s.name)}</td><td class="c">${actDone(s)}/${NA}</td><td><div class="cells">${[...Array(N)].map((_,i)=>`<span class="${s.done.includes(i)?'y':''}" title="${i+1}단계"></span>`).join('')}</div></td><td class="small">${escapeHtml(s.last||'')}</td></tr>`).join('')+
+    `</table></div><p class="small" style="margin:6px 0 0">학생을 누르면 아래에 그 학생의 답변만 보여요. 왼쪽 칸을 체크하면 삭제할 학생으로 골라져요.</p></div>`;
   // 답변 보기
   const ans=(DASH.answers||[]).filter(a=>a.sid!=='T' && (dashCls==='all'||clsOf(a.sid)===dashCls) && (!dashStep||String(a.step)===dashStep) && (!dashSid||a.sid===dashSid));
   let rows=ans.slice().reverse();
@@ -2188,12 +2200,43 @@ function renderDash(){
     `</table></div></div>`;
   $('dBody').innerHTML=h;
   $('dBody').querySelectorAll('tr[data-c]').forEach(tr=>tr.onclick=()=>{dashCls=tr.dataset.c;renderDash();window.scrollTo(0,0);$('dash').scrollTop=0;});
+  $('dBody').querySelectorAll('input.dSel').forEach(cb=>{ cb.onclick=e=>e.stopPropagation(); cb.onchange=()=>{ cb.checked?dashSel.add(cb.dataset.sid):dashSel.delete(cb.dataset.sid); renderDash(); }; });
+  if($('dSelAll')) $('dSelAll').onchange=e=>{ list.forEach(s=>e.target.checked?dashSel.add(s.sid):dashSel.delete(s.sid)); renderDash(); };
+  $('dDelSel').onclick=()=>deleteSelected();
+  $('dDelAll').onclick=()=>deleteEveryone();
   $('dBody').querySelectorAll('tr[data-sid]').forEach(tr=>tr.onclick=()=>{dashSid=tr.dataset.sid===dashSid?'':tr.dataset.sid;renderDash();});
   $('dStep').onchange=e=>{dashStep=e.target.value;renderDash();};
   $('dLatest').onchange=e=>{dashLatest=e.target.checked;renderDash();};
   if($('dAllStud')) $('dAllStud').onclick=()=>{dashSid='';renderDash();};
 }
-$('openDash').onclick=()=>{ modal.classList.remove('show'); $('dash').classList.add('show'); loadDash(); };
+/* 학생 기록 삭제 (스프레드시트의 진행현황·답변기록·골프기록에서 지워요) */
+async function deleteSelected(){
+  const sids=[...dashSel]; if(!sids.length) return;
+  const names=(DASH.students||[]).filter(s=>dashSel.has(s.sid)).map(s=>`${s.sid} ${s.name}`);
+  const preview=names.slice(0,8).join('\n')+(names.length>8?`\n… 외 ${names.length-8}명`:'');
+  if(!confirm(`선택한 학생 ${sids.length}명의 기록을 모두 지울까요?\n(진행현황·답변기록·골프기록)\n\n${preview}\n\n지운 기록은 되돌릴 수 없어요.`)) return;
+  await runDelete('deleteStudents',{sids});
+}
+async function deleteEveryone(){
+  const n=(DASH.students||[]).filter(s=>s.sid!=='T').length;
+  const v=prompt(`⚠ 모든 학생(${n}명)의 기록을 지워요. 스프레드시트의 진행현황·답변기록·골프기록이 모두 비워지고 되돌릴 수 없어요.\n\n계속하려면 아래 칸에  전체삭제  라고 입력하세요.`,'');
+  if(v===null) return;
+  if(v.trim()!=='전체삭제'){ alert('입력한 문구가 달라서 삭제하지 않았어요.'); return; }
+  await runDelete('deleteAll',{confirm:'전체삭제'});
+}
+async function runDelete(action,data){
+  $('dBody').insertAdjacentHTML('afterbegin','<div class="card" id="dDelMsg"><span class="spin"></span> 기록을 지우는 중…</div>');
+  try{
+    const r=await api(action,{token:adminToken,...data});
+    dashSel.clear(); dashSid='';
+    await loadDash();
+    $('dBody').insertAdjacentHTML('afterbegin',`<div class="card" style="background:#ecfdf5;border-left:4px solid #059669">✅ 삭제했어요. 진행현황 ${r.progress||0}명, 답변기록 ${r.answers||0}건, 골프기록 ${r.golf||0}건.<br><span class="small">학생 기기에 남아 있는 진행 상황은 그 기기에서 관리자 → '이 기기의 진행 상황 초기화'로 지울 수 있어요.</span></div>`);
+  }catch(e){
+    const m=$('dDelMsg'); if(m) m.remove();
+    if(/로그인이 만료/.test(e.message)){ handleAdminErr(e); return; }
+    $('dBody').insertAdjacentHTML('afterbegin',`<div class="card" style="color:var(--red)">❌ 삭제하지 못했어요: ${escapeHtml(e.message)}${/알 수 없는 요청/.test(e.message)?'<br><span class="small">앱스크립트에 새 Code.gs를 붙여 넣고 새 버전으로 다시 배포해야 이 기능을 쓸 수 있어요.</span>':''}</div>`);
+  }
+}$('openDash').onclick=()=>{ modal.classList.remove('show'); $('dash').classList.add('show'); loadDash(); };
 $('dRefresh').onclick=loadDash;
 $('dClose').onclick=()=>{ $('dash').classList.remove('show'); modal.classList.add('show'); };
 
