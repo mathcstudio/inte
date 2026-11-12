@@ -26,8 +26,10 @@ const TEACHER_RULES = `당신은 고등학교 2학년 '미적분Ⅰ'에서 정�
 - 정답이나 완성된 설명을 통째로 알려주지 마세요. 학생이 스스로 생각하도록 질문 한 개 또는 작은 실마리 한 개만 주세요.
 - 쉬운 말과 짧은 문장을 쓰고, 2~4문장, 150자 내외로 답하세요. 마크다운 기호는 쓰지 마세요.
 - 학생 답에서 잘한 점을 먼저 구체적으로 칭찬하세요.
-- 미적분Ⅰ 범위만 사용하세요: 정적분의 뜻(x축 위 넓이에서 아래 넓이를 뺀 값), 넓이 함수 S(x), 적분과 미분의 관계, 부정적분, F(b)−F(a).
-- 미적분Ⅱ 내용(구분구적법, 급수, 시그마 기호의 극한, 수열의 극한, 리만 합)은 용어로도 꺼내지 마세요.
+- 이 수업에서 정적분은 '잘게 나눈 직사각형 넓이의 합이 다가가는 값', 즉 '방향(적분 구간)과 부호(함숫값)를 가진 넓이'로 배웁니다.
+  x축 아래는 높이가 음수, 아래끝이 위끝보다 크면 폭 Δx가 음수, 아래끝과 위끝이 같으면 폭이 0인 넓이입니다.
+- 사용할 수 있는 내용: 위의 정적분의 뜻, 정적분의 성질, 넓이 함수 S(x), 적분과 미분의 관계 S'(x)=f(x), 부정적분, F(b)−F(a).
+- 미적분Ⅱ 용어(구분구적법, 급수, 수열의 극한, 리만 합)와 시그마·lim 기호를 쓴 설명은 꺼내지 마세요. "한없이 잘게 나누면 다가간다"처럼 말로 설명하세요.
 - 정적분·넓이 탐구와 관계없는 요청(다른 과목 숙제, 잡담, 코드 작성 등)에는 "지금은 정적분 탐구에 집중해 볼까요?"라고만 답하세요.`;
 
 /* ---------------- 진입점 ---------------- */
@@ -61,6 +63,7 @@ const ACTIONS = {
   getConfig:  req => { auth_(req.token); return config_(); },
   saveConfig: req => { auth_(req.token); return saveConfig_(req); },
   listModels: req => { auth_(req.token); return { models: listModels_() }; },
+  report:     req => { auth_(req.token); return report_(); },
   test:       req => { auth_(req.token); return { text: gemini_([{ role: 'user', parts: [{ text: '"연결 성공"이라고만 답하세요.' }] }], '짧게 답하세요.', false) }; },
 };
 
@@ -175,7 +178,7 @@ function checkLogQuota_() {
 
 /** 진행현황에서 학생 행을 찾거나 만들어요. (잠금 안에서 호출) */
 function progressRow_(sh, sid, name, total) {
-  total = Math.max(1, Math.min(40, Number(total) || 12));
+  total = Math.max(1, Math.min(40, Number(total) || 15));
   // 단계 열 머리글 보장: 6열부터 '1단계', '2단계', …
   const need = SHEETS.progress.header.length + total;
   if (sh.getLastColumn() < need) {
@@ -196,7 +199,7 @@ function progressRow_(sh, sid, name, total) {
 
 function studentLogin_(req) {
   checkLogQuota_();
-  const sid = cleanSid_(req.sid), name = cleanName_(req.name), total = Number(req.total) || 12;
+  const sid = cleanSid_(req.sid), name = cleanName_(req.name), total = Number(req.total) || 15;
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
     const sh = sheet_(SHEETS.progress);
@@ -232,7 +235,7 @@ function logAnswer_(req) {
         const cell = sh.getRange(row, SHEETS.progress.header.length + 1 + idx);
         if (!cell.getDisplayValue()) cell.setValue('✅ ' + Utilities.formatDate(now, 'Asia/Seoul', 'M/d HH:mm'));
       }
-      const total = Math.max(1, Math.min(40, Number(req.total) || 12));
+      const total = Math.max(1, Math.min(40, Number(req.total) || 15));
       const marks = sh.getRange(row, SHEETS.progress.header.length + 1, 1, total).getDisplayValues()[0];
       sh.getRange(row, 5).setValue(marks.filter(v => v).length);
     }
@@ -246,6 +249,33 @@ function logGolf_(req) {
   const rel = Number(req.strokes) - Number(req.par);
   sheet_(SHEETS.golf).appendRow([new Date(), "'" + sid, name, Number(req.code) || '', Number(req.strokes) || '', Number(req.par) || '',
     isFinite(rel) ? (rel > 0 ? '+' + rel : String(rel)) : '', card]);
+}
+
+/* ---------------- 교사용 현황 보고서 ----------------
+ * 진행현황 전체와 최근 답변기록(최대 4000건)을 돌려줘요. 반 구분·달성률 계산은 앱에서 해요. */
+function report_() {
+  const ss = book_();
+  const out = { students: [], answers: [], steps: 0, sheetUrl: ss.getUrl() };
+  const ps = ss.getSheetByName(SHEETS.progress.name);
+  if (ps && ps.getLastRow() >= 2) {
+    const base = SHEETS.progress.header.length;
+    const vals = ps.getRange(1, 1, ps.getLastRow(), ps.getLastColumn()).getDisplayValues();
+    out.steps = Math.max(0, vals[0].length - base);
+    for (let r = 1; r < vals.length; r++) {
+      const row = vals[r]; if (!row[0]) continue;
+      const done = [];
+      for (let i = 0; i < out.steps; i++) if (row[base + i]) done.push(i);
+      out.students.push({ sid: row[0], name: row[1], first: row[2], last: row[3], done: done });
+    }
+  }
+  const as = ss.getSheetByName(SHEETS.answers.name);
+  if (as && as.getLastRow() >= 2) {
+    const n = as.getLastRow() - 1, take = Math.min(n, 4000);
+    const vals = as.getRange(as.getLastRow() - take + 1, 1, take, SHEETS.answers.header.length).getDisplayValues();
+    out.answers = vals.map(v => ({ t: v[0], sid: v[1], name: v[2], step: Number(v[3]) || 0, title: v[4], type: v[5],
+      answer: v[6], result: v[7], feedback: v[8], tries: v[9], hints: v[10] }));
+  }
+  return out;
 }
 
 /* ---------------- 사용량 제한 ---------------- */
