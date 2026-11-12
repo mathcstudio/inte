@@ -11,6 +11,7 @@
   --green:#059669; --amber:#d97706; --accent:#7c3aed;
 }
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;background:var(--bg);color:var(--ink)}
 header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:12px 20px;background:#1e293b;color:#fff}
 header h1{font-size:20px;margin:0;white-space:nowrap}
@@ -25,10 +26,11 @@ header button.ghost{border-color:#64748b;color:#fff}
 button.sec{background:#e0e7ff;color:#3730a3}
 button:disabled{opacity:.45;cursor:not-allowed}
 main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,1fr);gap:16px;padding:16px;max-width:1400px;margin:0 auto}
-@media (max-width:700px){main{grid-template-columns:1fr}}
+@media (max-width:700px){main{grid-template-columns:minmax(0,1fr)}}
+main>section{min-width:0}
 .card{background:var(--panel);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:16px}
 #graphWrap{position:relative}
-canvas{width:100%;height:auto;display:block;border-radius:10px;background:#fff;border:1px solid var(--line)}
+canvas{width:100%;max-width:100%;height:auto;display:block;border-radius:10px;background:#fff;border:1px solid var(--line)}
 .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px;margin-top:14px}
 @media (max-width:600px){.controls{grid-template-columns:1fr}}
 .ctrl label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
@@ -64,7 +66,7 @@ select{font-family:inherit;font-size:14px;padding:6px 8px;border-radius:8px;bord
 .qbox .q{font-weight:700;margin-bottom:8px;line-height:1.6}
 .opt{display:block;width:100%;text-align:left;margin:6px 0;background:#fff;color:var(--ink);border:1px solid #cbd5e1}
 .opt.sel{border-color:var(--blue);background:#eff6ff}
-input[type=text],input[type=password],textarea{font-family:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1px solid #cbd5e1;width:100%}
+input[type=text],input[type=password],textarea{font-family:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid #cbd5e1;width:100%}
 textarea{min-height:90px;resize:vertical}
 .fb{margin-top:12px;padding:10px 12px;border-radius:10px;line-height:1.6;font-size:14.5px;display:none}
 .fb.show{display:block}
@@ -85,7 +87,8 @@ textarea{min-height:90px;resize:vertical}
 .modal .field{margin:10px 0}
 .modal .field label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
 .small{font-size:12.5px;color:var(--muted);line-height:1.5}
-.legend{display:flex;gap:14px;font-size:12.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap}
+.legend{display:flex;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:8px;flex-wrap:wrap;min-width:0}
+.legend span{min-width:0;overflow-wrap:anywhere}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .spin{display:inline-block;width:14px;height:14px;border:2px solid #c7d2fe;border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:-2px}
 @keyframes sp{to{transform:rotate(360deg)}}
@@ -107,6 +110,20 @@ input[type=range]{height:30px;accent-color:var(--blue)}
   .card{padding:12px}
   header .sub{display:none}
 }
+/* ---- 휴대폰 화면: 머리글을 작게, 질문↔그래프 이동 버튼 ---- */
+#jumpBtn{display:none}
+@media (max-width:700px){
+  header{padding:8px 10px;gap:6px}
+  header h1{font-size:17px}
+  .hbtns{gap:5px;justify-content:flex-start}
+  header .hbtns button,header .hbtns .badge{padding:6px 9px !important;font-size:12.5px !important;min-height:34px !important}
+  #aiBadge{display:none}
+  .fbox .formula{font-size:16px}
+  .fbox .nw{white-space:normal}
+  body.in #jumpBtn{display:block;position:fixed;right:12px;bottom:14px;z-index:30;border-radius:999px;padding:12px 16px;font-size:14px;
+    background:#4c1d95;color:#fff;box-shadow:0 6px 18px rgba(76,29,149,.35)}
+}
+
 /* ---- 입장 화면 (학번·이름 / 관리자) ---- */
 #gate{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:16px;
   background:radial-gradient(circle at 30% 20%,#ede9fe,#f5f7fb 55%,#e0f2fe);overflow-y:auto}
@@ -348,6 +365,8 @@ input[type=range]{height:30px;accent-color:var(--blue)}
     </div>
   </section>
 </main>
+
+<button id="jumpBtn" type="button">❓ 질문 보기</button>
 
 <!-- 관리자: 반별 학습 현황 -->
 <div id="dash" class="dash">
@@ -1167,14 +1186,30 @@ async function flushLogs(){
 setInterval(flushLogs,30000);
 window.addEventListener('online',flushLogs);
 
+/* 휴대폰: 그래프와 질문이 멀리 떨어져 있어서, 한 번에 오가는 버튼을 둬요 */
+function jumpTargets(){ return {q:document.querySelector('.qbox'), g:(S.view==='shape'?$('shapeCv'):$('cv'))}; }
+function updateJump(){
+  const {q}=jumpTargets(); if(!q) return;
+  const below=q.getBoundingClientRect().top>innerHeight*0.6;
+  $('jumpBtn').textContent=below?'❓ 질문 보기':'📈 그래프 보기';
+}
+$('jumpBtn').onclick=()=>{
+  const {q,g}=jumpTargets(); if(!q||!g) return;
+  const below=q.getBoundingClientRect().top>innerHeight*0.6;
+  (below?q:g).scrollIntoView({behavior:'smooth',block:below?'center':'start'});
+  setTimeout(updateJump,600);
+};
+window.addEventListener('scroll',()=>{ if(document.body.classList.contains('in')) updateJump(); },{passive:true});
+
 function showGate(){
+  document.body.classList.remove('in');
   $('gate').classList.remove('hide'); $('gSid').value=''; $('gName').value=''; $('gErr').textContent='';
   $('whoChip').style.display='none'; setTimeout(()=>$('gSid').focus(),50);
 }
 async function enter(sid,name,teacher){
   ME={sid,name,teacher:!!teacher};
   try{sessionStorage.setItem('defint1_me',JSON.stringify(ME))}catch(e){}
-  $('gate').classList.add('hide');
+  $('gate').classList.add('hide'); document.body.classList.add('in');
   $('whoChip').style.display=''; $('whoChip').textContent=teacher?'👀 선생님 체험':`👤 ${sid} ${name}`;
   P=loadProg(); if(P.cur>=MISSIONS.length) P.cur=0;
   loadMission();
