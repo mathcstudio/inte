@@ -219,7 +219,15 @@ body.escape #escBar{display:flex}
 .esc-card h2{margin:4px 0 10px;color:#fde68a}
 .esc-card p{line-height:1.7;font-size:15px;color:#cbd5e1}
 .esc-card button{background:#b45309;font-size:16px;padding:11px 22px;margin:4px}
-#escOver .esc-card.light{background:#fff;color:#1f2937;border-color:#c4b5fd}
+.memo-box{background:#fffbeb;border:2px dashed #d97706;border-radius:12px;padding:12px;margin:10px 0;text-align:left;color:#422006}
+.memo-box b{color:#78350f}
+.memo-box textarea{width:100%;min-height:70px;margin-top:6px;font-size:16px;background:#fff;color:#1f2937;border:1px solid #d6b77a;border-radius:8px;padding:8px}
+.memo-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.memo-row .small{color:#b45309!important}
+.memo-saved{font-size:16px;line-height:1.6;margin:6px 0;color:#422006}
+.esc-card .memo-box button{background:#b45309;font-size:14px;padding:8px 14px}
+.esc-card .memo-box button.memo-small{background:transparent;color:#92400e;border:1px solid #d97706;padding:4px 10px;font-size:13px}
+.esc-card{max-height:92vh;overflow-y:auto}#escOver .esc-card.light{background:#fff;color:#1f2937;border-color:#c4b5fd}
 #escOver .esc-card.light h2{color:#4c1d95}
 #escOver .esc-card.light p{color:#374151}
 #escOver .esc-card.light button{background:var(--accent)}
@@ -612,7 +620,7 @@ body.escape #escBar{display:flex}
       <h3>🤖 AI 도우미에게 물어보기 <span class="small">(정답 대신 생각할 실마리를 줘요)</span></h3>
       <div id="chatLog"></div>
       <div class="row" style="flex-wrap:nowrap">
-        <input type="text" id="chatIn" placeholder="예: Δx가 왜 작아져야 해요?">
+        <input type="text" id="chatIn" placeholder="예: Δx가 왜 작아져야 해요? (10초에 한 번 보낼 수 있어요)">
         <button id="chatSend">보내기</button>
       </div>
     </div>
@@ -1402,6 +1410,7 @@ function loadMission(){
   $('revealBtn').onclick=()=>{ showFb('info','📘 풀이: '+m.reveal+'<br><span class="small">풀이를 읽고 난 뒤, 자신의 말로 다시 답을 제출해 보세요.</span>'); record(m,'','풀이 열람',''); };
   $('submitBtn').onclick=()=>submit(m);
   $('nextBtn').onclick=()=>{ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; saveProg(); loadMission(); };
+  showChances(); refreshLockUI();
   if(ESCAPE) $('nextBtn').textContent=nextAct(P.cur)>=0?(roomOf(nextAct(P.cur))!==roomOf(P.cur)?'🚪 다음 방으로 ▶':'다음 자물쇠 ▶'):'처음 방으로';
   decorateEscape(m);
 }
@@ -1423,11 +1432,12 @@ function record(m, answer, result, feedback){
 function correct(m, answer, result, fbHtml){
   record(m, answer, result, fbHtml||'');
   const sh=document.getElementById('stuckHelp'); if(sh) sh.remove();
+  if(P.wrong) delete P.wrong[lockKey()]; if(P.lock) delete P.lock[lockKey()]; saveProg();
   if(m.q2 && PART===0){
     $('donePart').innerHTML=`<div class="fb show good" style="margin-top:10px">✅ ${successOf(m)}</div>`;
     PART=1; tries=0; $('qArea').innerHTML=qboxHtml(m,m.q2); bindQ(m);
     $('fb').className='fb'; $('fb').innerHTML=''; $('revealBtn').style.display='none';
-    $('hintLine').textContent='이제 ②번 문항이에요. 구한 값을 그래프와 연결해 보세요.';
+    showChances(); refreshLockUI();
     return;
   }
   showFb('good',(ESCAPE?'<span class="esc-lock">🔓</span>':'')+(fbHtml?fbHtml+'<br><br>':'')+'✅ '+successOf(m)); solved(m);
@@ -1447,7 +1457,53 @@ function solved(m){
     d.querySelector('button').onclick=()=>openGolf(); fb.appendChild(d);
   }
 }
-/* 여러 번 틀렸을 때: 정답 대신, 도움을 받는 방법을 안내해요 (풀이·정답은 보여 주지 않아요) */
+/* ---------- 신중하게 답하기 규칙 ----------
+   ① 틀린 답을 내면 그 문제는 15초 동안 다시 낼 수 없어요.
+   ② 한 문제에서 3번 틀리면 게임 오버 → 처음 단계부터 다시 시작해요.
+   (문제를 옮겨 다녀도 풀리지 않도록, 문제별로 기억해요) */
+const LOCK_MS=15000, MAX_WRONG=3;
+const lockKey=()=>P.cur+(PART===1?'_2':'');
+const lockLeft=()=>Math.max(0,((P.lock||{})[lockKey()]||0)-Date.now());
+const wrongNow=()=>(P.wrong||{})[lockKey()]||0;
+function refreshLockUI(){
+  const btn=$('submitBtn'); if(!btn) return;
+  const s=Math.ceil(lockLeft()/1000);
+  if(s>0){ btn.disabled=true; btn.textContent=`⏳ ${s}초 뒤 다시 제출`; }
+  else if(btn.disabled && /초 뒤/.test(btn.textContent)){ btn.disabled=false; btn.textContent='제출하기'; }
+}
+setInterval(refreshLockUI,500);
+function showChances(){
+  const hl=$('hintLine'); if(!hl||P.done.includes(P.cur)&&!(PART===1)) return;
+  const left=MAX_WRONG-wrongNow();
+  hl.innerHTML=`남은 기회 <b>${'●'.repeat(left)}${'○'.repeat(MAX_WRONG-left)}</b> — 한 문제에서 3번 틀리면 처음부터 다시 시작해요. 신중하게!`;
+}
+/* 틀렸을 때 공통 처리: 기회 줄이기, 15초 잠금, 마지막 기회 경고, 게임 오버 */
+function afterWrong(m){
+  P.wrong=P.wrong||{}; P.lock=P.lock||{};
+  const k=lockKey(), n=(P.wrong[k]||0)+1; P.wrong[k]=n; P.lock[k]=Date.now()+LOCK_MS; saveProg();
+  refreshLockUI(); showChances();
+  if(n>=MAX_WRONG){ setTimeout(()=>gameOver(m),1600); return; }
+  if(n===MAX_WRONG-1) showLastChance();
+}
+function showLastChance(){
+  if(document.getElementById('stuckHelp')) return;
+  const d=document.createElement('div'); d.id='stuckHelp'; d.className='fb show bad'; d.style.marginTop='8px';
+  d.innerHTML=`⚠ <b>한 번 더 틀리면 게임 오버!</b> 처음 단계부터 다시 해야 해요. 제출하기 전에 이렇게 해 볼까요?<br>
+    ① ${ESCAPE?'📜 연구원의 쪽지':'💡 힌트'}를 다시 읽고, 그래프를 직접 움직여 보기<br>
+    ② ${AI_ON?'🤖 AI 도우미에게 <b>"어디서부터 생각해야 해요?"</b>라고 물어보기<br>③ ':''}그래도 어려우면 <b>선생님께 손을 들어</b> 물어보기`;
+  $('fb').after(d);
+}
+function gameOver(m){
+  const at=P.cur, title=plain(MISSIONS[at].title)+partTag(m);
+  logEvent({index:at, title, type:'게임오버', answer:'', result:'게임오버', feedback:`'${title}'에서 ${MAX_WRONG}번 틀려 처음부터 다시 시작`, tries:'', hints:hintsUsed});
+  P.done=[]; P.cur=ACT()[0]; P.wrong={}; P.lock={}; P.gameOvers=(P.gameOvers||0)+1; saveProg();
+  const body = ESCAPE
+    ? `<div class="big">🚨</div><h2>보안 장치 작동!</h2><p>같은 자물쇠를 ${MAX_WRONG}번 잘못 돌려서 경보가 울렸다.<br>연구소 문이 모두 다시 잠기고, <b>처음 방</b>으로 돌아왔다.</p><p class="small">이번에는 쪽지와 장치를 잘 살펴보고 신중하게 답해 보세요!</p>`
+    : `<div class="big">⛔</div><h2>게임 오버</h2><p>한 문제에서 ${MAX_WRONG}번 틀려서 <b>처음 단계부터</b> 다시 시작해요.</p><p class="small">이번에는 힌트를 잘 읽고, 그래프를 움직여 확인한 뒤 신중하게 답해 보세요!</p>`;
+  showEscCard(body+`<button id="escGo">처음부터 다시 시작 ↺</button>`, !ESCAPE);
+  $('escGo').onclick=()=>{ hideEscCard(); renderProg(); loadMission(); };
+  renderProg();
+}/* (예전) 여러 번 틀렸을 때 안내 — 지금은 '마지막 기회 경고'가 대신해요 */
 function showStuckHelp(){
   if(document.getElementById('stuckHelp')) return;
   const d=document.createElement('div'); d.id='stuckHelp'; d.className='fb show info'; d.style.marginTop='8px';
@@ -1460,11 +1516,11 @@ function showStuckHelp(){
   const hs=hintsOf(m), h=hs.length?hs[Math.min(tries-1,hs.length-1)]:'';
   showFb('bad', msg + (h?'<br>'+(ESCAPE?'📜 ':'💡 ')+h:''));
   if(ESCAPE){ const qb=document.querySelector('.qbox'); qb.classList.remove('esc-shake'); void qb.offsetWidth; qb.classList.add('esc-shake'); }
-  if(tries>=3) showStuckHelp();
-  $('hintLine').textContent=`시도 ${tries}번째 — 틀려도 괜찮아요. 생각을 고쳐 가는 게 배우는 과정이에요.`;
+  afterWrong(m);
 }
 async function submit(m){
   const q=CURQ;
+  if(lockLeft()>0){ showFb('info',`⏳ `+Math.ceil(lockLeft()/1000)+`초 뒤에 다시 낼 수 있어요. 그동안 힌트를 읽고 그래프를 다시 살펴보세요.`); refreshLockUI(); return; }
   if(q.type==='num'){
     const raw=$('ans').value.trim(); const v=parseNum(raw);
     if(raw===''){showFb('info','답을 먼저 입력해 볼까요? 정확하지 않아도 괜찮아요!');return}
@@ -1514,8 +1570,7 @@ async function submit(m){
         const r=await aiJudge(m,txt);
         tries++;
         if(r.pass){ correct(m,txt,'통과','✅ '+escapeHtml(r.feedback)); }
-        else { showFb('bad','🤔 '+escapeHtml(r.feedback)); record(m,txt,'미통과','[AI] '+r.feedback); if(tries>=3) showStuckHelp();
-               $('hintLine').textContent=`시도 ${tries}번째 — 피드백을 참고해서 고쳐 써 보세요.`; }
+        else { showFb('bad','🤔 '+escapeHtml(r.feedback)); record(m,txt,'미통과','[AI] '+r.feedback); afterWrong(m); }
         return;
       }catch(e){ console.warn(e); /* 실패 시 규칙 기반으로 */ }
     }
@@ -1663,12 +1718,30 @@ function escOnSolved(firstTime){
     setTimeout(()=>playEnding(showCert),900);
   }
 }
-/* 일반 모드: 모든 단계를 마치면 '나의 정적분 노트' */
+/* 마무리: 기억에 남는 정적분 내용 한 줄 쓰기 (스프레드시트 답변기록에 '마무리'로 저장) */
+function memoBox(){
+  if(P.memo) return `<div class="memo-box"><b>✍ 기억에 남는 정적분</b><div class="memo-saved">“${escapeHtml(P.memo)}”</div><button type="button" id="memoEdit" class="memo-small">고쳐 쓰기</button></div>`;
+  return `<div class="memo-box"><b>✍ 오늘 가장 기억에 남는 정적분 내용을 한 줄로 써 보세요</b>
+    <textarea id="memoIn" maxlength="300" placeholder="예: 정적분은 넓이인데, x축 아래는 빼서 계산한다는 게 기억에 남아요."></textarea>
+    <div class="memo-row"><span class="small" id="memoMsg"></span><button type="button" id="memoSave">저장하기</button></div></div>`;
+}
+function bindMemo(rerender){
+  const ed=$('memoEdit'); if(ed) ed.onclick=()=>{ const keep=P.memo; P.memo=''; rerender(); const ta=$('memoIn'); if(ta){ ta.value=keep; ta.focus(); } };
+  const sv=$('memoSave'); if(!sv) return;
+  sv.onclick=()=>{
+    const v=$('memoIn').value.trim();
+    if(v.length<5){ $('memoMsg').textContent='조금만 더 써 볼까요? (5글자 이상)'; return; }
+    P.memo=v; saveProg();
+    logEvent({index:MISSIONS.length-1, title:'✍ 기억에 남는 정적분', type:'마무리', answer:v, result:'작성', feedback:'', tries:'', hints:''});
+    rerender();
+  };
+}/* 일반 모드: 모든 단계를 마치면 '나의 정적분 노트' */
 function showFinalNotes(){
-  showEscCard(`<div class="big">🎉</div><h2>탐구 완료! 나의 정적분 노트</h2>${notesList()}${aiInvite()}
+  showEscCard(`<div class="big">🎉</div><h2>탐구 완료! 나의 정적분 노트</h2>${notesList()}${memoBox()}${aiInvite()}
     <button id="escGolf">⛳ 보너스 게임(골프)</button><button id="escClose" style="background:#64748b">닫기</button>`,true);
   $('escGolf').onclick=()=>{ hideEscCard(); openGolf(); };
   $('escClose').onclick=hideEscCard;
+  bindMemo(showFinalNotes);
 }
 function showCert(){
   const d=new Date(), who=ME?(ME.teacher?'선생님 (체험)':`${ME.sid} ${ME.name}`):'';
@@ -1681,11 +1754,12 @@ function showCert(){
       <div style="margin-top:6px">위 사람은 넓이의 비밀을 밝혀 <b>정적분 연구소</b>를 탈출하였음을 증명합니다.</div>
       <div style="margin-top:8px;border-top:1px dashed #a16207;padding-top:6px"><b>📓 나의 연구 일지</b>${notesList()}</div>
       <div style="text-align:right;font-size:13px">${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.</div></div>
-    ${aiInvite()}
+    ${memoBox()}${aiInvite()}
     <button id="escGolf">⛳ 보너스 방(골프)으로</button><button id="escReplay" style="background:#4c1d95">🎬 탈출 장면 다시 보기</button><button id="escClose" style="background:#334155">닫기</button>`);
   $('escReplay').onclick=()=>{ hideEscCard(); playEnding(showCert); };
   $('escGolf').onclick=()=>{ hideEscCard(); openGolf(); };
   $('escClose').onclick=hideEscCard;
+  bindMemo(showCert);
 }
 /* 탈출 시간: 방탈출 모드에서 화면을 보고 있는 동안만 쌓여요 (제한 시간 없음) */
 setInterval(()=>{
@@ -1736,7 +1810,7 @@ function playOpening(){
       ${[...Array(18)].map((_,i)=>`<span class="op-dust" style="left:${(i*13+5)%100}%;top:${60+(i*11)%40}%;animation-duration:${6+(i%5)}s;animation-delay:${-(i*0.9)}s"></span>`).join('')}
     </div>
     <div class="op-cap" id="opCap"></div>
-    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><button id="opStart">🔦 탈출 시작</button></div>
+    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><p style="color:#fbbf24;font-size:clamp(14px,2.2vw,17px)">⚠ 한 자물쇠에서 3번 틀리면 처음으로! · 틀리면 15초 동안 다시 낼 수 없어요</p><button id="opStart">🔦 탈출 시작</button></div>
     <button class="op-skip" id="opSkip">건너뛰기 ▶▶</button>`;
   document.body.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('on'));
@@ -1764,8 +1838,9 @@ function playOpening(){
   at(13600,()=>el.classList.add('rattle'));
   at(15600,()=>{ el.classList.remove('rattle'); el.classList.add('fadeclick'); });
   at(16600,()=>{ el.classList.add('slip'); say('노트 사이에서 쪽지 한 장이 떨어졌다. <span class="note">"넓이의 비밀을 풀어야 문이 열린다."</span>'); });
-  at(20600,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다.`));
-  at(23000,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
+  at(20600,()=>say('⚠ 쪽지 뒷면의 경고: <span class="note">"한 자물쇠에서 <b>3번 연속 틀리면</b> 보안 장치가 작동해 <b>처음으로 돌아간다.</b> 신중하게 답하라!"</span>'));
+  at(25600,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다. 서두르지 말고, 신중하게!`));
+  at(28000,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
   el.querySelector('#opSkip').onclick=finish; el.querySelector('#opStart').onclick=finish;
 }
 
@@ -1843,8 +1918,8 @@ const ESC_TOUR=[
    body:'장치(그림과 그래프)를 직접 움직여 보면서 자물쇠의 답을 찾아요.'},
   {el:'#cv', title:'연구 장치',
    body:'장치(그림과 그래프)를 직접 움직여 보면서 자물쇠의 답을 찾아요.'},
-  {el:'.qbox', title:'자물쇠',
-   body:'답을 넣고 <b>제출하기</b>를 누르면 자물쇠가 열려요 🔓. 틀리면 덜컹 흔들려요.<br>어떤 문은 <b>설명</b>을 써야 열려요.'},
+  {el:'.qbox', title:'자물쇠 (신중하게!)',
+   body:'답을 넣고 <b>제출하기</b>를 누르면 자물쇠가 열려요 🔓. 틀리면 덜컹 흔들리고 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 자물쇠에서 3번 틀리면</b> 보안 장치가 작동해 <b>처음 방으로</b> 돌아가요. 아래에 남은 기회(●●●)가 보여요.'},
   {el:'#hintBtn', title:'📜 연구원의 쪽지',
    body:'막히면 연구원이 남긴 쪽지(힌트)를 읽어 보세요. 그래도 어려우면 AI 도우미나 선생님께 도움을 요청해요. <b>정답은 직접 찾아야 문이 열려요!</b>'},
   {el:'#golfBtn', title:'보너스 방',
@@ -2002,9 +2077,21 @@ function addRating(bubble,question,answer){
     box.innerHTML='<span>평가 고마워요! 📝 '+(b.textContent.startsWith('⚠')?'어느 부분이 틀린 것 같은지 선생님께 말해 봐요.':b.textContent.startsWith('🙊')?'답보다 생각하는 과정이 더 중요해요!':'')+'</span>';
   });
   bubble.after(box); $('chatLog').scrollTop=1e9;
-}async function sendChat(){
+}
+/* AI 도우미는 10초에 한 번만 보낼 수 있어요 (생각하고 묻도록) */
+const CHAT_GAP=10000; let CHAT_UNTIL=0, chatBusy=false;
+function refreshChatLock(){
+  const b=$('chatSend'); if(!b) return;
+  if(chatBusy){ b.disabled=true; b.textContent='…'; return; }
+  const s=Math.ceil((CHAT_UNTIL-Date.now())/1000);
+  if(s>0){ b.disabled=true; b.textContent=`${s}초`; } else { b.disabled=false; b.textContent='보내기'; }
+}
+setInterval(refreshChatLock,500);async function sendChat(){
+  if(chatBusy) return;
+  if(Date.now()<CHAT_UNTIL){ refreshChatLock(); return; }   // 10초가 지나기 전에는 보내지 않아요 (입력한 글은 그대로 남아요)
   const t=$('chatIn').value.trim(); if(!t) return; $('chatIn').value='';
-  addMsg('me',t); const w=addMsg('ai','생각 중…'); $('chatSend').disabled=true;
+  CHAT_UNTIL=Date.now()+CHAT_GAP; chatBusy=true; refreshChatLock();
+  addMsg('me',t); const w=addMsg('ai','생각 중…');
   const m=missionFor(P.cur);
   const scene = S.view==='shape' ? (()=>{const d=pondCells(S.grid);return `모눈 위의 호수 활동: 모눈 한 변 ${S.grid} m, 완전히 들어간 칸 넓이 합 ${nfm(d.inner*S.grid*S.grid)} m², 걸친 칸까지 ${nfm(d.touch*S.grid*S.grid)} m²`;})() : S.view==='area'
     ? (()=>{const st=areaStats();return `넓이 함수 활동: ${AFUNCS[S.af].label}, x=${fmt(st.x,2)}, Δx=${fmt(st.dx,3)}, m=${fmt(st.m,3)}, M=${fmt(st.M,3)}, ΔS/Δx=${fmt(st.dS/st.dx,3)}, f(x)=${fmt(st.fx,3)}`;})()
@@ -2016,7 +2103,7 @@ function addRating(bubble,question,answer){
     const j=await api('chat',{history:chatHist.slice(-10),context});
     w.textContent=j.text; chatHist.push({role:'model',text:j.text}); addRating(w,t,j.text);
   }catch(e){ w.textContent='⚠ '+e.message; chatHist.pop(); }
-  $('chatSend').disabled=false;
+  chatBusy=false; refreshChatLock();
 }
 $('chatSend').onclick=sendChat; $('chatIn').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)sendChat()};
 
@@ -2192,6 +2279,18 @@ function renderDash(){
     <div class="tblwrap"><table class="dtable"><tr><th class="c"><input type="checkbox" id="dSelAll" title="이 목록 전체 선택" ${allHere?'checked':''}></th><th>학번</th><th>이름</th><th class="c">완료</th><th>단계 (1→${N})</th><th>마지막 활동</th></tr>`+
     list.map(s=>`<tr class="click" data-sid="${escapeHtml(s.sid)}" style="${s.sid===dashSid?'background:#ede9fe':''}"><td class="c"><input type="checkbox" class="dSel" data-sid="${escapeHtml(s.sid)}" ${dashSel.has(s.sid)?'checked':''}></td><td>${escapeHtml(s.sid)}</td><td>${escapeHtml(s.name)}</td><td class="c">${actDone(s)}/${NA}</td><td><div class="cells">${[...Array(N)].map((_,i)=>`<span class="${s.done.includes(i)?'y':''}" title="${i+1}단계"></span>`).join('')}</div></td><td class="small">${escapeHtml(s.last||'')}</td></tr>`).join('')+
     `</table></div><p class="small" style="margin:6px 0 0">학생을 누르면 아래에 그 학생의 답변만 보여요. 왼쪽 칸을 체크하면 삭제할 학생으로 골라져요.</p></div>`;
+  // 마무리 한 줄: 학생별 마지막으로 쓴 '기억에 남는 정적분'
+  { const inCls=a=>a.sid!=='T'&&(dashCls==='all'||clsOf(a.sid)===dashCls);
+    const last={}; (DASH.answers||[]).filter(a=>a.type==='마무리'&&inCls(a)).forEach(a=>{ last[a.sid]=a; });
+    const memos=Object.values(last).sort((a,b)=>String(a.sid).localeCompare(String(b.sid)));
+    const overs={}; (DASH.answers||[]).filter(a=>a.result==='게임오버'&&inCls(a)).forEach(a=>{ overs[a.sid]=(overs[a.sid]||0)+1; });
+    const overList=Object.entries(overs).sort((a,b)=>b[1]-a[1]);
+    h+=`<div class="card"><h3>✍ 기억에 남는 정적분 · 학생 한 줄 (${memos.length}명)</h3>`+
+      (memos.length?`<div class="tblwrap" style="max-height:320px"><table class="dtable"><tr><th>학번</th><th>이름</th><th>한 줄</th></tr>`+
+        memos.map(a=>`<tr><td>${escapeHtml(a.sid)}</td><td>${escapeHtml(a.name)}</td><td style="white-space:pre-wrap">${escapeHtml(a.answer)}</td></tr>`).join('')+`</table></div>`
+        :'<p class="small">아직 쓴 학생이 없어요. 모든 단계를 마치면(방탈출은 탈출 증명서에서) 쓸 수 있어요.</p>')+
+      (overList.length?`<p class="small" style="margin:10px 0 0">⛔ 게임 오버(한 문제 3번 오답) 기록: ${overList.slice(0,30).map(([s,c])=>`${escapeHtml(s)} ${c}회`).join(', ')}</p>`:'')+
+      `</div>`; }
   // 답변 보기
   const ans=(DASH.answers||[]).filter(a=>a.sid!=='T' && (dashCls==='all'||clsOf(a.sid)===dashCls) && (!dashStep||String(a.step)===dashStep) && (!dashSid||a.sid===dashSid));
   let rows=ans.slice().reverse();
@@ -2331,8 +2430,8 @@ const MAIN_TOUR=[
    body:'직사각형 넓이의 합(어림값)과 정적분 값이 보여요. 정적분 값은 처음엔 🔒 잠겨 있고, <b>정적분의 뜻을 설명하는 단계</b>를 통과하면 열려요.'},
   {el:'#prog', title:'탐구 단계',
    body:'동그라미 하나가 한 단계예요. 순서는<br>넓이를 구하는 아이디어 → 곡선 아래 넓이와 정적분 → 방향과 부호를 가진 넓이 → 적분과 미분의 관계 → 부정적분으로 정적분 계산·해석<br>장이 끝날 때마다 <b>📓 연구 노트</b>에 알게 된 것이 정리돼요.<br>해결하면 <b style="color:#059669">초록색</b>이 되고 다음 단계가 열려요.'},
-  {el:'.qbox', title:'질문에 답하기',
-   body:'답을 쓰고 <b>제출하기</b>를 누르면 바로 피드백이 나와요.<br>막히면 <b>💡 힌트</b>를 보고, 그래도 어려우면 AI 도우미나 선생님께 물어보세요. 틀려도 괜찮아요!'},
+  {el:'.qbox', title:'질문에 답하기 (신중하게!)',
+   body:'답을 쓰고 <b>제출하기</b>를 누르면 바로 피드백이 나와요. 틀리면 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 문제에서 3번 틀리면 게임 오버</b> — 처음 단계부터 다시 해요. 막히면 <b>💡 힌트</b>를 보고, AI 도우미나 선생님께 물어보세요.'},
   {el:'#chatCard', title:'AI 도우미',
    body:'궁금한 것을 물어보면 AI가 <b>정답 대신 생각할 실마리</b>를 줘요. (선생님이 AI를 켰을 때만 보여요)'},
   {el:'#golfBtn', title:'보너스 게임 ⛳',

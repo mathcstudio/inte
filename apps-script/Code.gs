@@ -246,6 +246,12 @@ function logAnswer_(req) {
     const sh = sheet_(SHEETS.progress);
     const row = progressRow_(sh, sid, name, req.total);
     sh.getRange(row, 4).setValue(now);
+    if (ev.result === '게임오버') {
+      // 한 문제에서 3번 틀려 처음부터 다시: 단계 완료 표시를 모두 지워요 (답변기록은 그대로 남아요)
+      const total = Math.max(1, Math.min(40, Number(req.total) || 15));
+      sh.getRange(row, SHEETS.progress.header.length + 1, 1, total).clearContent();
+      sh.getRange(row, 5).setValue(0);
+    }
     if (ev.result === '정답' || ev.result === '통과') {
       if (isFinite(idx) && idx >= 0 && idx < 40) {
         const cell = sh.getRange(row, SHEETS.progress.header.length + 1 + idx);
