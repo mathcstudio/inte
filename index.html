@@ -541,7 +541,9 @@ body.escape .mfin.no{border-color:#fb923c;background:#431407}
 body.escape .lvl-pick button{color:#1e293b}
 .dash-lv{display:flex;gap:6px;margin:0 0 8px}
 .dash-lv button{padding:6px 14px;border-radius:999px;border:1px solid #c7d2fe;background:#fff;color:#3730a3;font-weight:700;cursor:pointer}
-.dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}</style>
+.dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
+#bootCover.off{opacity:0;pointer-events:none}
+</style>
 </head>
 <body>
 <header>
@@ -2260,7 +2262,13 @@ function showGate(){  document.body.classList.remove('in');
   $('gate').classList.remove('hide'); $('gSid').value=''; $('gName').value=''; $('gErr').textContent='';
   $('whoChip').style.display='none'; if(!fixedLevel()) GATE_LV=''; renderGateLevel(); setTimeout(()=>$('gSid').focus(),50);
 }
+/* 입장 직후 검은 화면: 서버 설정(방탈출 모드 여부)을 받고 오프닝이 시작될 때까지 문제를 가려요 */
+let STATUS_DONE=false, STATUS_P=null;
+function showCover(){ let c=$('bootCover'); if(!c){ c=document.createElement('div'); c.id='bootCover'; document.body.appendChild(c); } c.classList.remove('off'); }
+function hideCover(){ const c=$('bootCover'); if(c) c.classList.add('off'); }
 async function enter(sid,name,teacher,level){
+  if(!STATUS_DONE && serverUrl()){ showCover(); await Promise.race([STATUS_P||Promise.resolve(), new Promise(r=>setTimeout(r,8000))]); }
+  if(ESCAPE) showCover();
   setLevel(fixedLevel()||level||'high'); if(COURSE==='short'&&LEVEL!=='high') COURSE='full';
   ME={sid,name,teacher:!!teacher,level:LEVEL};
   try{sessionStorage.setItem('defint1_me',JSON.stringify(ME))}catch(e){}
@@ -2278,8 +2286,9 @@ async function enter(sid,name,teacher,level){
       flushLogs();
     }catch(e){ console.warn('학생 기록 서버 연결 실패:',e.message); }
   }
-  if(ESCAPE) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) playOpening(); },150);
-  else if(!Tour.seen('main')) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) Tour.start('main',MAIN_TOUR,'정적분 탐구실'); },400);
+  if(ESCAPE) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) playOpening(); setTimeout(hideCover,60); },150);
+  else hideCover();
+  if(!ESCAPE && !Tour.seen('main')) setTimeout(()=>{ if(ME && $('gate').classList.contains('hide')) Tour.start('main',MAIN_TOUR,'정적분 탐구실'); },400);
 }
 $('gGo').onclick=()=>{
   const sid=$('gSid').value.trim().replace(/\s/g,''), name=$('gName').value.trim();
@@ -2350,6 +2359,7 @@ function applyCourse(mode, vary, levelMode){
 }async function refreshStatus(){
   if(!serverUrl()){AI_ON=false;updateBadge();return}
   try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; setEscape(!!j.escapeMode); applyCourse(j.courseMode, j.varyLocks, j.levelMode); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  STATUS_DONE=true;
   if(typeof updateGolfBtn==='function') updateGolfBtn();
   updateBadge();
 }
@@ -3085,7 +3095,7 @@ window.addEventListener('resize',()=>{ clearTimeout(window._rz); window._rz=setT
 /* ====================== 시작 ====================== */
 updateBadge();
 setEscape(false);   // 주소에 ?mode=escape가 있으면 바로 방탈출 모드
-refreshStatus();
+STATUS_P=refreshStatus();
 // 같은 브라우저 창에서 이미 입장했다면 이어서, 아니면 입장 화면부터
 (function(){ let me=null; try{me=JSON.parse(sessionStorage.getItem('defint1_me'))}catch(e){}
   if(me&&me.sid) enter(me.sid,me.name,me.teacher,me.level); else showGate(); })();
