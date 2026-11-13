@@ -547,7 +547,17 @@ body.escape .lvl-pick button{color:#1e293b}
 .fl-note b{color:#7c2d12}
 body.escape .fl-note .mfin{background:#fff;color:#0f172a;border-color:#a16207;padding:2px 6px;min-width:0;max-width:none}
 body.escape .fl-note .mfin.ok{border-color:#16a34a;background:#dcfce7}
-body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
+body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}/* 태블릿: 숫자 키패드에 − 키가 없어서 부호 버튼을 둬요 / 입력칸 글자 16px(작으면 아이패드가 확대해 커서가 어긋나요) */
+.mfin{font-size:16px}
+.numwrap{display:inline-flex;align-items:center;gap:4px}
+.numrow{display:flex;gap:6px;align-items:center}
+.sgn{flex:none;padding:6px 10px;min-width:48px;font-size:16px;font-weight:700;background:#e0e7ff;color:#3730a3;border-radius:8px;line-height:1.2}
+body.escape .sgn{background:#312e81;color:#e0e7ff}
+/* 마지막 노트(출구 금고): 스크롤은 카드 하나만, 키보드가 올라오면 보이는 화면에 맞춰요 */
+.fl-box{max-height:none;overflow:visible}
+.fl-note .mfin{font-size:16px}
+.esc-over.kb{align-items:flex-start}
+.esc-over.kb .esc-card{max-height:100%}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
 #bootCover.off{opacity:0;pointer-events:none}
 #bootCover{display:flex;align-items:center;justify-content:center}
 .boot-msg{color:#fbbf24;font-size:clamp(18px,3vw,24px);font-weight:700;letter-spacing:.04em;text-shadow:0 0 18px rgba(251,191,36,.45);animation:bootPulse 1.6s ease-in-out infinite}
@@ -1612,7 +1622,7 @@ const successOf=(m)=> (CURQ && CURQ.success) || m.success;
 const partTag=(m)=> m.q2 ? (PART===0?' ①':' ②') : '';
 function qboxHtml(m,q){
   let qhtml='';
-  if(q.type==='num') qhtml=`<input type="text" id="ans" placeholder="답을 입력하세요 (예: 0.5, −2, 1/2)">`;
+  if(q.type==='num') qhtml=`<div class="numrow"><input type="text" id="ans" placeholder="답을 입력하세요 (예: 0.5, −2, 1/2)"><button type="button" class="sgn" title="부호 바꾸기">+/−</button></div>`;
   if(q.type==='mc') qhtml=q.options.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(9312+i)} ${o}</button>`).join('');
   if(q.type==='text') qhtml=(q.frame?`<div class="frame">✍ 문장 틀: ${q.frame}</div>`:'')+`<textarea id="ans" placeholder="${q.frame?'문장 틀을 참고해서 내 말로 써 보세요.':'생각한 것을 자유롭게 써 보세요.'}"></textarea>`+(q.cards?`<div class="wcards"><span class="small">낱말 카드(누르면 들어가요):</span>${q.cards.map(c=>`<button type="button" class="wcard">${c}</button>`).join('')}</div>`:'');
   if(q.type==='multi') qhtml=multiHtml(q);
@@ -1622,7 +1632,7 @@ function qboxHtml(m,q){
 function multiHtml(q){
   const ctl=(f,i)=> f.type==='select'
     ? `<select class="mfin" data-k="${i}"><option value="">고르기 ▾</option>${f.options.map((o,k)=>`<option value="${k}">${o}</option>`).join('')}</select>`
-    : `<input type="text" class="mfin" data-k="${i}" inputmode="decimal" placeholder="□">`;
+    : `<span class="numwrap"><input type="text" class="mfin" data-k="${i}" inputmode="decimal" placeholder="□"><button type="button" class="sgn" title="부호 바꾸기">+/−</button></span>`;
   if(q.template) return `<div class="mtemplate">${q.template.replace(/\{(\d+)\}/g,(s,k)=>ctl(q.fields[+k],+k))}</div>`;
   return `<div class="mfields">${q.fields.map((f,i)=>`<label class="mf"><span>${f.label}</span>${ctl(f,i)}</label>`).join('')}</div>`;
 }
@@ -1633,6 +1643,9 @@ function bindQ(m){
   const ans=$('ans'); if(ans&&CURQ.type==='num') ans.onkeydown=e=>{if(e.key==='Enter')submit(m)};
   document.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{ const ta=$('ans'); if(!ta) return; const s=ta.selectionStart??ta.value.length, e=ta.selectionEnd??s; const w=b.textContent; ta.value=ta.value.slice(0,s)+w+' '+ta.value.slice(e); ta.focus(); const c=s+w.length+1; ta.setSelectionRange(c,c); });
   document.querySelectorAll('input.mfin').forEach(inp=>inp.onkeydown=e=>{ if(e.key==='Enter') submit(m); });
+  // +/− 버튼: 앞에 −를 붙이거나 떼요 (태블릿 숫자 키패드에는 − 키가 없어요)
+  document.querySelectorAll('.qbox .sgn').forEach(b=>b.onclick=()=>{ const inp=b.previousElementSibling; if(!inp) return;
+    const v=inp.value.trim(); inp.value=/^[-−–]/.test(v)?v.replace(/^[-−–]\s*/,''):'−'+v; inp.focus(); const n=inp.value.length; try{ inp.setSelectionRange(n,n); }catch(e){} });
 }
 function loadMission(){
   if(!isActive(P.cur)){ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; }
@@ -2261,6 +2274,14 @@ const ESC_TOUR=[
    body:'이 안내는 <b>ⓘ 사용 안내</b> 버튼으로 다시 볼 수 있어요. 그럼, 탈출을 시작해 볼까요?'},
 ];
 
+/* 태블릿 키보드가 올라오면 카드 창을 '보이는 화면'에 맞추고, 입력칸을 가운데로 (커서 위치 어긋남 방지) */
+(function(){ const vv=window.visualViewport; if(!vv) return;
+  const fit=()=>{ const o=document.getElementById('escOver'); if(!o) return; const kb=window.innerHeight-vv.height>120;
+    if(kb){ o.style.top=vv.offsetTop+'px'; o.style.height=vv.height+'px'; o.style.bottom='auto'; } else { o.style.top=''; o.style.height=''; o.style.bottom=''; }
+    o.classList.toggle('kb',kb); };
+  vv.addEventListener('resize',fit); vv.addEventListener('scroll',fit); })();
+document.addEventListener('focusin',e=>{ const el=e.target; if(el&&el.matches&&el.matches('#escCard input, #escCard textarea')) setTimeout(()=>{ try{ el.scrollIntoView({block:'center'}); }catch(_){} },350); });
+document.addEventListener('animationend',e=>{ if(e.target&&e.target.classList) e.target.classList.remove('esc-shake'); });   // 흔들림(transform)이 끝나면 지워서 입력칸 위치가 흔들리지 않게
 /* ====================== 학생 입장 · 기록 ====================== */
 const LOGQ='defint1_logq';
 let memQ=[];   // 브라우저 저장소를 못 쓰는 경우(시크릿 창 등)에도 기록이 사라지지 않게
