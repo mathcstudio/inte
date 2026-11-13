@@ -1461,7 +1461,8 @@ function solved(m){
    ① 틀린 답을 내면 그 문제는 15초 동안 다시 낼 수 없어요.
    ② 한 문제에서 3번 틀리면 게임 오버 → 처음 단계부터 다시 시작해요.
    (문제를 옮겨 다녀도 풀리지 않도록, 문제별로 기억해요) */
-const LOCK_MS=15000, MAX_WRONG=3;
+const LOCK_MS=15000;
+const maxWrong=()=> (CURQ&&CURQ.type==='text') ? 5 : 3;   // 서술형은 5번, 나머지는 3번까지
 const lockKey=()=>P.cur+(PART===1?'_2':'');
 const lockLeft=()=>Math.max(0,((P.lock||{})[lockKey()]||0)-Date.now());
 const wrongNow=()=>(P.wrong||{})[lockKey()]||0;
@@ -1474,16 +1475,17 @@ function refreshLockUI(){
 setInterval(refreshLockUI,500);
 function showChances(){
   const hl=$('hintLine'); if(!hl||P.done.includes(P.cur)&&!(PART===1)) return;
-  const left=MAX_WRONG-wrongNow();
-  hl.innerHTML=`남은 기회 <b>${'●'.repeat(left)}${'○'.repeat(MAX_WRONG-left)}</b> — 한 문제에서 3번 틀리면 처음부터 다시 시작해요. 신중하게!`;
+  const MW=maxWrong(), left=Math.max(0,MW-wrongNow());
+  hl.innerHTML=`남은 기회 <b>${'●'.repeat(left)}${'○'.repeat(MW-left)}</b> — 이 문제에서 ${MW}번 틀리면 처음부터 다시 시작해요${MW===5?' (서술형은 5번까지)':''}. 신중하게!`;
 }
 /* 틀렸을 때 공통 처리: 기회 줄이기, 15초 잠금, 마지막 기회 경고, 게임 오버 */
 function afterWrong(m){
   P.wrong=P.wrong||{}; P.lock=P.lock||{};
   const k=lockKey(), n=(P.wrong[k]||0)+1; P.wrong[k]=n; P.lock[k]=Date.now()+LOCK_MS; saveProg();
   refreshLockUI(); showChances();
-  if(n>=MAX_WRONG){ setTimeout(()=>gameOver(m),1600); return; }
-  if(n===MAX_WRONG-1) showLastChance();
+  const MW=maxWrong();
+  if(n>=MW){ setTimeout(()=>gameOver(m),1600); return; }
+  if(n===MW-1) showLastChance();
 }
 function showLastChance(){
   if(document.getElementById('stuckHelp')) return;
@@ -1494,7 +1496,7 @@ function showLastChance(){
   $('fb').after(d);
 }
 function gameOver(m){
-  const at=P.cur, title=plain(MISSIONS[at].title)+partTag(m);
+  const at=P.cur, title=plain(MISSIONS[at].title)+partTag(m), MAX_WRONG=maxWrong();
   logEvent({index:at, title, type:'게임오버', answer:'', result:'게임오버', feedback:`'${title}'에서 ${MAX_WRONG}번 틀려 처음부터 다시 시작`, tries:'', hints:hintsUsed});
   P.done=[]; P.cur=ACT()[0]; P.wrong={}; P.lock={}; P.gameOvers=(P.gameOvers||0)+1; saveProg();
   const body = ESCAPE
@@ -1810,7 +1812,7 @@ function playOpening(){
       ${[...Array(18)].map((_,i)=>`<span class="op-dust" style="left:${(i*13+5)%100}%;top:${60+(i*11)%40}%;animation-duration:${6+(i%5)}s;animation-delay:${-(i*0.9)}s"></span>`).join('')}
     </div>
     <div class="op-cap" id="opCap"></div>
-    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><p style="color:#fbbf24;font-size:clamp(14px,2.2vw,17px)">⚠ 한 자물쇠에서 3번 틀리면 처음으로! · 틀리면 15초 동안 다시 낼 수 없어요</p><button id="opStart">🔦 탈출 시작</button></div>
+    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><p style="color:#fbbf24;font-size:clamp(14px,2.2vw,17px)">⚠ 한 자물쇠에서 3번(설명을 쓰는 자물쇠는 5번) 틀리면 처음으로! · 틀리면 15초 동안 다시 낼 수 없어요</p><button id="opStart">🔦 탈출 시작</button></div>
     <button class="op-skip" id="opSkip">건너뛰기 ▶▶</button>`;
   document.body.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('on'));
@@ -1838,7 +1840,7 @@ function playOpening(){
   at(13600,()=>el.classList.add('rattle'));
   at(15600,()=>{ el.classList.remove('rattle'); el.classList.add('fadeclick'); });
   at(16600,()=>{ el.classList.add('slip'); say('노트 사이에서 쪽지 한 장이 떨어졌다. <span class="note">"넓이의 비밀을 풀어야 문이 열린다."</span>'); });
-  at(20600,()=>say('⚠ 쪽지 뒷면의 경고: <span class="note">"한 자물쇠에서 <b>3번 연속 틀리면</b> 보안 장치가 작동해 <b>처음으로 돌아간다.</b> 신중하게 답하라!"</span>'));
+  at(20600,()=>say('⚠ 쪽지 뒷면의 경고: <span class="note">"한 자물쇠에서 <b>3번 틀리면</b>(설명을 쓰는 자물쇠는 5번) 보안 장치가 작동해 <b>처음으로 돌아간다.</b> 신중하게 답하라!"</span>'));
   at(25600,()=>say(`${escapeHtml(who)}, 탈출을 시작합니다. 서두르지 말고, 신중하게!`));
   at(28000,()=>{ el.classList.add('title'); el.querySelector('#opCap').style.opacity='0'; el.querySelector('#opSkip').style.display='none'; });
   el.querySelector('#opSkip').onclick=finish; el.querySelector('#opStart').onclick=finish;
@@ -1919,7 +1921,7 @@ const ESC_TOUR=[
   {el:'#cv', title:'연구 장치',
    body:'장치(그림과 그래프)를 직접 움직여 보면서 자물쇠의 답을 찾아요.'},
   {el:'.qbox', title:'자물쇠 (신중하게!)',
-   body:'답을 넣고 <b>제출하기</b>를 누르면 자물쇠가 열려요 🔓. 틀리면 덜컹 흔들리고 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 자물쇠에서 3번 틀리면</b> 보안 장치가 작동해 <b>처음 방으로</b> 돌아가요. 아래에 남은 기회(●●●)가 보여요.'},
+   body:'답을 넣고 <b>제출하기</b>를 누르면 자물쇠가 열려요 🔓. 틀리면 덜컹 흔들리고 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 자물쇠에서 3번 틀리면</b>(설명을 쓰는 자물쇠는 5번) 보안 장치가 작동해 <b>처음 방으로</b> 돌아가요. 아래에 남은 기회(●●●)가 보여요.'},
   {el:'#hintBtn', title:'📜 연구원의 쪽지',
    body:'막히면 연구원이 남긴 쪽지(힌트)를 읽어 보세요. 그래도 어려우면 AI 도우미나 선생님께 도움을 요청해요. <b>정답은 직접 찾아야 문이 열려요!</b>'},
   {el:'#golfBtn', title:'보너스 방',
@@ -2431,7 +2433,7 @@ const MAIN_TOUR=[
   {el:'#prog', title:'탐구 단계',
    body:'동그라미 하나가 한 단계예요. 순서는<br>넓이를 구하는 아이디어 → 곡선 아래 넓이와 정적분 → 방향과 부호를 가진 넓이 → 적분과 미분의 관계 → 부정적분으로 정적분 계산·해석<br>장이 끝날 때마다 <b>📓 연구 노트</b>에 알게 된 것이 정리돼요.<br>해결하면 <b style="color:#059669">초록색</b>이 되고 다음 단계가 열려요.'},
   {el:'.qbox', title:'질문에 답하기 (신중하게!)',
-   body:'답을 쓰고 <b>제출하기</b>를 누르면 바로 피드백이 나와요. 틀리면 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 문제에서 3번 틀리면 게임 오버</b> — 처음 단계부터 다시 해요. 막히면 <b>💡 힌트</b>를 보고, AI 도우미나 선생님께 물어보세요.'},
+   body:'답을 쓰고 <b>제출하기</b>를 누르면 바로 피드백이 나와요. 틀리면 <b>15초 동안</b> 다시 낼 수 없어요.<br>⚠ <b>한 문제에서 3번 틀리면 게임 오버</b>(서술형은 5번) — 처음 단계부터 다시 해요. 막히면 <b>💡 힌트</b>를 보고, AI 도우미나 선생님께 물어보세요.'},
   {el:'#chatCard', title:'AI 도우미',
    body:'궁금한 것을 물어보면 AI가 <b>정답 대신 생각할 실마리</b>를 줘요. (선생님이 AI를 켰을 때만 보여요)'},
   {el:'#golfBtn', title:'보너스 게임 ⛳',
