@@ -1118,7 +1118,7 @@ function refreshShape(){
   document.querySelectorAll('#gridBtns button').forEach(b=>b.classList.toggle('sec',+b.dataset.g!==g));
   $('showTouch').checked=S.showTouch;
   $('cellOut').textContent=`${nfm(g)} × ${nfm(g)} = ${nfm(a)} m²`;
-  $('innerOut').textContent=`${d.inner}칸 × ${nfm(a)} = ${nfm(d.inner*a)} m²`;
+  $('innerOut').textContent=(CURM&&CURM.id==='l_pond'&&!P.done.includes(P.cur))?'직접 구해 보세요':`${d.inner}칸 × ${nfm(a)} = ${nfm(d.inner*a)} m²`;
   $('outerChip').style.display=S.showTouch?'':'none'; $('touchLegend').style.display=S.showTouch?'':'none';
   $('outerOut').textContent=`${d.touch}칸 × ${nfm(a)} = ${nfm(d.touch*a)} m²`;
   if(S.shapeTrue){$('pondChip').classList.remove('locked');$('pondOut').textContent=`약 ${POND_AREA.toFixed(1)} m²`;}
@@ -1238,7 +1238,7 @@ const MISSIONS_HIGH = [
    story:`x축 위(파랑, +)와 아래(빨강, −)가 함께 있어요. 위 부분의 넓이를 S₁, 아래 부분의 넓이를 S₂라 하면, 정적분은 둘을 부호대로 더한 값이에요.`,
    q:{type:'num', text:INT('−3','1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:0, tol:0.001},
    hints:['파란 삼각형(−1부터 1까지)의 넓이 S₁과 빨간 삼각형(−3부터 −1까지)의 넓이 S₂를 각각 구해 보세요.','S₁ = 2는 +로, S₂ = 2는 −로 계산해요. (+2) + (−2) = ?'],
-   success:'맞아요, <b>0</b>이에요! 즉 '+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이). 교과서의 정적분과 같은 값이에요.',
+   success:'맞아요, <b>0</b>이에요! 즉 '+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이).',
    reveal:'S₁ = 2, S₂ = 2 → S₁ − S₂ = <b>0</b>' },
 
  { id:'dir', title:'7. 방향: 거꾸로 훑으면?', setup:{fi:fiOf('lin1'),a:2,b:0,n:4,method:'right',rects:true,signed:true}, hideExact:true,
@@ -1252,20 +1252,20 @@ const MISSIONS_HIGH = [
    story:`지금은 <b>a = b = 1</b>이에요. 폭 Δx = 0이니까 넓이도 0, 즉 ${INT('a','a','f(x) dx')} = 0 이에요.<br>또 넓이는 이어 붙일 수 있어요: ${INT(0,1,'f(x) dx')} + ${INT(1,3,'f(x) dx')} = ${INT(0,3,'f(x) dx')}<div class="tip">💡 a와 b 슬라이더로 구간 [0, 1], [1, 3], [0, 3]을 차례로 만들어 보세요.</div>`,
    q:{type:'num', text:INT(0,1,'(x + 1) dx')+' = 1.5, &nbsp;'+INT(0,3,'(x + 1) dx')+' = 7.5 일 때, '+INT(1,3,'(x + 1) dx')+' 의 값은?', answer:6, tol:0.001},
    hints:['[0, 3]은 [0, 1]과 [1, 3]을 이어 붙인 구간이에요.','1.5 + (구하는 값) = 7.5'],
-   success:'정확해요! 구간을 나누어 더할 수 있어요. 방향이 있으니 a, b, c의 순서와 상관없이 '+INT('a','c','')+' = '+INT('a','b','')+' + '+INT('b','c','')+' 가 성립해요.',
+   success:'정확해요! 구간을 나누어 더할 수 있어요. 방향이 있으니 a, b, c의 순서와 상관없이 '+INT('a','c','f(x) dx')+' = '+INT('a','b','f(x) dx')+' + '+INT('b','c','f(x) dx')+' 가 성립해요.',
    reveal:'7.5 − 1.5 = <b>6</b>' },
 
  { id:'def', title:'9. 정적분을 내 말로 정의하기', setup:{fi:fiOf('dec'),a:3,b:0,n:6,method:'mid',rects:true,signed:true}, hideExact:true,
    story:`지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 높이가 음수인 부분도 있죠?<br>a, b, n을 바꿔 보며 지금까지 알게 된 것을 정리해 보세요.`,
    q:{type:'text', text:'정적분이 "방향과 부호를 가진 넓이"라는 것을 설명해 보세요. (높이가 음수일 때, a > b일 때, a = b일 때 중 두 가지 이상)',
-      rubric:[{name:'부호: 높이 f(x)가 음수(x축 아래)이면 넓이가 −로 계산된다', kw:['아래','음수','높이','부호','마이너스','−','-']},
-              {name:'방향: a > b이면 폭 Δx가 음수라서 −가 된다', kw:['방향','거꾸로','폭','Δx','반대','왼쪽','a>b','a > b','b<a']},
-              {name:'폭이 없으면(a = b) 0이다', kw:['0','같','폭이 없','없는']}],
+      rubric:[{name:'부호: 높이 f(x)가 음수(x축 아래)이면 넓이가 −로 계산된다', kw:['아래','음수','부호','마이너스']},
+              {name:'방향: a > b이면 폭 Δx가 음수라서 부호가 바뀐다', kw:['방향','거꾸로','폭','Δx','반대','왼쪽','a>b','a > b','b<a']},
+              {name:'폭이 없으면(a = b) 0이다', kw:[], all:[['같','a=b','a = b','폭이 0','폭이 없','폭 0'],['0']]}],
       need:2,
-      goal:'정적분은 잘게 나눈 직사각형 넓이(높이 f(x) × 폭 Δx)의 합이 다가가는 값이다. 높이가 음수(x축 아래)이면 넓이가 음수로, a > b이면 폭 Δx가 음수라서 음수로 계산되고, a = b이면 폭이 0이라 0이다.'},
+      goal:'정적분은 잘게 나눈 직사각형 넓이(높이 f(x) × 폭 Δx)의 합이 다가가는 값이다. 높이가 음수(x축 아래)이면 넓이가 음수로, a > b이면 폭 Δx가 음수라서 부호가 반대로 바뀌고, a = b이면 폭이 0이라 0이다.'},
    hints:['직사각형 하나의 넓이는 (높이) × (폭)이에요. 높이가 음수가 되는 때는 언제였나요?','폭 Δx = (b − a) ÷ n이 음수가 되는 때는 언제였나요? 0이 되는 때는요?'],
    success:'훌륭해요! 정적분은 <b>방향(적분 구간)과 부호(함숫값)를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 공개됐어요. 여러 경우를 바꿔 가며 확인해 보세요.',
-   reveal:'높이가 음수이면 −, a > b이면 폭이 음수라 −, a = b이면 폭이 0이라 0이 된다.',
+   reveal:'높이가 음수이면 −, a > b이면 폭이 음수라 부호가 바뀌고, a = b이면 폭이 0이라 0이 된다.',
    onSolve:()=>{S.exactUnlocked=true} },
 
  /* ---------- ④ 적분과 미분의 관계 ---------- */
@@ -1298,10 +1298,10 @@ const MISSIONS_HIGH = [
  /* ---------- ⑤ 부정적분과 정적분의 관계 ---------- */
  { id:'constC', view:'area', title:'13. 부정적분으로 넓이 구하기', setup:{af:'lin1',ax:3,adxV:0,showC:true,C:2},
    story:`S(x)가 f(t) = t + 1의 한 부정적분이니까, 다른 부정적분 F(x) = x²/2 + x + C 와는 <b>상수만</b> 달라요.<br>아래 <b>C 슬라이더</b>를 여러 값으로 바꿔 보며 <b>F(x) − F(0)</b>과 <b>S(x)</b>를 비교해 보세요. x의 위치도 바꿔 보세요.`,
-   q:{type:'mc', text:'C의 값을 바꾸면 F(x) − F(0) 은 어떻게 될까요?', options:['C가 커지면 같이 커진다','C에 상관없이 항상 S(x)와 같다 (C가 빼면서 없어진다)','C가 0일 때만 S(x)와 같다','항상 0이다'], answer:1},
+   q:{type:'mc', text:'C의 값을 바꾸면 F(x) − F(0) 은 어떻게 될까요?', options:['C가 커지면 같이 커진다','C에 상관없이 항상 S(x)와 같다','C가 0일 때만 S(x)와 같다','항상 0이다'], answer:1},
    needC:3,
    hints:['C를 −3, 0, 4처럼 여러 값으로 바꿔 보며 F(x) − F(0) 값을 보세요.','F(x) − F(0) = (x²/2 + x + C) − (0 + C) 를 계산하면 C는 어떻게 되나요?'],
-   success:'맞아요! 어떤 부정적분 F를 써도 C가 빼면서 사라져서 '+INT('a','b','f(x) dx')+' = <b>F(b) − F(a)</b> 로 정적분을 구할 수 있어요.',
+   success:'맞아요! 어떤 부정적분 F를 써도 빼는 과정에서 C가 사라져서 '+INT('a','b','f(x) dx')+' = <b>F(b) − F(a)</b> 로 정적분을 구할 수 있어요.',
    reveal:'F(x) − F(0) = (x²/2 + x + C) − C = x²/2 + x = S(x). C에 상관없이 같다.' },
 
  { id:'calc', title:'14. 처음의 넓이를 정확히!', setup:{fi:fiOf('sq'),a:0,b:2,n:200,method:'right',showArea:true,rects:true}, hideExact:true,
@@ -1317,9 +1317,9 @@ const MISSIONS_HIGH = [
       hints:['3x² − 8x 의 한 부정적분은 F(x) = x³ − 4x² 이에요.','F(2) = 8 − 16 = −8, F(−1) = −1 − 4 = −5 → F(2) − F(−1) = ?'],
       success:'맞아요, <b>−3</b>이에요! 그런데 색칠된 부분이 분명 있는데 왜 음수일까요?'},
    q2:{type:'text', text:'② 구한 값 −3이 무엇을 뜻하는지, x축 위 부분과 아래 부분의 넓이를 이용해 설명해 보세요.',
-      rubric:[{name:'x축 위(양수인 부분)의 넓이 S₁을 구했다 / +로 계산한다', kw:['위','양수','+','5','S₁','S1','파란','파랑']},
-              {name:'x축 아래(음수인 부분)의 넓이 S₂를 구했다 / −로 계산한다', kw:['아래','음수','빼','8','S₂','S2','빨간','빨강']},
-              {name:'−3 = S₁ − S₂ (5 − 8)', kw:['5-8','5 - 8','5−8','5 − 8','차','뺀 값','빼면','-3','−3']}],
+      rubric:[{name:'x축 위(양수인 부분)의 넓이 S₁을 구했다 / +로 계산한다', kw:[], all:[['위','양수','S₁','S1','파란','파랑'],['5']]},
+              {name:'x축 아래(음수인 부분)의 넓이 S₂를 구했다 / −로 계산한다', kw:[], all:[['아래','음수','S₂','S2','빨간','빨강'],['8']]},
+              {name:'−3 = S₁ − S₂ (5 − 8)', kw:['5-8','5 - 8','5−8','5 − 8','차이','뺀 값','빼면','뺀']}],
       need:2,
       goal:'f(x)는 [−1, 0]에서 양수, [0, 2]에서 음수이다. 양수인 부분의 넓이 S₁ = F(0) − F(−1) = 5, 음수인 부분의 넓이 S₂ = −(F(2) − F(0)) = 8이므로, 정적분 −3은 양수인 부분의 넓이에서 음수인 부분의 넓이를 뺀 값(5 − 8)이다.',
       hints:['그래프가 x축과 만나는 점은 x = 0이에요. [−1, 0]과 [0, 2]로 나누어 생각해 보세요.','F(0) − F(−1)과 F(2) − F(0)을 각각 구해 보세요. 이 두 값과 −3은 어떤 관계인가요?'],
@@ -1359,7 +1359,7 @@ const MID_TX={
   dir:m=>{ const a=m.meta.area, v=m.q.answer; return { q:{type:'multi', text:m.q.text.replace(' 의 값을 구해 보세요.',' 를 두 단계로 구해 보세요.'),
       fields:[{label:'① 색칠된 부분의 넓이 =',name:'넓이',answer:a},{label:'② 정적분 값 (방향 생각하기) =',name:'정적분 값',answer:v}]},
     hints:[...m.hints,'먼저 넓이를 구하고, 구간을 거꾸로(오른쪽 → 왼쪽) 훑으면 부호를 바꿔요.'] }; },
-  def:m=>({ q:Object.assign({},m.q,{frame:'높이가 음수이면 ______, a > b이면 ______, a = b이면 ______. 그래서 정적분은 ______.'}),
+  def:m=>({ q:Object.assign({},m.q,{frame:'높이가 음수이면 넓이를 ______로 계산하고, a > b이면 부호가 ______, a = b이면 ______. 그래서 정적분은 ______.'}),
     hints:[...m.hints,'문장 틀의 빈칸을 하나씩 채워 보세요. 각 경우에 넓이를 + / − / 0 중 무엇으로 계산했나요?'] }),
   areafn:m=>H3(m,'보라색은 사다리꼴이에요: (윗변 + 아랫변) × 높이 ÷ 2.'),
   squeeze:m=>Object.assign({observe:'dx'},H3(m,'관찰 기록표에서 Δx가 작아질수록 "ΔS ÷ Δx" 칸과 "f(x)" 칸을 비교해 보세요.')),
@@ -1409,7 +1409,7 @@ const MISSIONS_LOW=[
    success:'맞아요! 한없이 잘게 나눌 때 다가가는 넓이(약 2.67)를 '+INT(0,2,'x² dx')+' 로 쓰고 <b>정적분</b>이라고 해요.',
    reveal:'n이 커질수록 넓이의 합은 약 2.67에 가까워진다.' },
  { id:'l_read', title:'6. 정적분 기호 읽기', setup:{fi:fiOf('two_x'),a:0,b:2,rects:false,showArea:false}, hideExact:true,
-   story:`정적분 기호를 읽어 볼게요. <span style="font-size:1.25em">${INT(0,2,'2x dx')}</span><br>그래프에는 <b>y = 2x</b>와 a, b의 위치가 그려져 있어요.`,
+   story:`정적분 기호를 읽어 볼게요. <span style="font-size:1.25em">${INT(0,2,'2x dx')}</span><br>그래프에는 이 기호가 나타내는 함수와 a, b의 위치가 그려져 있어요.`,
    q:{type:'multi', text:'빈칸에 알맞은 것을 골라 보세요.', template:INT(0,2,'2x dx')+' 는 함수 {0} 의 그래프와 x축 사이에서, x = {1} 부터 x = {2} 까지의 넓이를 나타내요.',
       fields:[{type:'select',name:'함수',options:['y = x²','y = 2x','y = 2'],answer:1},{type:'select',name:'아랫끝',options:['0','2','2x'],answer:0},{type:'select',name:'윗끝',options:['0','2','2x'],answer:1}]},
    hints:['∫ 오른쪽, dx 앞에 있는 식이 넓이를 구할 함수예요.','∫ 아래쪽 수가 아랫끝(시작), 위쪽 수가 윗끝(끝)이에요.'],
@@ -1430,19 +1430,19 @@ const MISSIONS_LOW=[
    success:'맞아요! x축 아래의 넓이는 <b>−로 계산</b>해요. 이것이 정적분의 <b>부호</b>예요.',
    reveal:'높이는 음수, 넓이는 −로 계산한다.' },
  { id:'l_signcalc', title:'9. 정적분 값 구하기 (아래)', setup:{fi:fiOf('lin'),a:-2,b:0,rects:false,signed:true}, hideExact:true,
-   story:`빨간 삼각형의 넓이는 <b>2</b>예요. (밑변 2 × 높이 2 ÷ 2)<br>그런데 x축 <b>아래</b>에 있어요.`,
+   story:`그래프 <b>y = x</b>와 x축 사이, x = −2부터 x = 0까지의 부분(빨간 삼각형)이에요.`,
    q:{type:'num', text:INT('−2','0','x dx')+' 의 값은?', answer:-2, tol:0.001},
    special:{2:'🤔 넓이는 2가 맞아요! 그런데 x축 <b>아래</b>에 있으면 정적분 값은 어떻게 될까요?'},
-   hints:['넓이는 2예요.','x축 아래이므로 넓이에 −를 붙여요.'],
+   hints:['먼저 빨간 삼각형의 넓이를 구해요: 밑변 2, 높이 2인 삼각형이에요.','넓이는 2예요. 그런데 x축 아래에 있으면 정적분 값에는 무엇이 붙었나요? (8단계)'],
    success:'맞아요, <b>−2</b>예요!', reveal:'넓이 2, x축 아래 → −2' },
  { id:'l_mix', title:'10. 위와 아래가 함께', setup:{fi:fiOf('lin'),a:-2,b:2,rects:false,signed:true}, hideExact:true,
-   story:`이번엔 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 함께 있어요.<br>위 넓이 <b>S₁ = 2</b>, 아래 넓이 <b>S₂ = 2</b>예요.`,
+   story:`이번엔 x = −2부터 x = 2까지예요. x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 함께 있어요.`,
    q:{type:'num', text:INT('−2','2','x dx')+' 의 값은?', answer:0, tol:0.001},
    special:{4:'🤔 넓이를 모두 더했군요! 정적분은 위 넓이에서 아래 넓이를 <b>빼요.</b>'},
-   hints:['S₁ − S₂ = 2 − 2','같은 수끼리 빼면?'],
+   hints:['파란 삼각형과 빨간 삼각형의 넓이를 각각 구해 보세요. (둘 다 밑변 2, 높이 2)','위는 +, 아래는 −로 계산해요. (위 넓이) − (아래 넓이) = ?'],
    success:'맞아요, <b>0</b>이에요! 위와 아래 넓이가 같으면 서로 빠져서 0이 돼요.', reveal:'2 − 2 = 0' },
  { id:'l_dir', title:'11. 거꾸로 가면?', setup:{fi:fiOf('lin1'),a:2,b:0,n:4,method:'right',rects:true,signed:true}, hideExact:true, dial:-4,
-   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로 <b>왼쪽으로</b> 거꾸로 가요. 화살표(←)와 색을 보세요.<br>기호로 쓰면 <b>${INT(2,0,'(x + 1) dx')}</b> 예요. (아랫끝 2, 윗끝 0)<br>0에서 2로 <b>오른쪽으로</b> 갈 때는 ${INT(0,2,'(x + 1) dx')} = 4 였어요.`,
+   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로 <b>왼쪽으로</b> 거꾸로 가요. 화살표(←)와 색을 보세요.<br>기호로 쓰면 <b>${INT(2,0,'(x + 1) dx')}</b> 예요. (아랫끝 2, 윗끝 0)<br>0에서 2로 <b>오른쪽으로</b> 갈 때의 넓이(사다리꼴)는 ${INT(0,2,'(x + 1) dx')} = 4 예요.`,
    q:{type:'multi', text:'거꾸로 갈 때의 정적분을 알아보세요.',
       fields:[{type:'select',label:'① '+INT(2,0,'(x + 1) dx')+' 는 '+INT(0,2,'(x + 1) dx')+' 와 비교해',name:'비교',options:['똑같다','부호만 반대이다','0이다'],answer:1},
               {label:'② '+INT(2,0,'(x + 1) dx')+' =',name:'값',answer:-4}]},
@@ -1458,7 +1458,7 @@ const MISSIONS_LOW=[
    reveal:INT(1,1,'(x + 1) dx')+' = 0, 폭 b − a = 0이므로' },
  { id:'l_def', title:'13. 정적분의 뜻 정리', setup:{fi:fiOf('dec'),a:3,b:0,n:6,method:'mid',rects:true,signed:true}, hideExact:true, unlockExact:true,
    story:`지금까지 알게 된 것을 정리해 볼게요. 그래프를 움직여 보며 확인해도 좋아요.`,
-   q:{type:'multi', text:'빈칸에 알맞은 말을 골라 문장을 완성해 보세요.', template:'정적분은 x축 위 넓이에서 x축 {0} 넓이를 {1} 값이다. 구간을 거꾸로 하면 부호가 {2}. 아랫끝과 윗끝이 같으면 값은 {3}.',
+   q:{type:'multi', text:'빈칸에 알맞은 말을 골라 문장을 완성해 보세요.', template:'a < b일 때, 정적분은 x축 위 넓이에서 x축 {0} 넓이를 {1} 값이다. 구간을 거꾸로 하면 부호가 {2}. 아랫끝과 윗끝이 같으면 값은 {3}.',
       fields:[{type:'select',name:'첫째 빈칸',options:['위','아래'],answer:1},{type:'select',name:'둘째 빈칸',options:['더한','뺀'],answer:1},{type:'select',name:'셋째 빈칸',options:['그대로다','바뀐다'],answer:1},{type:'select',name:'넷째 빈칸',options:['0이다','1이다','알 수 없다'],answer:0}]},
    hints:['10단계에서 S₁과 S₂를 어떻게 계산했나요?','11·12단계에서 거꾸로 가거나 끝이 같으면 어떻게 되었나요?'],
    success:'훌륭해요! 정적분은 <b>방향과 부호를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 보여요.',
@@ -1466,16 +1466,16 @@ const MISSIONS_LOW=[
  { id:'l_areafn', view:'area', title:'14. 넓이를 함수로 보기', setup:{af:'c2',ax:1,adxV:0,showC:false}, hideS:true,
    story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 움직여 보세요.`,
    q:{type:'multi', text:'S(3)을 구하고, S(x) = 2x를 미분해 보세요.',
-      fields:[{label:'① S(3) =',name:'S(3)',answer:6},{type:'select',label:'② S(x) = 2x를 미분하면',name:'미분',options:['2 (= f(x)와 같다)','x²','0'],answer:0}]},
+      fields:[{label:'① S(3) =',name:'S(3)',answer:6},{type:'select',label:'② S(x) = 2x를 미분하면',name:'미분',options:['2','x²','0'],answer:0}]},
    hints:['S(3) = 3 × 2','2x를 미분하면 기울기 2가 남아요. f(t) = 2와 비교해 보세요.'],
    success:'맞아요! <b>넓이 함수 S(x)를 미분하면 원래 함수 f(x)</b>가 돼요. 즉 S(x)는 f(x)의 한 부정적분이에요.',
    reveal:'S(3) = 6, S′(x) = 2 = f(x)' },
  { id:'l_ftc', title:'15. 부정적분으로 정적분 계산', setup:{fi:fiOf('two_x'),a:0,b:2,rects:false,signed:true}, hideExact:true,
-   story:`그래프 <b>y = 2x</b> 아래 0부터 2까지의 넓이를 <b>부정적분</b>으로 구해 볼게요.<br>${INT('a','b','f(x) dx')} = <b>F(b) − F(a)</b> (F는 f의 한 부정적분)`,
+   story:`그래프 <b>y = 2x</b> 아래 0부터 2까지의 넓이를 <b>부정적분</b>으로 구해 볼게요.<br>14단계에서 넓이 함수 S(x)는 f의 한 부정적분이었어요. 그래서 0부터 2까지의 넓이는 S(2) − S(0)이고, 다른 부정적분 F를 써도 상수 C는 빼면서 사라져요.<br>${INT('a','b','f(x) dx')} = <b>F(b) − F(a)</b> (F는 f의 한 부정적분)`,
    q:{type:'multi', text:INT(0,2,'2x dx')+' 를 구해 보세요.',
       fields:[{type:'select',label:'① 2x의 한 부정적분 F(x) =',name:'F(x)',options:['x²','2','2x²'],answer:0},{label:'② F(2) − F(0) =',name:'F(2) − F(0)',answer:4}]},
    hints:['미분해서 2x가 되는 것을 골라요.','F(2) − F(0) = 2² − 0² = ?'],
-   success:'맞아요, <b>4</b>예요! 파란 7단계에서 삼각형으로 구한 넓이 4와 똑같죠? 부정적분으로도 정적분을 구할 수 있어요.',
+   success:'맞아요, <b>4</b>예요! 7단계에서 삼각형으로 구한 넓이 4와 똑같죠? 부정적분으로도 정적분을 구할 수 있어요.',
    reveal:'F(x) = x², F(2) − F(0) = 4' },
  { id:'l_interp', title:'16. 계산하고 설명하기', setup:{fi:fiOf('two_x'),a:-1,b:2,rects:false,signed:true}, hideExact:true,
    story:`그래프 <b>y = 2x</b>예요. 구간 [−1, 2]에서 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 모두 있어요.`,
@@ -1486,8 +1486,8 @@ const MISSIONS_LOW=[
    q2:{type:'text', text:'② 구한 값 3이 무엇을 뜻하는지, 그래프의 넓이를 이용해 설명해 보세요.',
       frame:'x축 위의 넓이는 ______, x축 아래의 넓이는 ______이다. 정적분 3은 ______ 넓이에서 ______ 넓이를 ______ 값이다.',
       cards:['위','아래','넓이','뺀','4','1','4 − 1'],
-      rubric:[{name:'x축 위(파랑) 넓이 4를 찾았다', kw:['4','위','파란','파랑','S₁','S1']},
-              {name:'x축 아래(빨강) 넓이 1을 찾았다', kw:['1','아래','빨간','빨강','S₂','S2']},
+      rubric:[{name:'x축 위(파랑) 넓이 4를 찾았다', kw:[], all:[['위','파란','파랑','S₁','S1'],['4']]},
+              {name:'x축 아래(빨강) 넓이 1을 찾았다', kw:[], all:[['아래','빨간','빨강','S₂','S2'],['1']]},
               {name:'3 = 4 − 1 (위 넓이에서 아래 넓이를 뺀 값)', kw:['4-1','4 - 1','4−1','4 − 1','뺀','빼','차']}],
       need:2,
       goal:'f(x) = 2x는 [−1, 0]에서 x축 아래, [0, 2]에서 x축 위에 있다. 위 넓이는 밑변 2 × 높이 4 ÷ 2 = 4, 아래 넓이는 밑변 1 × 높이 2 ÷ 2 = 1이므로, 정적분 3은 위 넓이 4에서 아래 넓이 1을 뺀 값(4 − 1)이다.',
@@ -1523,32 +1523,34 @@ let VARY=URLP.get('vary')==='1';
 const fmtN=v=>(v<0?'−':'')+(Math.round(Math.abs(v)*100)/100);
 const variantNo=()=>{ if(!ME||ME.teacher) return 0; let h=0; for(const ch of String(ME.sid)) h=(h*31+ch.charCodeAt(0))%9973; return h%3; };
 const F1=x=>x*x/2+x;              // f(x) = x + 1 의 한 부정적분
+/* 숫자 뒤 조사: 마지막 숫자를 읽을 때 받침이 있으면(0 1 3 6 7 8) 앞의 것, 없으면 뒤의 것 */
+const josa=(x,a,b)=>'013678'.includes(String(fmtN(x)).slice(-1))?a:b;
 const VARIANTS={
   sign:v=>{ const L=[-3,-5,-4][v], w=-1-L, area=w*w/2, ans=-area;
-    return { meta:{area}, setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?`},
+    return { meta:{area}, setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}${josa(area,'이','가')} 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?`},
       q:{type:'num', text:INT(fmtN(L),'−1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 ${w}, 높이 ${w}예요.`,'높이가 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
-      success:`맞아요, <b>${fmtN(ans)}</b>예요! 정적분은 <b>부호</b>를 가진 넓이예요.`,
+      success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 정적분은 <b>부호</b>를 가진 넓이예요.`,
       reveal:`삼각형 넓이 ${w} × ${w} ÷ 2 = ${fmtN(area)}, 높이가 음수이므로 <b>${fmtN(ans)}</b>` }; },
   mix:v=>{ const [a,b]=[[-3,1],[-3,2],[-4,1]][v], S1=(b+1)**2/2, S2=(-1-a)**2/2, ans=S1-S2;
     return { meta:{S1,S2}, setup:{a,b}, special:{[S1+S2]:'🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?'},
       q:{type:'num', text:INT(fmtN(a),fmtN(b),'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
-      hints:[`파란 삼각형(−1부터 ${fmtN(b)}까지)의 넓이 S₁과 빨간 삼각형(${fmtN(a)}부터 −1까지)의 넓이 S₂를 각각 구해 보세요.`,`S₁ = ${fmtN(S1)}은 +로, S₂ = ${fmtN(S2)}는 −로 계산해요.`],
-      success:`맞아요, <b>${fmtN(ans)}</b>이에요! 즉 `+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이). 교과서의 정적분과 같은 값이에요.',
+      hints:[`파란 삼각형(−1부터 ${fmtN(b)}까지)의 넓이 S₁과 빨간 삼각형(${fmtN(a)}부터 −1까지)의 넓이 S₂를 각각 구해 보세요.`,`S₁ = ${fmtN(S1)}${josa(S1,'은','는')} +로, S₂ = ${fmtN(S2)}${josa(S2,'은','는')} −로 계산해요.`],
+      success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 즉 `+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이).',
       reveal:`S₁ = ${fmtN(S1)}, S₂ = ${fmtN(S2)} → S₁ − S₂ = <b>${fmtN(ans)}</b>` }; },
   dir:v=>{ const [a,b]=[[2,0],[3,1],[1,0]][v], area=F1(a)-F1(b), ans=-area;
-    return { meta:{area}, setup:{a,b}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 ${a}에서 ${b}로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?`},
+    return { meta:{area}, setup:{a,b}, special:{[area]:`🤔 넓이는 ${fmtN(area)}${josa(area,'이','가')} 맞아요! 그런데 ${a}에서 ${b}로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?`},
       story:`이번엔 <b>a = ${a}, b = ${b}</b>이에요. ${a}에서 ${b}로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (${b} − ${a}) ÷ n 이 <b>음수</b>가 돼요! 높이는 양수, 폭은 음수 → 넓이는 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
       q:{type:'num', text:INT(a,b,'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`색칠된 부분(${b}부터 ${a}까지)의 넓이는 사다리꼴: (${b+1} + ${a+1}) × ${a-b} ÷ 2 예요.`,'방향이 거꾸로(폭이 음수)라서 넓이를 −로 계산해요.'],
-      success:`맞아요, <b>${fmtN(ans)}</b>예요! 정적분은 <b>방향</b>을 가진 넓이라서 `+INT('b','a','f(x) dx')+' = −'+INT('a','b','f(x) dx')+' 예요.',
+      success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 정적분은 <b>방향</b>을 가진 넓이라서 `+INT('b','a','f(x) dx')+' = −'+INT('a','b','f(x) dx')+' 예요.',
       reveal:`넓이 ${fmtN(area)}, 폭이 음수이므로 <b>${fmtN(ans)}</b>` }; },
   split:v=>{ const [p,q,r]=[[0,1,3],[0,2,3],[0,1,2]][v], A=F1(q)-F1(p), B=F1(r)-F1(p), ans=B-A;
     return { setup:{a:q,b:q}, special:{[A+B]:`🤔 두 값을 더했군요. [${p}, ${r}] = [${p}, ${q}] + [${q}, ${r}] 이에요. 구하는 것은 [${q}, ${r}]이에요.`},
       story:`지금은 <b>a = b = ${q}</b>이에요. 폭 Δx = 0이니까 넓이도 0, 즉 ${INT('a','a','f(x) dx')} = 0 이에요.<br>또 넓이는 이어 붙일 수 있어요: ${INT(p,q,'f(x) dx')} + ${INT(q,r,'f(x) dx')} = ${INT(p,r,'f(x) dx')}<div class="tip">💡 a와 b 슬라이더로 구간 [${p}, ${q}], [${q}, ${r}], [${p}, ${r}]을 차례로 만들어 보세요.</div>`,
       q:{type:'num', text:INT(p,q,'(x + 1) dx')+` = ${fmtN(A)}, &nbsp;`+INT(p,r,'(x + 1) dx')+` = ${fmtN(B)} 일 때, `+INT(q,r,'(x + 1) dx')+' 의 값은?', answer:ans, tol:0.001},
       hints:[`[${p}, ${r}]은 [${p}, ${q}]와 [${q}, ${r}]을 이어 붙인 구간이에요.`,`${fmtN(A)} + (구하는 값) = ${fmtN(B)}`],
-      success:'정확해요! 구간을 나누어 더할 수 있어요. 방향이 있으니 a, b, c의 순서와 상관없이 '+INT('a','c','')+' = '+INT('a','b','')+' + '+INT('b','c','')+' 가 성립해요.',
+      success:'정확해요! 구간을 나누어 더할 수 있어요. 방향이 있으니 a, b, c의 순서와 상관없이 '+INT('a','c','f(x) dx')+' = '+INT('a','b','f(x) dx')+' + '+INT('b','c','f(x) dx')+' 가 성립해요.',
       reveal:`${fmtN(B)} − ${fmtN(A)} = <b>${fmtN(ans)}</b>` }; },
 };
 /* 지금 학생에게 보여 줄 단계(자물쇠 숫자가 바뀐 경우 반영) */
@@ -1557,10 +1559,15 @@ function missionFor(i){
   const f=VARY&&LEVEL!=='low'&&VARIANTS[m.id];
   if(f){ const o=f(variantNo()); m=Object.assign({},m,o,{setup:Object.assign({},m.setup,o.setup)}); }
   if(LEVEL==='mid'&&MID_TX[m.id]){ const o=MID_TX[m.id](m); m=Object.assign({},m,o); }
+  // 중수·1차시 코스는 8단계(a = b)와 12단계(한 부정적분)를 건너뛰어서, 바로 앞 단계 정답 문구에 한 줄을 보태요
+  if(LEVEL==='mid'||(LEVEL==='high'&&COURSE==='short')){
+    if(m.id==='dir') m=Object.assign({},m,{success:m.success+'<br>➕ 그리고 아랫끝과 윗끝이 같으면(a = b) 폭이 0이라서 '+INT('a','a','f(x) dx')+' = <b>0</b>이에요.'});
+    if(m.id==='squeeze') m=Object.assign({},m,{success:m.success+'<br>➕ 넓이 함수를 미분하면 원래 함수가 되니까, S(x)는 f(x)의 <b>한 부정적분</b>이에요.'});
+  }
   return m;
 }
 /* 거울의 방 다이얼에 들어갈 숫자 (5~8단계 답) */
-const dialDigits=()=>(LEVEL==='low'?['l_signcalc','l_mix','l_dir','l_same']:['sign','mix','dir','split']).filter(id=>idxOf(id)>=0&&isActive(idxOf(id))).map(id=>{ const mm=missionFor(idxOf(id)); return {id,txt:fmtN(mm.dial!==undefined?mm.dial:mm.q.answer)}; });
+const dialDigits=()=>(LEVEL==='low'?['l_signcalc','l_mix','l_dir','l_same']:['sign','mix','dir','split']).filter(id=>idxOf(id)>=0&&isActive(idxOf(id))).map(id=>{ const mm=missionFor(idxOf(id)); const qa=mm.q.answer!==undefined?mm.q.answer:(mm.q.fields?mm.q.fields[mm.q.fields.length-1].answer:0); return {id,txt:fmtN(mm.dial!==undefined?mm.dial:qa)}; });
 /* 진행 상황은 학생(학번)별로 이 기기에 저장하고, 서버(스프레드시트)와도 맞춰요 */
 let ME=null;                       // {sid, name, teacher}
 let P={done:[],cur:0};
@@ -1859,7 +1866,7 @@ async function submit(m){
   }
 }
 function ruleJudge(m,txt){
-  const q=CURQ; const t=txt.replace(/\s+/g,' '); const hit=q.rubric.map(r=>r.kw.some(k=>t.includes(k)));
+  const q=CURQ; const t=txt.replace(/\s+/g,' '); const hit=q.rubric.map(r=>r.all?r.all.every(g=>g.some(k=>t.includes(k))):r.kw.some(k=>t.includes(k)));
   const got=q.rubric.filter((r,i)=>hit[i]);
   if(got.length>=q.need){
     tries++;
@@ -1893,7 +1900,7 @@ const ESC_FLAVOR={
   pond2:'연구 일지가 잠겨 있다. 표지에 적힌 질문에 답해야 열린다.',
   rect2:'곡선 모양의 벽 앞에 직사각형 블록 두 개가 놓여 있다.',
   approach:'번호 조각이 숨겨진 상자. 블록을 한없이 잘게 쪼개면 숫자가 떠오른다.',
-  sign:'첫 번째 다이얼. 거울에 비친 넓이는 음수로 보인다.',
+  sign:'첫 번째 다이얼. 거울에 비친 넓이에는 무엇이 달라졌을까?',
   mix:'두 번째 다이얼. 위와 아래의 넓이가 서로 맞서 있다.',
   dir:'세 번째 다이얼. 거울 속에서는 길이 거꾸로 흐른다.',
   split:'네 번째 다이얼. 끊어진 길을 이어 붙여라.',
@@ -1906,7 +1913,7 @@ const ESC_FLAVOR={
   interp:'마지막 문. 계산하고, 그 뜻을 말해야 열린다.',
   l_pond:'벽에 커다란 호수 지도가 걸려 있다. 모눈 렌즈로 칸을 세어 보자.', l_gap:'렌즈를 바꿔 끼우면 무엇이 달라질까?',
   l_cmp:'곡선 벽 옆에 삼각형 판자가 기대어 있다. 어느 쪽이 더 넓을까?', l_how:'공식이 통하지 않는 벽. 지도실에서 배운 방법이 떠오른다.', l_read:'금고 문에 낯선 기호가 새겨져 있다. 읽을 줄 알아야 한다.', l_tri:'기호가 가리키는 판자의 넓이가 번호 조각이다.', l_same:'네 번째 다이얼. 시작과 끝이 같은 길이다.', l_approach:'블록을 잘게 쪼개면 번호 조각이 나타난다.',
-  l_sign1:'거울에 비친 직사각형은 거꾸로 서 있다.', l_signcalc:'첫 번째 다이얼. 아래쪽 넓이를 읽어라.', l_mix:'두 번째 다이얼. 위와 아래가 맞서 있다.', l_dir:'거울 속에서는 길이 거꾸로 흐른다.', l_def:'문 위의 문장에 빈칸이 있다. 알맞은 말을 채워라.',
+  l_sign1:'거울에 비친 직사각형은 거꾸로 서 있다.', l_signcalc:'첫 번째 다이얼. 아래쪽 넓이를 읽어라.', l_mix:'두 번째 다이얼. 위와 아래가 맞서 있다.', l_dir:'세 번째 다이얼. 거울 속에서는 길이 거꾸로 흐른다.', l_def:'문 위의 문장에 빈칸이 있다. 알맞은 말을 채워라.',
   l_areafn:'넓이 기계의 레버를 당겨 보자. 높이 2짜리 넓이가 쌓인다.', l_ftc:'금고 첫 칸: 부정적분의 열쇠를 골라라.', l_interp:'마지막 문. 계산하고, 그 뜻을 말해야 열린다.',
 };
 const roomOf=i=>ROOMS.findIndex(r=>r.ids.includes(MISSIONS[i].id));
@@ -1972,7 +1979,7 @@ function hideEscCard(){ $('escOver').classList.remove('show'); }
 const CH_NOTES=[
   '복잡한 도형의 넓이는 <b>잘게 나눈 간단한 도형의 넓이를 더해</b> 어림하고, 잘게 나눌수록 실제 넓이에 가까워진다.',
   '곡선 아래 넓이는 직사각형 넓이의 합으로 어림하고, <b>한없이 잘게 나눌 때 다가가는 값</b>이 정적분 '+INT('a','b','f(x) dx')+' 이다.',
-  '정적분은 <b>방향과 부호를 가진 넓이</b>: x축 아래는 −, a > b이면 −, a = b이면 0. 결국 <b>(위 넓이) − (아래 넓이)</b>.',
+  '정적분은 <b>방향과 부호를 가진 넓이</b>: x축 아래는 −, a > b이면 부호가 바뀌고, a = b이면 0. a < b일 때 <b>(위 넓이) − (아래 넓이)</b>.',
   '넓이 함수 S(x)를 미분하면 원래 함수가 된다: <b>S′(x) = f(x)</b>. 즉 S(x)는 f(x)의 한 부정적분.',
   'f(x)의 한 부정적분 F(x)로 <b>'+INT('a','b','f(x) dx')+' = F(b) − F(a)</b>를 계산하고, 그 값은 (위 넓이) − (아래 넓이)로 해석한다.',
 ];
@@ -1981,16 +1988,16 @@ const notesList=()=>`<ol style="text-align:left;line-height:1.75;font-size:14px;
 const aiInvite=()=> AI_ON ? `<p class="small" style="margin:6px 0">🤖 (선택) <b>AI 도우미</b>에게 정적분에 대해 질문 하나를 하고, 답 아래 버튼으로 <b>그 답을 평가</b>해 보세요.</p>` : '';
 /* 🔐 출구 금고: 연구 일지 5장의 중요한 낱말을 빈칸에 직접 입력해야 탈출 완료 (일지는 다시 보여 주지 않아요) */
 const CH_BLANKS=[
-  '복잡한 도형의 넓이는 잘게 나눈 [간단한 도형]의 넓이를 [더해] 어림하고, 잘게 나눌수록 [실제 넓이]에 가까워진다.',
+  '복잡한 도형의 넓이는 잘게 나눈 [간단한 도형]의 넓이를 [더해|더하여|더하고|합해] 어림하고, 잘게 나눌수록 [실제 넓이]에 가까워진다.',
   '곡선 아래 넓이는 [직사각형] 넓이의 합으로 어림하고, [한없이] 잘게 나눌 때 다가가는 값이 [정적분] '+INT('a','b','f(x) dx')+' 이다.',
-  '정적분은 [방향]과 [부호]를 가진 넓이: x축 아래는 −, a > b이면 −, a = b이면 [0]. 결국 (위 넓이) − (아래 넓이).',
+  '정적분은 [방향]과 [부호]를 가진 넓이: x축 아래는 −, a > b이면 부호가 [바뀌고|바뀐다|바뀜], a = b이면 [0]. a < b일 때 (위 넓이) − (아래 넓이).',
   '넓이 함수 S(x)를 [미분]하면 원래 함수가 된다: S′(x) = f(x). 즉 S(x)는 f(x)의 한 [부정적분].',
   'f(x)의 한 부정적분 F(x)로 '+INT('a','b','f(x) dx')+' = [F(b) − F(a)]를 계산하고, 그 값은 (위 넓이) − ([아래] 넓이)로 해석한다.',
 ];
 const NOTE_WARN='<div class="note-warn">✍ <b>지금 공책에 그대로 옮겨 적으세요!</b><br>마지막 출구 금고에서 이 연구 일지가 <b>빈칸 문제</b>로 다시 나와요. 그때는 일지를 다시 보여 주지 않아요.</div>';
 const blankNorm=s=>String(s).replace(/\s/g,'').replace(/[−–—]/g,'-').replace(/[′']/g,'').toLowerCase();
 const escaped=()=>allDone() && !!(P.escFinal || P.escDoneMs);
-function finalAnswers(){ const a=[]; CH_BLANKS.forEach(s=>s.replace(/\[([^\]]+)\]/g,(_,w)=>{a.push(w);return ''})); return a; }
+function finalAnswers(){ const a=[]; CH_BLANKS.forEach(s=>s.replace(/\[([^\]]+)\]/g,(_,w)=>{a.push(w);return ''})); return a; }   // '|'로 나눈 표현은 모두 정답
 function showFinalLock(){
   if(!ESCAPE||!ME||escaped()) return;
   let k=0;
@@ -2005,7 +2012,7 @@ function showFinalLock(){
   $('flGo').onclick=()=>{
     const ans=finalAnswers(), vals=ins.map(x=>x.value.trim());
     if(vals.some(v=>!v)){ $('flMsg').textContent='빈칸을 모두 채워 주세요.'; return; }
-    let ok=0; ins.forEach((x,i)=>{ const good=blankNorm(vals[i])===blankNorm(ans[i]); x.classList.toggle('ok',good); x.classList.toggle('no',!good); if(good) ok++; });
+    let ok=0; ins.forEach((x,i)=>{ const good=ans[i].split('|').some(w=>blankNorm(vals[i])===blankNorm(w)); x.classList.toggle('ok',good); x.classList.toggle('no',!good); if(good) ok++; });
     P.flTry=vals; P.flTries=(P.flTries||0)+1; saveProg();
     logEvent({index:MISSIONS.length-1, title:'🔐 출구 금고 (연구 일지 빈칸)', type:'방탈출', answer:vals.join(' / '), result:ok===ans.length?'정답':'오답', feedback:`${ans.length}칸 중 ${ok}칸 맞음`, tries:P.flTries, hints:''});
     if(ok<ans.length){
