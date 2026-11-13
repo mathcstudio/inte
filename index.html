@@ -580,7 +580,35 @@ body.escape .sgn{background:#312e81;color:#e0e7ff}
 .fl-box{max-height:none;overflow:visible}
 .fl-note .mfin{font-size:16px}
 .esc-over.kb{align-items:flex-start}
-.esc-over.kb .esc-card{max-height:100%}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
+.esc-over.kb .esc-card{max-height:100%}/* ===== 문제 화면: ① 상황 ② 해 볼 것 ③ 질문 / 필요한 조작만 강조 ===== */
+.sec-blk{border-radius:10px;padding:10px 12px;margin:8px 0;background:#f8fafc;border:1px solid #e5e7eb}
+.sec-h{font-size:12.5px;color:#6b7280;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:6px}
+.sec-n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#7c3aed;color:#fff;font-size:12px;align-items:center;justify-content:center;flex:none}
+.sec-blk .story{margin:0}
+.story.notip .tip{display:none}
+.todo-list{list-style:none;margin:0;padding:0}
+.todo-list li{padding:3px 0 3px 26px;font-size:14.5px;line-height:1.5;position:relative}
+.todo-list li::before{content:"⬜";position:absolute;left:0;top:3px}
+.todo-list li.ok{color:#047857}
+.todo-list li.ok::before{content:"✅"}
+.todo-list li.free::before{content:"•";left:8px}
+.ctrl.focus{border:2px solid #7c3aed;background:#f5f3ff;border-radius:10px;padding:6px 10px}
+.ctrl.focus::before{content:"👉 여기를 움직여요";display:block;font-size:12px;color:#6d28d9;font-weight:700;margin-bottom:2px}
+#gridBtns.focus,#animBtn.focus{outline:2px solid #7c3aed;outline-offset:3px;border-radius:8px}
+.chip.focus{outline:2px solid #7c3aed;background:#f5f3ff}
+.chip.dim{opacity:.5}
+#exploreBtn{margin-top:10px}
+.fbox details summary{cursor:pointer;color:var(--muted);font-size:13px}
+#vizSlot>section.card{box-shadow:none;border:1px solid #e5e7eb;padding:10px;margin:8px 0}
+body.escape .sec-blk{background:#0f172a;border-color:#334155}
+body.escape .sec-h{color:#94a3b8}
+body.escape .todo-list li{color:#e2e8f0}
+body.escape .todo-list li.ok{color:#4ade80}
+body.escape .ctrl.focus{border-color:#fbbf24;background:#1e1b4b}
+body.escape .ctrl.focus::before{color:#fde68a}
+body.escape #gridBtns.focus,body.escape #animBtn.focus{outline-color:#fbbf24}
+body.escape .chip.focus{outline-color:#fbbf24;background:#1e1b4b}
+body.escape #vizSlot>section.card{background:linear-gradient(180deg,#111827,#0f172a);border-color:#334155}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
 #bootCover.off{opacity:0;pointer-events:none}
 #bootCover{display:flex;align-items:center;justify-content:center}
 .boot-msg{color:#fbbf24;font-size:clamp(18px,3vw,24px);font-weight:700;letter-spacing:.04em;text-shadow:0 0 18px rgba(251,191,36,.45);animation:bootPulse 1.6s ease-in-out infinite}
@@ -629,8 +657,7 @@ body.escape .sgn{background:#312e81;color:#e0e7ff}
       <span id="dirLegend" style="display:none;color:#b45309;font-weight:700">← 방향: b &lt; a 라서 폭 Δx가 음수</span>
     </div>
     <div class="legend" id="legendRect">
-      <span><i style="background:var(--blue-soft);border:1px solid var(--blue)"></i>+로 계산되는 직사각형</span>
-      <span><i style="background:var(--red-soft);border:1px solid var(--red)"></i>−로 계산되는 직사각형</span>
+      <span><i style="background:var(--blue-soft);border:1px solid var(--blue)"></i>직사각형</span>
       <span><i style="background:rgba(124,58,237,.18)"></i>실제 영역</span>
     </div>
     <div class="legend" id="legendArea">
@@ -688,6 +715,7 @@ body.escape .sgn{background:#312e81;color:#e0e7ff}
     </div>
     <div class="fbox rectOnly" id="formulaRow"></div>
     </div>
+    <button class="sec" id="exploreBtn" style="display:none">🔧 더 탐구하기 (함수·구간 등 모든 조작 열기)</button>
   </section>
   <!-- 오른쪽: 탐구 -->
   <section class="card">
@@ -1095,9 +1123,9 @@ function refreshArea(){
   }
   drawArea(); updateObserve();
 }
-$('cRng').oninput=e=>{S.C=+e.target.value;S.cSeen.add(S.C);refresh()};
-$('axRng').oninput=e=>{S.ax=Math.min(+e.target.value,AX_MAX-0.02);refresh()};
-$('adxRng').oninput=e=>{S.adxV=+e.target.value;refresh()};
+$('cRng').oninput=e=>{S.C=+e.target.value;S.cSeen.add(S.C);touch('C');refresh()};
+$('axRng').oninput=e=>{S.ax=Math.min(+e.target.value,AX_MAX-0.02);touch('ax');refresh()};
+$('adxRng').oninput=e=>{S.adxV=+e.target.value;touch('adx');refresh()};
 
 /* ====================== ① 넓이를 구하는 아이디어: 모눈 위의 호수 ======================
    가로 12 m × 세로 8 m 땅 위의 울퉁불퉁한 호수. 모눈 크기를 바꿔 가며
@@ -1189,7 +1217,7 @@ function updateObserve(){
 function refresh(){
   const shape=S.view==='shape';
   $('shapePanel').style.display=shape?'':'none'; $('graphPanel').style.display=shape?'none':'';
-  if(shape){ refreshShape(); return; }
+  if(shape){ refreshShape(); applyUI(); return; }
   $('dirLegend').style.display=S.b<S.a?'':'none';
   $('cBox').style.display=(S.view==='area'&&S.showC)?'':'none';
   const area=S.view==='area';
@@ -1199,7 +1227,7 @@ function refresh(){
   $('legendSigned').style.display=(!area&&S.signed)?'':'none';
   $('legendRect').style.display=(!area&&!S.signed)?'':'none';
   document.querySelectorAll('.rectOnly').forEach(el=>el.style.display=(!area&&S.rects)?'':'none');
-  if(area){ refreshArea(); return; }
+  if(area){ refreshArea(); applyUI(); return; }
   $('fSel').value=S.fi; $('mSel').value=S.method;
   $('aRng').value=S.a; $('bRng').value=S.b; $('nRng').value=S.n; $('showArea').checked=S.showArea;
   $('aVal').textContent=S.a; $('bVal').textContent=S.b; $('nVal').textContent=S.n; $('fLabel').textContent='';
@@ -1209,15 +1237,18 @@ function refresh(){
   if(S.exactUnlocked && !S.hideExact){$('exactChip').classList.remove('locked');$('exOut').textContent=fmt(exact(),4);}
   else{$('exactChip').classList.add('locked');$('exOut').textContent=S.hideExact?'✏ 직접 계산해 보세요':`🔒 ${posOf(Math.max(0,MISSIONS.findIndex(x=>x.unlockExact||x.id==='def')))+1}단계 후 공개`;}
   const mname={left:'왼쪽 끝점',right:'오른쪽 끝점',mid:'가운데 점'}[S.method];
-  $('formulaRow').innerHTML=`<div class="formula"><span class="nw">어림값</span> <span class="nw">= (첫째 직사각형 넓이) + (둘째 직사각형 넓이) + ⋯</span> <span class="nw">= f(x<sub>1</sub>)·Δx + f(x<sub>2</sub>)·Δx + ⋯ + f(x<sub>n</sub>)·Δx</span></div><div class="small">— 각 직사각형의 높이는 그 칸의 ${mname}에서의 함숫값, 가로 Δx는 모든 칸이 같아요.</div>`;
-  draw(); updateObserve();
+  const fOpen=!!(CURG()&&CURG().formula)||S.explore, fKey=mname+'|'+fOpen+'|'+P.cur;
+  if($('formulaRow').dataset.k!==fKey){ $('formulaRow').dataset.k=fKey;
+    const fh=`<div class="formula"><span class="nw">어림값</span> <span class="nw">= (첫째 직사각형 넓이) + (둘째 직사각형 넓이) + ⋯</span> <span class="nw">= f(x<sub>1</sub>)·Δx + f(x<sub>2</sub>)·Δx + ⋯ + f(x<sub>n</sub>)·Δx</span></div><div class="small">— 각 직사각형의 높이는 그 칸의 ${mname}에서의 함숫값, 가로 Δx는 모든 칸이 같아요.</div>`;
+    $('formulaRow').innerHTML=fOpen?fh:'<details><summary>📎 참고: 어림값을 식으로 쓰면</summary>'+fh+'</details>'; }
+  draw(); updateObserve(); applyUI();
 }
 FUNCS.forEach((F,i)=>{const o=document.createElement('option');o.value=i;o.textContent=F.label;$('fSel').appendChild(o)});
 $('fSel').onchange=e=>{S.fi=+e.target.value;refresh()};
 $('mSel').onchange=e=>{S.method=e.target.value;refresh()};
-$('aRng').oninput=e=>{S.a=+e.target.value;refresh()};
-$('bRng').oninput=e=>{S.b=+e.target.value;refresh()};
-$('nRng').oninput=e=>{S.n=+e.target.value;S.maxN=Math.max(S.maxN,S.n);refresh()};
+$('aRng').oninput=e=>{S.a=+e.target.value;touch('a');trackAB();refresh()};
+$('bRng').oninput=e=>{S.b=+e.target.value;touch('b');trackAB();refresh()};
+$('nRng').oninput=e=>{S.n=+e.target.value;S.maxN=Math.max(S.maxN,S.n);touch('n');refresh()};
 $('showArea').onchange=e=>{S.showArea=e.target.checked;refresh()};
 let animT=null;
 $('animBtn').onclick=()=>{
@@ -1677,25 +1708,99 @@ function bindQ(m){
   document.querySelectorAll('.qbox .sgn').forEach(b=>b.onclick=()=>{ const inp=b.previousElementSibling; if(!inp) return;
     const v=inp.value.trim(); inp.value=/^[-−–]/.test(v)?v.replace(/^[-−–]\s*/,''):'−'+v; inp.focus(); const n=inp.value.length; try{ inp.setSelectionRange(n,n); }catch(e){} });
 }
-function loadMission(){
-  if(!isActive(P.cur)){ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; }
+/* ====================== 문제 화면 안내 (단계별) ======================
+   sit  : ① 상황 (없으면 이야기 그대로, 이야기 속 💡 조작 안내는 '해 볼 것'으로 옮겨요)
+   todo : ② 해 볼 것 — 그림을 움직이거나 관찰할 것만 (풀이 실마리는 넣지 않아요). ok가 있으면 저절로 ✅
+   ui   : 이 단계에서 보이는 조작 (graph: f m a b n play area / area: ax adx C / shape: grid touch). 해결 뒤 '더 탐구하기'로 모두 열려요
+   chip : 질문과 관련된 표시값 강조 (graph: dx sum exact / area: S sq ratio fx cF cDiff cS / shape: cell inner outer pond)
+   formula : 어림값 식을 펼쳐서 보여 줄 단계 */
+const GUIDE={
+  pond1:{ todo:[{t:'모눈 크기 버튼을 2 m, 1 m, 0.5 m, 0.25 m로 모두 눌러 보기',ok:S=>S.gridsSeen&&S.gridsSeen.size>=4},{t:'"완전히 들어간 칸 넓이의 합"이 어떻게 변하는지 보기'}], ui:['grid'], chip:'inner' },
+  pond2:{ todo:[{t:'모눈을 작게 바꿔 가며 2개 이상 비교하기',ok:S=>S.gridsSeen&&S.gridsSeen.size>=3},{t:'분홍 칸만 센 넓이와 노란 칸까지 센 넓이의 차이 보기'}], ui:['grid'], chip:['inner','outer'] },
+  rect2:{ ui:[], formula:true },
+  approach:{ sit:'곡선 <b>y = x²</b> 아래, x = 0부터 x = 2까지의 넓이를 직사각형으로 채우고 있어요. 지금은 직사각형이 2개라서 곡선 위로 튀어나온 부분이 많아요.',
+    todo:[{t:'n을 10개까지 늘려 보기',ok:S=>S.maxN>=10},{t:'n을 50개 이상으로 늘려 보기 (▶ 버튼을 눌러도 돼요)',ok:S=>S.maxN>=50},{t:'n = 200일 때 직사각형 넓이의 합 읽기',ok:S=>S.maxN>=200}], ui:['n','play'], chip:'sum' },
+  sign:{ ui:[] }, mix:{ ui:[] },
+  dir:{ todo:[{t:'b 슬라이더를 a보다 오른쪽으로 옮겨 색 보기',ok:S=>S.bRight},{t:'다시 b를 a보다 왼쪽으로 옮겨 색과 화살표(←) 보기',ok:S=>S.bRight&&S.b<S.a}], ui:['b'] },
+  split:{ todo:[{t:'a, b 슬라이더로 문제에 나온 세 구간을 차례로 만들어 보기',ok:S=>S.ab&&S.ab.size>=3}], ui:['a','b'] },
+  def:{ sit:'지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 높이가 음수인 부분도 있죠?',
+    todo:[{t:'b를 a보다 크게 만들어 보기',ok:S=>S.bRight},{t:'b를 a보다 작게 만들어 보기',ok:S=>S.bLeft},{t:'a와 b를 같게 만들어 보기',ok:S=>S.abEq}], ui:['a','b','n'] },
+  areafn:{ chip:'S', hideChips:['sq','ratio','fx'], sit:'0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. x가 정해지면 넓이도 하나로 정해지니까, S(x)는 <b>x에 대한 함수</b>예요. S(x) = '+INT(0,'x','f(t) dt')+' 로 나타내요.',
+    todo:[{t:'x의 위치 슬라이더를 움직여 보라색 넓이 보기',ok:S=>S.touch&&S.touch.has('ax')},{t:'x를 3에 맞춰 보기',ok:S=>Math.abs(S.ax-3)<0.03}], ui:['ax'] },
+  squeeze:{ todo:[{t:'Δx 슬라이더를 0 쪽으로 줄여 보기',ok:S=>S.minDx<=0.1},{t:'m, ΔS ÷ Δx, M, f(x) 값이 어떻게 변하는지 비교하기'}], ui:['adx'], chip:['ratio','fx'] },
+  ftc_text:{ sit:'앞 단계에서 넓이 함수 S(x)의 순간변화율, 즉 <b>S′(x)</b>를 알아냈어요.',
+    todo:[{t:'x와 Δx를 다시 움직여 보며 그림 확인하기',ok:S=>S.touch&&(S.touch.has('ax')||S.touch.has('adx'))}], ui:['ax','adx'], chip:['ratio','fx'] },
+  constC:{ sit:'S(x)가 f(t) = t + 1의 한 부정적분이니까, 다른 부정적분 F(x) = x²/2 + x + C 와는 <b>상수만</b> 달라요.',
+    todo:[{t:'C 슬라이더를 세 가지 이상의 값으로 바꿔 보기',ok:S=>S.cSeen&&S.cSeen.size>=3},{t:'F(x) − F(0)과 S(x)를 비교하기'},{t:'x의 위치도 바꿔 보기',ok:S=>S.touch&&S.touch.has('ax')}], ui:['ax','C'], chip:['cDiff','cS'] },
+  calc:{ ui:[] }, interp:{ ui:[] },
+  l_pond:{ ui:[] },
+  l_gap:{ sit:'호수를 모눈 위에 올려놓았어요. 호수 가장자리에는 칸으로 채우지 못한 <b>파란 빈틈</b>이 남아요.',
+    todo:[{t:'모눈을 2 m → 1 m → 0.5 m로 바꿔 보기',ok:S=>S.gridsSeen&&S.gridsSeen.size>=3},{t:'가장자리의 파란 빈틈 비교하기'}], ui:['grid'] },
+  l_cmp:{ ui:[] }, l_how:{ ui:[] },
+  l_approach:{ sit:'곡선 <b>y = x²</b> 아래, x = 0부터 x = 2까지의 넓이를 직사각형으로 채우고 있어요.',
+    todo:[{t:'n을 50개 이상으로 늘려 보기 (▶ 버튼을 눌러도 돼요)',ok:S=>S.maxN>=50},{t:'n = 200일 때 직사각형 넓이의 합 읽기',ok:S=>S.maxN>=200}], ui:['n','play'], chip:'sum' },
+  l_read:{ ui:[] }, l_tri:{ ui:[] }, l_sign1:{ ui:[] }, l_signcalc:{ ui:[] }, l_mix:{ ui:[] }, l_dir:{ ui:[] },
+  l_same:{ sit:'이번엔 아랫끝과 윗끝이 모두 <b>1</b>이에요: <b>'+INT(1,1,'(x + 1) dx')+'</b>',
+    todo:[{t:'a와 b를 점점 가깝게 움직여 보기',ok:S=>S.touch&&(S.touch.has('a')||S.touch.has('b'))},{t:'다시 a와 b를 둘 다 1로 맞추기',ok:S=>S.touch&&(S.touch.has('a')||S.touch.has('b'))&&S.a===1&&S.b===1}], ui:['a','b'] },
+  l_def:{ sit:'지금까지 알게 된 것을 정리해 볼게요.', todo:[{t:'(필요하면) a, b를 바꿔 보며 확인하기'}], ui:['a','b'] },
+  l_areafn:{ chip:'S', hideChips:['sq','ratio','fx'], sit:'높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요.',
+    todo:[{t:'x의 위치 슬라이더를 움직여 보기',ok:S=>S.touch&&S.touch.has('ax')}], ui:['ax'] },
+  l_ftc:{ ui:[] }, l_interp:{ ui:[] },
+};
+const CURG=()=>CURM?GUIDE[CURM.id]:null;
+function touch(k){ if(S.touch) S.touch.add(k); }
+function trackAB(){ if(S.b>S.a) S.bRight=true; if(S.b<S.a) S.bLeft=true; if(S.a===S.b) S.abEq=true; if(S.ab) S.ab.add(Math.min(S.a,S.b)+','+Math.max(S.a,S.b)); }
+const UI_EL={ f:()=>$('fSel').closest('.ctrl'), m:()=>$('mSel').closest('.ctrl'), a:()=>$('aRng').closest('.ctrl'), b:()=>$('bRng').closest('.ctrl'), n:()=>$('nRng').closest('.ctrl'),
+  play:()=>$('animBtn'), area:()=>$('showArea').closest('label'), ax:()=>$('axRng').closest('.ctrl'), adx:()=>$('adxRng').closest('.ctrl'), C:()=>$('cRng').closest('.ctrl'),
+  grid:()=>$('gridBtns'), touch:()=>$('showTouch').closest('.row') };
+const CHIP_EL={ dx:()=>$('dxOut').parentElement, sum:()=>$('sOut').parentElement, exact:()=>$('exactChip'), S:()=>$('aSOut').parentElement, sq:()=>$('aSqOut').parentElement,
+  ratio:()=>$('aRatioOut').parentElement, fx:()=>$('aFOut').parentElement, cF:()=>$('cFOut').parentElement, cDiff:()=>$('cDiffOut').parentElement, cS:()=>$('cSOut').parentElement,
+  cell:()=>$('cellOut').parentElement, inner:()=>$('innerOut').parentElement, outer:()=>$('outerChip'), pond:()=>$('pondChip') };
+function applyUI(){
+  const g=CURG(), all=!g||!g.ui||S.explore;
+  for(const k in UI_EL){ const el=UI_EL[k](); if(!el) continue; const on=g&&g.ui&&g.ui.includes(k);
+    if(!all&&!on) el.style.display='none'; else if(el.style.display==='none'&&!el.classList.contains('rectOnly')) el.style.display='';   // rectOnly 칸은 refresh가 정해요
+    el.classList.toggle('focus',!all&&!!on); }
+  const row=$('animBtn').parentElement; if(row) row.style.display=([...row.children].some(c=>c.style.display!=='none')&&S.view==='graph'&&S.rects)?'':'none';
+  const chips=g&&g.chip?[].concat(g.chip):[];
+  for(const k in CHIP_EL){ const el=CHIP_EL[k](); if(!el) continue; el.classList.toggle('focus',chips.includes(k)); el.classList.toggle('dim',chips.length>0&&!chips.includes(k)); }
+  for(const k in CHIP_EL){ const el=CHIP_EL[k](); if(el&&g&&g.hideChips) el.style.display=(!S.explore&&g.hideChips.includes(k))?'none':''; }
+  if(S.view==='area'){ const show=S.explore||!(g&&g.ui)||g.ui.includes('adx'); [...$('legendArea').children].forEach((c,i)=>{ if(i>0) c.style.display=show?'':'none'; }); }
+  const eb=$('exploreBtn'); if(eb) eb.style.display=(g&&g.ui&&!S.explore&&P&&P.done.includes(P.cur))?'':'none';
+  updateTodo();
+}
+function updateTodo(){ const g=CURG(), ul=$('todoList'); if(!g||!g.todo||!ul) return;
+  ul.querySelectorAll('li').forEach((li,i)=>{ const it=g.todo[i]; if(it&&it.ok){ let ok=false; try{ ok=!!it.ok(S); }catch(e){} li.classList.toggle('ok',ok); } }); }
+/* 좁은 화면(휴대폰·세운 태블릿): 그래프를 '해 볼 것'과 '질문' 사이로 옮겨 읽기 → 움직이기 → 답하기 순서로 */
+const LEFT_CARD=document.querySelector('main>section.card'), MAIN_EL=document.querySelector('main');
+function parkViz(){ if(LEFT_CARD&&LEFT_CARD.parentElement!==MAIN_EL) MAIN_EL.insertBefore(LEFT_CARD,MAIN_EL.firstElementChild); }
+function placeViz(){ const slot=$('vizSlot'); if(!LEFT_CARD) return;
+  if(matchMedia('(max-width:700px)').matches&&slot){ if(LEFT_CARD.parentElement!==slot){ slot.appendChild(LEFT_CARD); refresh(); } }
+  else if(LEFT_CARD.parentElement!==MAIN_EL){ parkViz(); refresh(); } }
+window.addEventListener('resize',()=>{ clearTimeout(window._pv); window._pv=setTimeout(placeViz,120); });
+$('exploreBtn').onclick=()=>{ S.explore=true; refresh(); };
+function loadMission(){  if(!isActive(P.cur)){ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; }
   const m=missionFor(P.cur); tries=0; PART=0; CURM=m; OBS=new Map();
   Object.assign(S,{rects:true,signed:false,showArea:false,n:4,method:'right',showC:false,guide:'',hideAB:false});
   S.view=m.view||'graph'; Object.assign(S,m.setup); S.maxN=S.n; S.minDx=9;
   if(S.view==='shape') S.gridsSeen=new Set([S.grid]);
-  S.cSeen=new Set([S.C]);
+  S.cSeen=new Set([S.C]); S.touch=new Set(); S.ab=new Set(); S.bLeft=false; S.bRight=false; S.abEq=false; S.explore=false;
+  parkViz();
   const fresh=!P.done.includes(P.cur);
   S.hideSum=!!m.hideSum && fresh; S.hideS=!!m.hideS && fresh; S.hideExact=!!m.hideExact && fresh;
   S.exactUnlocked=MISSIONS.some((x,i)=>(x.unlockExact||x.id==='def')&&P.done.includes(i));
   S.shapeTrue=MISSIONS.some((x,i)=>(x.unlockPond||x.id==='pond1')&&P.done.includes(i));
   refresh(); renderProg();
-  const solvedAlready=P.done.includes(P.cur);
+  const solvedAlready=P.done.includes(P.cur), G=CURG();
   $('mission').innerHTML=`
     <div class="mtitle">${dispTitle(P.cur)}</div>
-    <div class="story">${m.story}</div>
+    <div class="sec-blk"><div class="sec-h"><span class="sec-n">1</span>상황</div><div class="story${G&&G.todo?' notip':''}">${G&&G.sit?G.sit:m.story}</div></div>
+    ${G&&G.todo?`<div class="sec-blk"><div class="sec-h"><span class="sec-n">2</span>해 볼 것</div><ul class="todo-list" id="todoList">${G.todo.map(it=>`<li class="${it.ok?'':'free'}">${it.t}</li>`).join('')}</ul></div>`:''}
     ${m.observe?'<div class="obs"><b>📋 관찰 기록표</b> <span class="small">(움직이면 자동으로 기록돼요)</span><table id="obsT"></table></div>':''}
+    <div id="vizSlot"></div>
     <div id="donePart"></div>
     <div class="qbox">
+      <div class="sec-h"><span class="sec-n">${G&&G.todo?3:2}</span>질문</div>
       <div id="qArea">${qboxHtml(m,m.q)}</div>
       <div class="row">
         <button id="submitBtn">제출하기</button>
@@ -1706,7 +1811,7 @@ function loadMission(){
       <div class="hintline" id="hintLine">${solvedAlready?'✅ 이미 해결한 단계예요. 다시 풀어 봐도 좋아요.':(LEVEL==='low'?'먼저 혼자 생각해 보세요. 한 번 틀리면 힌트가 열려요.':'먼저 혼자 생각해 보고, 막히면 힌트를 눌러요.')}</div>
     </div>
     <div class="fb" id="fb"></div>`;
-  bindQ(m);
+  bindQ(m); placeViz(); updateTodo();
   $('hintBtn').onclick=()=>{
     const hs=hintsOf(m);
     if(hintsUsed<hs.length){ showFb('info',hintWord()+' '+(hintsUsed+1)+': '+hs[hintsUsed]); hintsUsed++; if(ESCAPE){P.escClues=(P.escClues||0)+1; saveProg(); renderEscBar();} }
@@ -2859,9 +2964,11 @@ const MAIN_TOUR=[
   {el:'#cv', title:'그래프 화면',
    body:'<b style="color:#2563eb">파란색</b>은 +로, <b style="color:#dc2626">빨간색</b>은 −로 계산되는 넓이예요. 높이가 음수이거나, 구간을 거꾸로 훑으면(폭이 음수) 빨간색이 돼요.'},
   {el:'#ctrlMain', title:'조작판',
-   body:'함수와 구간의 시작 a, 끝 b를 바꿀 수 있어요.<br>🤔 a와 b를 바꾸면 색칠된 부분이 어떻게 달라질지 직접 움직여 보세요.'},
+   body:'단계마다 <b>필요한 조작만</b> 보여요. <b>👉 여기를 움직여요</b> 표시가 붙은 것을 움직여 보세요.<br>단계를 해결하면 <b>🔧 더 탐구하기</b>로 함수·구간 등 모든 조작을 열 수 있어요.'},
   {el:'#readMain', title:'정적분 값',
    body:'직사각형 넓이의 합(어림값)과 정적분 값이 보여요. 정적분 값은 처음엔 🔒 잠겨 있고, <b>정적분의 뜻을 설명하는 단계</b>를 통과하면 열려요.'},
+  {el:'.sec-blk', title:'상황 → 해 볼 것 → 질문',
+   body:'① <b>상황</b>을 읽고, ② <b>해 볼 것</b>을 따라 그림을 움직여 보세요. 해 본 것은 ⬜가 ✅로 바뀌어요.<br>그다음 ③ <b>질문</b>에 답해요. 질문이 묻는 값은 그림 아래에 테두리로 표시돼요.'},
   {el:'#prog', title:'탐구 단계',
    body:'동그라미 하나가 한 단계예요. 순서는<br>넓이를 구하는 아이디어 → 곡선 아래 넓이와 정적분 → 방향과 부호를 가진 넓이 → 적분과 미분의 관계 → 부정적분으로 정적분 계산·해석<br>장이 끝날 때마다 <b>📓 연구 노트</b>에 알게 된 것이 정리돼요.<br>해결하면 <b style="color:#059669">초록색</b>이 되고 다음 단계가 열려요.'},
   {el:'.qbox', title:'질문에 답하기 (신중하게!)',
