@@ -800,12 +800,12 @@ body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}#bootCover
       <div class="field"><label><input type="checkbox" id="aiOn"> 학생에게 AI 피드백·AI 도우미 켜기</label></div>
       <div class="field"><label>📚 학생 수준</label>
         <select id="levelMode" style="width:auto">
-          <option value="choose">학생이 입장할 때 고르기 (상·중·하)</option>
-          <option value="high">모두 상으로 고정 · 15단계</option>
-          <option value="mid">모두 중으로 고정 · 12단계 + 도움 장치</option>
-          <option value="low">모두 하로 고정 · 16단계 차근차근</option>
+          <option value="choose">학생이 입장할 때 고르기 (고수·중수·입문자)</option>
+          <option value="high">모두 고수로 고정 · 15단계</option>
+          <option value="mid">모두 중수로 고정 · 12단계 + 도움 장치</option>
+          <option value="low">모두 입문자로 고정 · 16단계 차근차근</option>
         </select>
-        <div class="small" style="margin-top:2px">상: 전체 15단계 · 중: 핵심 12단계 + 관찰 기록표·과정 나누기·문장 틀·힌트 3개 · 하: 따로 만든 16단계(고르기·빈칸 위주, 마지막에 서술형 1개). 수준마다 진행 기록이 따로 저장돼요.</div></div>
+        <div class="small" style="margin-top:2px">고수: 전체 15단계 · 중수: 핵심 12단계 + 관찰 기록표·과정 나누기·문장 틀·힌트 3개 · 입문자: 따로 만든 16단계(고르기·빈칸 위주, 마지막에 서술형 1개). 수준마다 진행 기록이 따로 저장되고, 시트에는 상·중·하로 기록돼요.</div></div>
       <div class="field"><label><input type="checkbox" id="varyLocks"> 🔢 학생마다 다른 자물쇠 숫자 (5~8단계)</label>
         <div class="small" style="margin-top:2px">켜면 부호·위아래·방향·구간 나누기 단계의 구간과 답이 학번에 따라 세 가지 중 하나로 바뀌어요. 친구 답을 그대로 옮겨 적기 어려워요.</div></div>
       <div class="field"><label><input type="checkbox" id="escapeMode"> 🔐 방탈출 모드 〈정적분 연구소 탈출〉</label>
@@ -830,7 +830,7 @@ body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}#bootCover
         <div class="small" id="sheetInfo">불러오는 중…</div>
         <button id="openDash" style="margin-top:8px;background:#4f46e5">📊 반별 학습 현황 보기</button></div>
       <div class="row" style="margin:0">
-        <select id="previewLevel" style="width:auto"><option value="high">상</option><option value="mid">중</option><option value="low">하</option></select><button class="sec" id="teacherPreview">👀 선생님 체험으로 들어가기</button>
+        <select id="previewLevel" style="width:auto"><option value="high">고수</option><option value="mid">중수</option><option value="low">입문자</option></select><button class="sec" id="teacherPreview">👀 선생님 체험으로 들어가기</button>
         <button class="ghost" id="resetProg">이 기기의 진행 상황 초기화</button>
       </div>
       <p class="small" style="margin-top:8px">선생님 체험에서는 활동 기록이 스프레드시트에 저장되지 않아요.</p>
@@ -1336,9 +1336,9 @@ MISSIONS_HIGH.find(m=>m.id==='dir').meta={area:4};
 
 /* ====================== 수준: 상(전체) / 중(핵심 + 도움 장치) / 하(차근차근) ====================== */
 const LEVELS={
-  high:{name:'상', desc:'모든 탐구 15단계 · 설명 쓰기 4개'},
-  mid: {name:'중', desc:'핵심 탐구 12단계 + 도움 장치 · 설명 쓰기 2개'},
-  low: {name:'하', desc:'차근차근 16단계 · 고르기와 빈칸 위주 · 설명 쓰기 1개'},
+  high:{name:'고수', desc:'모든 탐구 15단계 · 설명 쓰기 4개'},
+  mid: {name:'중수', desc:'핵심 탐구 12단계 + 도움 장치 · 설명 쓰기 2개'},
+  low: {name:'입문자', desc:'차근차근 16단계 · 고르기와 빈칸 위주 · 설명 쓰기 1개'},
 };
 const LEVEL_KO={high:'상',mid:'중',low:'하'}, LEVEL_EN={'상':'high','중':'mid','하':'low'};
 const MID_IDS=['pond1','rect2','approach','sign','mix','dir','def','areafn','squeeze','constC','calc','interp'];
@@ -2349,7 +2349,7 @@ $('gGo').onclick=()=>{
   const sid=$('gSid').value.trim().replace(/\s/g,''), name=$('gName').value.trim();
   if(!/^[0-9A-Za-z\-]{2,12}$/.test(sid)){ $('gErr').textContent='학번을 확인해 주세요. (숫자 2~12자리)'; $('gSid').focus(); return; }
   if(name.length<1||name.length>20||/[=+@<>]/.test(name)){ $('gErr').textContent='이름을 확인해 주세요.'; $('gName').focus(); return; }
-  const lv=fixedLevel()||GATE_LV; if(!lv){ $('gErr').textContent='수준(상·중·하)을 골라 주세요.'; return; }
+  const lv=fixedLevel()||GATE_LV; if(!lv){ $('gErr').textContent='수준(고수·중수·입문자)을 골라 주세요.'; return; }
   enter(sid,name,false,lv);
 };
 $('gName').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)$('gGo').onclick()};
@@ -2606,7 +2606,7 @@ function renderDash(){
   LEVEL=dashLv; MISSIONS=SETS[dashLv]; COURSE='full';
   try{ renderDashLevel(); } finally { DASH=all; MISSIONS=saveM; COURSE=saveC; LEVEL=saveL; }
   const bar=document.createElement('div'); bar.className='dash-lv';
-  bar.innerHTML=['high','mid','low'].map(k=>`<button data-l="${k}" class="${k===dashLv?'on':''}">${LEVELS[k].name} 수준 (${cnt[k]}명)</button>`).join('');
+  bar.innerHTML=['high','mid','low'].map(k=>`<button data-l="${k}" class="${k===dashLv?'on':''}">${LEVELS[k].name} (${cnt[k]}명)</button>`).join('');
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{ dashLv=b.dataset.l; dashCls='all'; dashStep=''; dashSid=''; dashSel.clear(); renderDash(); });
   $('dTabs').prepend(bar);
 }
