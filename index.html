@@ -127,23 +127,42 @@ body.escape .ai-rate{color:#94a3b8} body.escape .ai-rate button{background:#1e29
     background:#4c1d95;color:#fff;box-shadow:0 6px 18px rgba(76,29,149,.35)}
 }
 
-/* ---- 입장 화면 (학번·이름 / 관리자) ---- */
+/* ---- 입장 화면: 연구원 출입증 (일반 모드는 밝은 보라, 방탈출 모드는 남색·호박색) ---- */
 #gate{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:16px;
   background:radial-gradient(circle at 30% 20%,#ede9fe,#f5f7fb 55%,#e0f2fe);overflow-y:auto}
 #gate.hide{display:none}
-.gate-card{background:#fff;border-radius:18px;box-shadow:0 18px 40px rgba(30,41,59,.15);padding:28px 26px;width:100%;max-width:420px}
-.gate-card h1{margin:0 0 4px;font-size:26px}
-.gate-card .lead{color:var(--muted);font-size:14.5px;line-height:1.6;margin:0 0 18px}
-.gate-card .field{margin:12px 0}
-.gate-card label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+.gate-card{width:100%;max-width:430px;margin:auto;border-radius:18px;overflow:hidden;background:#fff;border:1.5px solid #c4b5fd;box-shadow:0 18px 40px rgba(30,41,59,.15);color:#1f2937}
+.bc-strap{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 16px;background:#5b21b6;color:#f5f3ff;font-size:13px}
+.bc-no{font-family:ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.bc-body{padding:18px 22px 10px}
+.bc-head{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+.bc-photo{flex:none;width:64px;height:78px;border-radius:8px;border:1.5px dashed #a78bfa;background:#faf5ff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#7c3aed;font-size:26px}
+.bc-photo img{width:54px;height:54px;object-fit:contain}
+.bc-title{margin:0;font-size:22px;line-height:1.25}
+.bc-sub{font-size:13px;color:#6b7280;margin-top:3px}
+.gate-card .lead{color:#4b5563;font-size:14px;line-height:1.6;margin:0 0 4px}
+.gate-card .field{margin:10px 0}
+.gate-card label{display:block;font-size:13px;color:#4b5563;margin-bottom:4px}
 .gate-card input{font-size:18px}
-.gate-card button.go{width:100%;font-size:17px;padding:13px;margin-top:8px;background:var(--accent)}
-.gate-card .err{color:var(--red);font-size:13.5px;min-height:20px;margin-top:6px}
-.gate-sep{display:flex;align-items:center;gap:10px;color:#94a3b8;font-size:12.5px;margin:18px 0 12px}
-.gate-sep:before,.gate-sep:after{content:"";flex:1;border-top:1px solid var(--line)}
-.gate-card button.teacher{width:100%;background:#fff;color:#334155;border:1px solid #cbd5e1}
-.gate-note{font-size:12px;color:#94a3b8;line-height:1.5;margin-top:14px}
-#whoChip{background:#4c1d95}
+.gate-card button.go{width:100%;font-size:17px;padding:13px;margin-top:10px;background:#6d28d9}
+.gate-card .err{color:var(--red);font-size:13.5px;min-height:18px;margin-top:6px}
+.gate-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:4px}
+.gate-note{font-size:11.5px;color:#9ca3af;line-height:1.5;margin:0}
+.teacher-link{flex:none;background:transparent;color:#6b7280;border:none;padding:4px 2px;font-size:12.5px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.bc-barcode{height:20px;margin:10px 22px 14px;background:repeating-linear-gradient(90deg,#d4d4d8 0 2px,transparent 2px 4px,#d4d4d8 4px 5px,transparent 5px 8px);border-radius:2px}
+.only-esc{display:none}
+body.escape .only-esc{display:inline} body.escape .only-norm{display:none}
+body.escape #gate{background:radial-gradient(ellipse at 30% 10%,#1e1b4b 0%,#0b1020 55%,#05070f 100%)}
+body.escape .gate-card{background:#151b33;border-color:#a16207;color:#e5e7eb;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+body.escape .bc-strap{background:#a16207;color:#fff7e6}
+body.escape .bc-photo{border-color:#a16207;background:#0f172a;color:#fbbf24}
+body.escape .bc-title{color:#fde68a}
+body.escape .bc-sub,body.escape .gate-card .lead,body.escape .gate-card label{color:#cbd5e1}
+body.escape .gate-card input{background:#0f172a;color:#f1f5f9;border-color:#334155}
+body.escape .gate-card button.go{background:#b45309}
+body.escape .gate-note,body.escape .teacher-link{color:#9ca3af}
+body.escape .bc-barcode{background:repeating-linear-gradient(90deg,#a16207 0 2px,transparent 2px 4px,#a16207 4px 5px,transparent 5px 8px);opacity:.6}
+@media(max-width:420px){ .bc-body{padding:16px 16px 8px} .bc-barcode{margin:8px 16px 12px} .bc-photo{width:54px;height:66px} .bc-title{font-size:20px} }#whoChip{background:#4c1d95}
 
 /* ==================== 방탈출 모드: 정적분 연구소 탈출 ==================== */
 #escTimer,#escBar{display:none}
@@ -163,10 +182,8 @@ body.escape canvas{border-color:#475569}
 body.escape select,body.escape .opt{background:#f8fafc;color:#111827}
 body.escape .chat{background:#0f172a!important;border-color:#334155!important;color:#e5e7eb}
 /* 방탈출 모드에서도 밝은 바탕 화면(입장 화면·관리자 창·반별 현황)은 진한 글자로 */
-body.escape .gate-card,body.escape .modal,body.escape .dash{color:#1f2937}
-body.escape .gate-card .lead,body.escape .gate-card label,body.escape .gate-card .small,
+body.escape .modal,body.escape .dash{color:#1f2937}
 body.escape .modal .small,body.escape .modal label,body.escape .dash .small,body.escape .dash .k{color:#4b5563}
-body.escape .gate-card .gate-note{color:#6b7280}
 body.escape .dash .card{background:#fff}
 /* 방탈출 모드의 AI 대화창: 연구원 쪽지(밝은 종이) + 학생 말풍선(남색) — 글자 대비를 충분히 */
 body.escape .chat h3{color:#fde68a}
@@ -507,12 +524,18 @@ body.escape #escBar{display:flex}
 #golfApp .gi-guess input{width:80px;font-size:16px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-family:inherit}
 #golfApp button.gi-start{font-size:18px;padding:12px 28px;border-radius:12px}
 /* ===== 수준 선택 · 도움 장치 ===== */
-.lvl-pick{display:flex;gap:8px}
-.lvl-pick button{flex:1;padding:10px 6px;border-radius:10px;border:2px solid #cbd5e1;background:#fff;color:#1e293b;font-weight:700;font-size:15px;cursor:pointer}
-.lvl-pick button small{display:block;font-weight:500;font-size:11px;color:#64748b;margin-top:2px}
-.lvl-pick button.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3}
-.lvl-fixed{padding:9px 12px;border-radius:10px;background:#eef2ff;color:#3730a3;font-size:14px}
+.lvl-pick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lvl-pick button{padding:9px 6px;border-radius:10px;border:2px solid #ddd6fe;background:#fff;color:#1e293b;font-weight:700;font-size:15px;cursor:pointer;line-height:1.3}
+.lvl-pick button small{display:block;font-weight:500;font-size:11.5px;color:#64748b;margin-top:3px}
+.lvl-pick button.on{border-color:#6d28d9;background:#f5f3ff;color:#4c1d95}
+.lvl-fixed{padding:9px 12px;border-radius:10px;background:#f5f3ff;color:#4c1d95;font-size:14px}
 .lvl-desc{font-size:12px;color:#64748b;margin-top:6px;min-height:16px}
+body.escape .lvl-pick button{background:#0f172a;color:#e2e8f0;border-color:#334155}
+body.escape .lvl-pick button small{color:#94a3b8}
+body.escape .lvl-pick button.on{background:#3a2a05;border-color:#fbbf24;color:#fde68a}
+body.escape .lvl-pick button.on small{color:#fcd34d}
+body.escape .lvl-fixed{background:#3a2a05;color:#fde68a}
+body.escape .lvl-desc{color:#94a3b8}
 .frame{margin:8px 0;padding:9px 12px;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#334155;font-size:14px;line-height:1.6}
 .frame b{color:#4338ca}
 .wcards{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
@@ -538,7 +561,7 @@ body.escape .wcard{background:#312e81;color:#e0e7ff;border-color:#6366f1}
 body.escape .mfin{background:#0f172a;color:#f1f5f9;border-color:#475569}
 body.escape .mfin.ok{border-color:#22c55e;background:#052e16}
 body.escape .mfin.no{border-color:#fb923c;background:#431407}
-body.escape .lvl-pick button{color:#1e293b}
+
 .dash-lv{display:flex;gap:6px;margin:0 0 8px}
 .dash-lv button{padding:6px 14px;border-radius:999px;border:1px solid #c7d2fe;background:#fff;color:#3730a3;font-weight:700;cursor:pointer}
 .dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}.note-warn{margin:8px 0;padding:9px 12px;border-radius:10px;background:#fef3c7;color:#78350f;border:2px dashed #d97706;font-size:13.5px;line-height:1.6;text-align:left}
@@ -705,19 +728,26 @@ body.escape .sgn{background:#312e81;color:#e0e7ff}
 <!-- 입장 화면 -->
 <div id="gate">
   <div class="gate-card">
-    <h1>∫ 정적분 탐구실</h1>
-    <p class="lead">미적분Ⅰ · 넓이로 정적분의 뜻을 찾아가는 탐구 활동이에요.<br>학번과 이름을 입력하고 시작하세요.</p>
-    <div class="field"><label for="gSid">학번</label><input type="text" id="gSid" inputmode="numeric" autocomplete="off" placeholder="예: 20315" maxlength="12"></div>
-    <div class="field"><label for="gName">이름</label><input type="text" id="gName" autocomplete="off" placeholder="예: 홍길동" maxlength="20"></div>
-    <div class="field"><label>수준</label><div id="gLevel"></div><div class="lvl-desc" id="gLevelDesc"></div></div>
-    <button class="go" id="gGo">탐구 시작하기 →</button>
-    <div class="err" id="gErr"></div>
-    <div class="gate-sep">또는</div>
-    <button class="teacher" id="gTeacher">🔐 선생님(관리자)으로 들어가기</button>
-    <p class="gate-note">입력한 학번·이름, 단계 달성 여부, 답변 내용은 선생님의 구글 스프레드시트에 저장돼요.</p>
+    <div class="bc-strap"><span><span class="only-norm">정적분 탐구실 · 입장 등록</span><span class="only-esc">정적분 연구소 · 출입 등록</span></span><span class="bc-no" id="gNo">No. -----</span></div>
+    <div class="bc-body">
+      <div class="bc-head">
+        <div class="bc-photo" id="gPhoto">∫</div>
+        <div><h1 class="bc-title">연구원 출입증</h1><div class="bc-sub">곡정고 미적분Ⅰ · 정적분 탐구실</div></div>
+      </div>
+      <p class="lead"><span class="only-norm">넓이로 정적분의 뜻을 찾아가는 탐구 활동이에요. 출입증을 만들고 들어가세요.</span><span class="only-esc">연구소에 들어가려면 출입증이 필요해요. 정보를 입력하고 출입증을 발급받으세요.</span></p>
+      <div class="field"><label for="gSid">연구원 번호 (학번)</label><input type="text" id="gSid" inputmode="numeric" autocomplete="off" placeholder="예: 20315" maxlength="12"></div>
+      <div class="field"><label for="gName">이름</label><input type="text" id="gName" autocomplete="off" placeholder="예: 홍길동" maxlength="20"></div>
+      <div class="field"><label>출입 등급 (수준)</label><div id="gLevel"></div><div class="lvl-desc" id="gLevelDesc"></div></div>
+      <button class="go" id="gGo">출입증 발급하고 들어가기 →</button>
+      <div class="err" id="gErr"></div>
+      <div class="gate-foot">
+        <p class="gate-note">입력한 학번·이름, 단계 달성 여부, 답변 내용은 선생님의 구글 스프레드시트에 저장돼요.</p>
+        <button type="button" class="teacher-link" id="gTeacher">🔐 선생님</button>
+      </div>
+    </div>
+    <div class="bc-barcode" aria-hidden="true"></div>
   </div>
 </div>
-
 <!-- 보너스 게임: 정적분 골프 -->
 <div id="golfApp">
 <header>
@@ -2332,14 +2362,17 @@ let GATE_LV='';
 function renderGateLevel(){
   const box=$('gLevel'), desc=$('gLevelDesc'), fx=fixedLevel(); if(!box) return;
   if(fx){ GATE_LV=fx; box.innerHTML=`<div class="lvl-fixed">선생님이 정한 수준: <b>${LEVELS[fx].name}</b></div>`; desc.textContent=LEVELS[fx].desc; return; }
-  box.innerHTML='<div class="lvl-pick">'+['high','mid','low'].map(k=>`<button type="button" data-l="${k}" class="${GATE_LV===k?'on':''}">${LEVELS[k].name}<small>${k==='high'?'15단계':k==='mid'?'12단계 + 도움':'16단계 차근차근'}</small></button>`).join('')+'</div>';
-  desc.textContent=GATE_LV?LEVELS[GATE_LV].desc:'자신에게 맞는 수준을 골라 주세요. 수준마다 진행 기록이 따로 저장돼요.';
+  const LV_HINT={high:['15단계','설명 쓰기까지 모두'],mid:['12단계','도움 장치와 함께'],low:['16단계','고르기·빈칸으로 차근차근']};
+  box.innerHTML='<div class="lvl-pick">'+['high','mid','low'].map(k=>`<button type="button" data-l="${k}" class="${GATE_LV===k?'on':''}">${LEVELS[k].name}<small>${LV_HINT[k][0]}</small><small>${LV_HINT[k][1]}</small></button>`).join('')+'</div>';
+  desc.textContent=GATE_LV?'수준마다 진행 기록이 따로 저장돼요.':'자신에게 맞는 등급을 골라 주세요. 잘 모르겠으면 중수부터 시작해도 좋아요.';
   box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ GATE_LV=b.dataset.l; renderGateLevel(); });
 }
 function whoText(){ return ME.teacher?`👀 선생님 체험 · ${LEVELS[LEVEL].name}`:`👤 ${ME.sid} ${ME.name} · ${LEVELS[LEVEL].name}`; }
+function gateBadge(){ const ph=$('gPhoto'); if(ph&&typeof EMBLEM_SRC==='string'&&EMBLEM_SRC&&!ph.querySelector('img')) ph.innerHTML='<img src="'+EMBLEM_SRC+'" alt="곡정고등학교 교표">';
+  const v=($('gSid').value||'').trim(); $('gNo').textContent='No. '+(v||'-----'); }
 function showGate(){  document.body.classList.remove('in');
   $('gate').classList.remove('hide'); $('gSid').value=''; $('gName').value=''; $('gErr').textContent='';
-  $('whoChip').style.display='none'; if(!fixedLevel()) GATE_LV=''; renderGateLevel(); setTimeout(()=>$('gSid').focus(),50);
+  $('whoChip').style.display='none'; if(!fixedLevel()) GATE_LV=''; renderGateLevel(); gateBadge(); setTimeout(()=>$('gSid').focus(),50);
 }
 /* 입장 직후 검은 화면: 서버 설정(방탈출 모드 여부)을 받고 오프닝이 시작될 때까지 문제를 가려요 */
 let STATUS_DONE=false, STATUS_P=null;
@@ -2382,6 +2415,7 @@ $('gGo').onclick=()=>{
 };
 $('gName').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)$('gGo').onclick()};
 $('gSid').onkeydown=e=>{if(e.key==='Enter')$('gName').focus()};
+$('gSid').addEventListener('input',gateBadge);
 $('gTeacher').onclick=()=>$('adminBtn').onclick();
 $('exitBtn').onclick=()=>{
   if(!confirm('나가면 입장 화면으로 돌아가요. 지금까지의 기록은 저장돼 있어요. 나갈까요?')) return;
@@ -3177,7 +3211,7 @@ window.addEventListener('resize',()=>{ if(started && $('golfApp').classList.cont
 window.addEventListener('resize',()=>{ clearTimeout(window._rz); window._rz=setTimeout(()=>refresh(),80); });
 /* ====================== 시작 ====================== */
 updateBadge();
-setEscape(false);   // 주소에 ?mode=escape가 있으면 바로 방탈출 모드
+setEscape((()=>{ try{ return localStorage.getItem('defint1_esc')==='1'; }catch(e){ return false; } })());   // 지난번 서버 설정(방탈출 여부)으로 입장 화면 색을 먼저 맞춰요. ?mode=escape도 그대로 적용
 STATUS_P=refreshStatus();
 // 같은 브라우저 창에서 이미 입장했다면 이어서, 아니면 입장 화면부터
 (function(){ let me=null; try{me=JSON.parse(sessionStorage.getItem('defint1_me'))}catch(e){}
