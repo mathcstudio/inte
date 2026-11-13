@@ -541,7 +541,13 @@ body.escape .mfin.no{border-color:#fb923c;background:#431407}
 body.escape .lvl-pick button{color:#1e293b}
 .dash-lv{display:flex;gap:6px;margin:0 0 8px}
 .dash-lv button{padding:6px 14px;border-radius:999px;border:1px solid #c7d2fe;background:#fff;color:#3730a3;font-weight:700;cursor:pointer}
-.dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
+.dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}.note-warn{margin:8px 0;padding:9px 12px;border-radius:10px;background:#fef3c7;color:#78350f;border:2px dashed #d97706;font-size:13.5px;line-height:1.6;text-align:left}
+.fl-box{text-align:left;max-height:52vh;overflow-y:auto;margin:6px 0}
+.fl-note{background:#fdf6e3;color:#422006;border-radius:10px;padding:9px 12px;margin:7px 0;font-size:14px;line-height:2.3}
+.fl-note b{color:#7c2d12}
+body.escape .fl-note .mfin{background:#fff;color:#0f172a;border-color:#a16207;padding:2px 6px;min-width:0;max-width:none}
+body.escape .fl-note .mfin.ok{border-color:#16a34a;background:#dcfce7}
+body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
 #bootCover.off{opacity:0;pointer-events:none}
 </style>
 </head>
@@ -1659,6 +1665,7 @@ function loadMission(){
   showChances(); refreshLockUI();
   if(ESCAPE) $('nextBtn').textContent=nextAct(P.cur)>=0?(roomOf(nextAct(P.cur))!==roomOf(P.cur)?'🚪 다음 방으로 ▶':'다음 자물쇠 ▶'):'처음 방으로';
   decorateEscape(m); updHintBtn();
+  if(ESCAPE && allDone() && !escaped() && !$('escOver').classList.contains('show')){ const go=()=>{ if(!escaped()) showFinalLock(); }; if(ESC_HOLD) ESC_PENDING=go; else setTimeout(go,700); }  // 새로고침해도 출구 금고부터
 }
 function showFb(kind,html){const fb=$('fb');fb.className='fb show '+kind;fb.innerHTML=html;}
 function parseNum(s){
@@ -1868,7 +1875,7 @@ let ESCAPE=false;
 const ESC_URL=/[?&]mode=escape\b/.test(location.search);
 const ROOMS=[
   {icon:'🗺', name:'지도실',      ids:['pond1','pond2','l_pond','l_gap'], key:'📓', keyName:'연구 일지',
-   intro:'등 뒤의 문은 스스로 잠겨 꼼짝도 하지 않는다.<br>노트에서 떨어진 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>연구소 안쪽으로 들어가 보자. 첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.'},
+   intro:'등 뒤의 문은 스스로 잠겨 꼼짝도 하지 않는다.<br>노트에서 떨어진 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>연구소 안쪽으로 들어가 보자. 첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.<div class="note-warn" style="margin-top:10px">✍ <b>공책을 준비하세요!</b> 방을 하나 나갈 때마다 <b>연구 일지</b>를 한 장씩 얻어요. 공책에 옮겨 적어 두세요. 마지막 출구는 연구 일지 5장의 낱말을 직접 입력해야 열려요.</div>'},
   {icon:'📐', name:'측량실',      ids:['rect2','approach','l_cmp','l_how','l_approach','l_read','l_tri'], key:'🧩', keyName:'금고 번호 조각',
    intro:'곡선으로 휘어진 벽이 있는 <b>측량실</b>.<br>공식이 없는 넓이를 재야 금고 번호 조각을 얻을 수 있다.'},
   {icon:'🪞', name:'거울의 방',   ids:['sign','mix','dir','split','def','l_sign1','l_signcalc','l_mix','l_dir','l_same','l_def'], key:'🔢', keyName:'다이얼 번호',
@@ -1969,8 +1976,47 @@ const CH_NOTES=[
 const CH_NAMES=['넓이를 구하는 아이디어','곡선 아래 넓이와 정적분','방향과 부호를 가진 넓이','적분과 미분의 관계','부정적분과 정적분의 관계'];
 const notesList=()=>`<ol style="text-align:left;line-height:1.75;font-size:14px;padding-left:20px;margin:8px 0">${CH_NOTES.map(n=>`<li>${n}</li>`).join('')}</ol>`;
 const aiInvite=()=> AI_ON ? `<p class="small" style="margin:6px 0">🤖 (선택) <b>AI 도우미</b>에게 정적분에 대해 질문 하나를 하고, 답 아래 버튼으로 <b>그 답을 평가</b>해 보세요.</p>` : '';
-/* 맞혔을 때: (방탈출) 자물쇠 열림·열쇠 조각·탈출 / (일반) 장이 끝나면 연구 노트 */
-function escOnSolved(firstTime){
+/* 🔐 출구 금고: 연구 일지 5장의 중요한 낱말을 빈칸에 직접 입력해야 탈출 완료 (일지는 다시 보여 주지 않아요) */
+const CH_BLANKS=[
+  '복잡한 도형의 넓이는 잘게 나눈 [간단한 도형]의 넓이를 [더해] 어림하고, 잘게 나눌수록 [실제 넓이]에 가까워진다.',
+  '곡선 아래 넓이는 [직사각형] 넓이의 합으로 어림하고, [한없이] 잘게 나눌 때 다가가는 값이 [정적분] '+INT('a','b','f(x) dx')+' 이다.',
+  '정적분은 [방향]과 [부호]를 가진 넓이: x축 아래는 −, a > b이면 −, a = b이면 [0]. 결국 (위 넓이) − (아래 넓이).',
+  '넓이 함수 S(x)를 [미분]하면 원래 함수가 된다: S′(x) = f(x). 즉 S(x)는 f(x)의 한 [부정적분].',
+  'f(x)의 한 부정적분 F(x)로 '+INT('a','b','f(x) dx')+' = [F(b) − F(a)]를 계산하고, 그 값은 (위 넓이) − ([아래] 넓이)로 해석한다.',
+];
+const NOTE_WARN='<div class="note-warn">✍ <b>지금 공책에 그대로 옮겨 적으세요!</b><br>마지막 출구 금고에서 이 연구 일지가 <b>빈칸 문제</b>로 다시 나와요. 그때는 일지를 다시 보여 주지 않아요.</div>';
+const blankNorm=s=>String(s).replace(/\s/g,'').replace(/[−–—]/g,'-').replace(/[′']/g,'').toLowerCase();
+const escaped=()=>allDone() && !!(P.escFinal || P.escDoneMs);
+function finalAnswers(){ const a=[]; CH_BLANKS.forEach(s=>s.replace(/\[([^\]]+)\]/g,(_,w)=>{a.push(w);return ''})); return a; }
+function showFinalLock(){
+  if(!ESCAPE||!ME||escaped()) return;
+  let k=0;
+  const body=CH_BLANKS.map((s,r)=>`<div class="fl-note"><b>📓 ${r+1}. ${CH_NAMES[r]}</b><div>${s.replace(/\[([^\]]+)\]/g,(_,w)=>`<input class="mfin fl-in" data-k="${k++}" autocomplete="off" style="width:7em">`)}</div></div>`).join('');
+  showEscCard(`<div class="big">🔐</div><h2>마지막 출구 금고</h2>
+    <p>금고 문에 연구원들의 일지 5장이 새겨져 있다. 그런데 <b>중요한 낱말</b>이 지워져 있다!<br><span class="small">공책에 적어 둔 연구 일지를 보고 빈칸을 채워 입력하세요.</span></p>
+    <div class="fl-box">${body}</div><div class="small" id="flMsg" style="min-height:18px;margin:6px 0"></div>
+    <button id="flGo">🔓 출구 열기</button>`);
+  const ins=[...document.querySelectorAll('.fl-in')]; const saved=P.flTry||[]; ins.forEach((x,i)=>{ if(saved[i]) x.value=saved[i]; });
+  ins.forEach((x,i)=>x.onkeydown=e=>{ if(e.key==='Enter'&&!e.isComposing){ const nx=ins[i+1]; if(nx) nx.focus(); else $('flGo').click(); } });
+  setTimeout(()=>{ const f=ins.find(x=>!x.value)||ins[0]; f&&f.focus({preventScroll:true}); },100);
+  $('flGo').onclick=()=>{
+    const ans=finalAnswers(), vals=ins.map(x=>x.value.trim());
+    if(vals.some(v=>!v)){ $('flMsg').textContent='빈칸을 모두 채워 주세요.'; return; }
+    let ok=0; ins.forEach((x,i)=>{ const good=blankNorm(vals[i])===blankNorm(ans[i]); x.classList.toggle('ok',good); x.classList.toggle('no',!good); if(good) ok++; });
+    P.flTry=vals; P.flTries=(P.flTries||0)+1; saveProg();
+    logEvent({index:MISSIONS.length-1, title:'🔐 출구 금고 (연구 일지 빈칸)', type:'방탈출', answer:vals.join(' / '), result:ok===ans.length?'정답':'오답', feedback:`${ans.length}칸 중 ${ok}칸 맞음`, tries:P.flTries, hints:''});
+    if(ok<ans.length){
+      $('flMsg').innerHTML=`🔒 철컥… 금고가 열리지 않는다. <b>${ans.length}칸 중 ${ok}칸</b>이 맞았다. 주황색 칸을 공책의 연구 일지와 다시 비교해 보세요.`;
+      const c=$('escCard'); c.classList.remove('esc-shake'); void c.offsetWidth; c.classList.add('esc-shake'); return;
+    }
+    P.escFinal=true; P.escDoneMs=P.escMs; delete P.flTry; saveProg();
+    logEvent({index:MISSIONS.length-1, title:'🎉 연구소 탈출', type:'방탈출', answer:'', result:'탈출',
+      feedback:`걸린 시간 ${fmtTime(P.escMs)}, 연구원의 쪽지 ${P.escClues||0}장 사용, 출구 금고 ${P.flTries}번 만에`, tries:'', hints:P.escClues||0});
+    $('flMsg').innerHTML='🔓 <b>철컥! 금고가 열렸다!</b>'; $('flGo').disabled=true;
+    setTimeout(()=>{ hideEscCard(); playEnding(showCert); },1200);
+  };
+}
+/* 맞혔을 때: (방탈출) 자물쇠 열림·열쇠 조각·탈출 / (일반) 장이 끝나면 연구 노트 */function escOnSolved(firstTime){
   const r=roomOf(P.cur);
   if(!ESCAPE){
     if(!firstTime) return;
@@ -1982,15 +2028,17 @@ function escOnSolved(firstTime){
   renderEscBar();
   if(firstTime && roomDone(r) && r<ROOMS.length-1){
     setTimeout(()=>{ showEscCard(`<div class="big">${ROOMS[r].key}</div><h2>열쇠 조각 획득!</h2><p><b>${ROOMS[r].keyName}</b>을(를) 손에 넣었다.</p>
-      <div class="cert" style="margin:8px 0;font-size:14px;line-height:1.7"><b>📓 연구 일지에 적힌 것</b><br>${CH_NOTES[r]}</div>
-      <p>${r+2}번 방 <b>${ROOMS[r+1].name}</b>으로 가는 문이 열렸다.</p><button id="escGo">다음 방으로 ▶</button>`);
+      <div class="cert" style="margin:8px 0;font-size:14px;line-height:1.7"><b>📓 연구 일지에 적힌 것</b><br>${CH_NOTES[r]}</div>${NOTE_WARN}
+      <p>${r+2}번 방 <b>${ROOMS[r+1].name}</b>으로 가는 문이 열렸다.</p><button id="escGo">공책에 적었어요 ✍ 다음 방으로 ▶</button>`);
       $('escGo').onclick=()=>{ hideEscCard(); P.cur=roomIdx(r+1)[0]; saveProg(); loadMission(); }; },900);
   }
-  if(firstTime && allDone()){
-    P.escDoneMs=P.escMs; saveProg();
-    logEvent({index:MISSIONS.length-1, title:'🎉 연구소 탈출', type:'방탈출', answer:'', result:'탈출',
-      feedback:`걸린 시간 ${fmtTime(P.escMs)}, 연구원의 쪽지 ${P.escClues||0}장 사용`, tries:'', hints:P.escClues||0});
-    setTimeout(()=>playEnding(showCert),900);
+  if(firstTime && allDone() && !escaped()){
+    // 마지막 방의 연구 일지를 보여 준 뒤, 출구 금고(연구 일지 빈칸)로
+    const last=ROOMS.length-1;
+    setTimeout(()=>{ showEscCard(`<div class="big">${ROOMS[last].key}</div><h2>마지막 열쇠 조각 획득!</h2><p><b>${ROOMS[last].keyName}</b>을(를) 손에 넣었다. 그런데 출구 앞에 금고가 하나 더 있다…</p>
+      <div class="cert" style="margin:8px 0;font-size:14px;line-height:1.7"><b>📓 연구 일지에 적힌 것</b><br>${CH_NOTES[last]}</div>${NOTE_WARN}
+      <button id="escGo">공책에 적었어요 ✍ 출구 금고로 ▶</button>`);
+      $('escGo').onclick=()=>showFinalLock(); },900);
   }
 }
 /* 마무리: 기억에 남는 정적분 내용 한 줄 쓰기 (스프레드시트 답변기록에 '마무리'로 저장) */
@@ -2038,7 +2086,7 @@ function showCert(){
 }
 /* 탈출 시간: 방탈출 모드에서 화면을 보고 있는 동안만 쌓여요 (제한 시간 없음) */
 setInterval(()=>{
-  if(!ESCAPE||!ME||document.visibilityState!=='visible'||allDone()||document.getElementById('opening')||$('gate').classList.contains('hide')===false) { if(ESCAPE&&ME) $('escTimer').textContent='⏱ '+fmtTime(P.escDoneMs||P.escMs); return; }
+  if(!ESCAPE||!ME||document.visibilityState!=='visible'||escaped()||document.getElementById('opening')||$('gate').classList.contains('hide')===false) { if(ESCAPE&&ME) $('escTimer').textContent='⏱ '+fmtTime(P.escDoneMs||P.escMs); return; }
   P.escMs=(P.escMs||0)+1000; $('escTimer').textContent='⏱ '+fmtTime(P.escMs);
   if(P.escMs%15000===0) saveProg();
 },1000);
