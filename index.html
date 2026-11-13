@@ -506,7 +506,42 @@ body.escape #escBar{display:flex}
 #golfApp .gi-guess{font-size:15px;color:var(--muted)}
 #golfApp .gi-guess input{width:80px;font-size:16px;padding:6px 8px;border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-family:inherit}
 #golfApp button.gi-start{font-size:18px;padding:12px 28px;border-radius:12px}
-</style>
+/* ===== 수준 선택 · 도움 장치 ===== */
+.lvl-pick{display:flex;gap:8px}
+.lvl-pick button{flex:1;padding:10px 6px;border-radius:10px;border:2px solid #cbd5e1;background:#fff;color:#1e293b;font-weight:700;font-size:15px;cursor:pointer}
+.lvl-pick button small{display:block;font-weight:500;font-size:11px;color:#64748b;margin-top:2px}
+.lvl-pick button.on{border-color:#4f46e5;background:#eef2ff;color:#3730a3}
+.lvl-fixed{padding:9px 12px;border-radius:10px;background:#eef2ff;color:#3730a3;font-size:14px}
+.lvl-desc{font-size:12px;color:#64748b;margin-top:6px;min-height:16px}
+.frame{margin:8px 0;padding:9px 12px;border:1px dashed #94a3b8;border-radius:10px;background:#f8fafc;color:#334155;font-size:14px;line-height:1.6}
+.frame b{color:#4338ca}
+.wcards{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.wcard{padding:5px 10px;border-radius:999px;border:1px solid #a5b4fc;background:#eef2ff;color:#3730a3;font-size:13px;cursor:pointer}
+.wcard:active{transform:scale(.95)}
+.mfields{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.mf{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px}
+.mtemplate{margin:8px 0;font-size:15px;line-height:2.4}
+.mfin{font:inherit;padding:5px 8px;border-radius:8px;border:2px solid #cbd5e1;background:#fff;color:#0f172a;width:auto;min-width:72px;max-width:180px}
+input.mfin{width:90px}
+.mfin.ok{border-color:#16a34a;background:#f0fdf4}
+.mfin.no{border-color:#f97316;background:#fff7ed}
+.obs{margin:10px 0;padding:8px 10px;border-radius:10px;background:#f1f5f9;color:#334155;font-size:13px}
+.obs table{border-collapse:collapse;width:100%;margin-top:4px}
+.obs th,.obs td{border-bottom:1px solid #e2e8f0;padding:3px 6px;text-align:center}
+.obs th{color:#475569;font-weight:700}
+.obs tr.now td{background:#e0e7ff;font-weight:700}
+body.escape .frame,body.escape .obs{background:#1e293b;color:#e2e8f0;border-color:#475569}
+body.escape .frame b{color:#fde68a}
+body.escape .obs th{color:#cbd5e1} body.escape .obs th,body.escape .obs td{border-color:#334155}
+body.escape .obs tr.now td{background:#3730a3;color:#fff}
+body.escape .wcard{background:#312e81;color:#e0e7ff;border-color:#6366f1}
+body.escape .mfin{background:#0f172a;color:#f1f5f9;border-color:#475569}
+body.escape .mfin.ok{border-color:#22c55e;background:#052e16}
+body.escape .mfin.no{border-color:#fb923c;background:#431407}
+body.escape .lvl-pick button{color:#1e293b}
+.dash-lv{display:flex;gap:6px;margin:0 0 8px}
+.dash-lv button{padding:6px 14px;border-radius:999px;border:1px solid #c7d2fe;background:#fff;color:#3730a3;font-weight:700;cursor:pointer}
+.dash-lv button.on{background:#4f46e5;color:#fff;border-color:#4f46e5}</style>
 </head>
 <body>
 <header>
@@ -653,6 +688,7 @@ body.escape #escBar{display:flex}
     <p class="lead">미적분Ⅰ · 넓이로 정적분의 뜻을 찾아가는 탐구 활동이에요.<br>학번과 이름을 입력하고 시작하세요.</p>
     <div class="field"><label for="gSid">학번</label><input type="text" id="gSid" inputmode="numeric" autocomplete="off" placeholder="예: 20315" maxlength="12"></div>
     <div class="field"><label for="gName">이름</label><input type="text" id="gName" autocomplete="off" placeholder="예: 홍길동" maxlength="20"></div>
+    <div class="field"><label>수준</label><div id="gLevel"></div><div class="lvl-desc" id="gLevelDesc"></div></div>
     <button class="go" id="gGo">탐구 시작하기 →</button>
     <div class="err" id="gErr"></div>
     <div class="gate-sep">또는</div>
@@ -751,12 +787,14 @@ body.escape #escBar{display:flex}
         <div class="row" style="margin:0;flex-wrap:nowrap"><select id="modelIn"></select><button class="ghost" id="modelLoad" style="white-space:nowrap">목록 불러오기</button></div>
         <div class="small" id="modelDesc" style="margin-top:4px"></div></div>
       <div class="field"><label><input type="checkbox" id="aiOn"> 학생에게 AI 피드백·AI 도우미 켜기</label></div>
-      <div class="field"><label>📚 수업 코스</label>
-        <select id="courseMode" style="width:auto">
-          <option value="full">전체 코스 · 15단계 (약 2차시)</option>
-          <option value="short">1차시 코스 · 12단계 (서술 2개, 약 30~40분)</option>
+      <div class="field"><label>📚 학생 수준</label>
+        <select id="levelMode" style="width:auto">
+          <option value="choose">학생이 입장할 때 고르기 (상·중·하)</option>
+          <option value="high">모두 상으로 고정 · 15단계</option>
+          <option value="mid">모두 중으로 고정 · 12단계 + 도움 장치</option>
+          <option value="low">모두 하로 고정 · 13단계 차근차근</option>
         </select>
-        <div class="small" style="margin-top:2px">1차시 코스는 2단계(서술), 8단계(구간 나누기), 12단계(서술)를 건너뛰어요. 진행 기록은 두 코스가 함께 이어져요.</div></div>
+        <div class="small" style="margin-top:2px">상: 전체 15단계 · 중: 핵심 12단계 + 관찰 기록표·과정 나누기·문장 틀·힌트 3개 · 하: 따로 만든 13단계(고르기·빈칸 위주, 마지막에 서술형 1개). 수준마다 진행 기록이 따로 저장돼요.</div></div>
       <div class="field"><label><input type="checkbox" id="varyLocks"> 🔢 학생마다 다른 자물쇠 숫자 (5~8단계)</label>
         <div class="small" style="margin-top:2px">켜면 부호·위아래·방향·구간 나누기 단계의 구간과 답이 학번에 따라 세 가지 중 하나로 바뀌어요. 친구 답을 그대로 옮겨 적기 어려워요.</div></div>
       <div class="field"><label><input type="checkbox" id="escapeMode"> 🔐 방탈출 모드 〈정적분 연구소 탈출〉</label>
@@ -781,7 +819,7 @@ body.escape #escBar{display:flex}
         <div class="small" id="sheetInfo">불러오는 중…</div>
         <button id="openDash" style="margin-top:8px;background:#4f46e5">📊 반별 학습 현황 보기</button></div>
       <div class="row" style="margin:0">
-        <button class="sec" id="teacherPreview">👀 선생님 체험으로 들어가기</button>
+        <select id="previewLevel" style="width:auto"><option value="high">상</option><option value="mid">중</option><option value="low">하</option></select><button class="sec" id="teacherPreview">👀 선생님 체험으로 들어가기</button>
         <button class="ghost" id="resetProg">이 기기의 진행 상황 초기화</button>
       </div>
       <p class="small" style="margin-top:8px">선생님 체험에서는 활동 기록이 스프레드시트에 저장되지 않아요.</p>
@@ -800,11 +838,13 @@ const FUNCS = [
   {id:'cub',  label:'f(x) = x³ ÷ 4', f:x=>x*x*x/4},
   {id:'lin',  label:'f(x) = x',      f:x=>x},
   {id:'ex15', label:'f(x) = 3x² − 8x', f:x=>3*x*x-8*x},
+  {id:'two_x', label:'f(x) = 2x', f:x=>2*x},
 ];
 const fiOf=id=>FUNCS.findIndex(F=>F.id===id);
 // 넓이 함수 S(x) 활동에 쓰는 함수 (구간 0 ≤ t ≤ 3.5)
 const AFUNCS={
   lin1:{label:'f(t) = t + 1', f:t=>t+1},
+  c2:{label:'f(t) = 2', f:t=>2},
   wave:{label:'f(t) = 0.3t³ − 1.6t² + 2t + 1.5', f:t=>0.3*t*t*t-1.6*t*t+2*t+1.5},
 };
 const AX_MAX=3.5;
@@ -1001,7 +1041,7 @@ function refreshArea(){
     $('cDiffOut').textContent=`${fmt(F(st.x),3)} − (${fmt(F(0),3)}) = ${fmt(F(st.x)-F(0),3)}`;
     $('cSOut').textContent=fmt(st.Sx,3);
   }
-  drawArea();
+  drawArea(); updateObserve();
 }
 $('cRng').oninput=e=>{S.C=+e.target.value;S.cSeen.add(S.C);refresh()};
 $('axRng').oninput=e=>{S.ax=Math.min(+e.target.value,AX_MAX-0.02);refresh()};
@@ -1077,7 +1117,23 @@ GRIDS.forEach(g=>{const b=document.createElement('button');b.dataset.g=g;b.textC
   b.onclick=()=>{S.grid=g;S.gridsSeen.add(g);refresh()}; $('gridBtns').appendChild(b);});
 $('showTouch').onchange=e=>{S.showTouch=e.target.checked;refresh()};
 
-/* ====================== UI 동기화 ====================== */
+/* 📋 관찰 기록표 (중 수준 도움 장치): 슬라이더를 움직일 때마다 값을 모아 표로 보여 줘요 */
+let CURM=null, OBS=new Map();
+function updateObserve(){
+  const tb=document.getElementById('obsT'); if(!tb||!CURM||!CURM.observe) return;
+  if(CURM.observe==='n' && S.view!=='area'){
+    const r=riemann(); OBS.set(S.n, r.s);
+    const rows=[...OBS.entries()].sort((a,b)=>a[0]-b[0]);
+    const show=rows.length>8?[...rows.slice(0,3),...rows.slice(-5)]:rows;
+    tb.innerHTML='<tr><th>직사각형 개수 n</th><th>넓이의 합</th></tr>'+show.map(([n,s])=>`<tr${n===S.n?' class="now"':''}><td>${n}</td><td>${fmt(s,4)}</td></tr>`).join('');
+  }
+  if(CURM.observe==='dx' && S.view==='area'){
+    const st=areaStats(), k=Math.round(st.dx*1000)/1000; OBS.set(k,{m:st.m,M:st.M,r:st.dS/st.dx,f:st.fx});
+    const rows=[...OBS.entries()].sort((a,b)=>b[0]-a[0]);
+    const show=rows.length>7?[...rows.slice(0,3),...rows.slice(-4)]:rows;
+    tb.innerHTML='<tr><th>Δx</th><th>m</th><th>ΔS ÷ Δx</th><th>M</th><th>f(x)</th></tr>'+show.map(([d,v])=>`<tr${d===k?' class="now"':''}><td>${fmt(d,3)}</td><td>${fmt(v.m,3)}</td><td><b>${fmt(v.r,3)}</b></td><td>${fmt(v.M,3)}</td><td>${fmt(v.f,3)}</td></tr>`).join('');
+  }
+}/* ====================== UI 동기화 ====================== */
 function refresh(){
   const shape=S.view==='shape';
   $('shapePanel').style.display=shape?'':'none'; $('graphPanel').style.display=shape?'none':'';
@@ -1099,10 +1155,10 @@ function refresh(){
   $('dxOut').textContent=fmt(r.dx,4);
   $('sOut').textContent=S.hideSum?'✏ 직접 계산해 보세요':fmt(r.s,4);
   if(S.exactUnlocked && !S.hideExact){$('exactChip').classList.remove('locked');$('exOut').textContent=fmt(exact(),4);}
-  else{$('exactChip').classList.add('locked');$('exOut').textContent=S.hideExact?'✏ 직접 계산해 보세요':`🔒 ${posOf(idxOf('def'))+1}단계 후 공개`;}
+  else{$('exactChip').classList.add('locked');$('exOut').textContent=S.hideExact?'✏ 직접 계산해 보세요':`🔒 ${posOf(Math.max(0,MISSIONS.findIndex(x=>x.unlockExact||x.id==='def')))+1}단계 후 공개`;}
   const mname={left:'왼쪽 끝점',right:'오른쪽 끝점',mid:'가운데 점'}[S.method];
   $('formulaRow').innerHTML=`<div class="formula"><span class="nw">어림값</span> <span class="nw">= (첫째 직사각형 넓이) + (둘째 직사각형 넓이) + ⋯</span> <span class="nw">= f(x<sub>1</sub>)·Δx + f(x<sub>2</sub>)·Δx + ⋯ + f(x<sub>n</sub>)·Δx</span></div><div class="small">— 각 직사각형의 높이는 그 칸의 ${mname}에서의 함숫값, 가로 Δx는 모든 칸이 같아요.</div>`;
-  draw();
+  draw(); updateObserve();
 }
 FUNCS.forEach((F,i)=>{const o=document.createElement('option');o.value=i;o.textContent=F.label;$('fSel').appendChild(o)});
 $('fSel').onchange=e=>{S.fi=+e.target.value;refresh()};
@@ -1122,7 +1178,7 @@ $('animBtn').onclick=()=>{
 /* ====================== 탐구 미션 ====================== */
 const INT = (a,b,body)=>`<span class="formula"><span class="int">∫</span><span class="lim"><span>${b}</span><span>${a}</span></span>${body}</span>`;
 const REF_BOX=`<details style="margin-top:8px"><summary class="small" style="cursor:pointer">📎 참고: 식으로 쓰면</summary><div class="fbox" style="margin-top:6px"><div class="formula">${'<span class="int">∫</span><span class="lim"><span>b</span><span>a</span></span>'}f(x) dx = lim<sub>n→∞</sub> Σ<sub>k=1</sub><sup>n</sup> f(x<sub>k</sub>)·Δx</div><div class="small">(Δx = (b − a) ÷ n, x<sub>k</sub> = a + kΔx) — 이 식은 참고로만 보고, '한없이 잘게 나눌 때 다가가는 넓이'라는 뜻을 기억하세요.</div></div></details>`;
-const MISSIONS = [
+const MISSIONS_HIGH = [
  /* ---------- ① 넓이를 구하는 아이디어 ---------- */
  { id:'pond1', view:'shape', title:'1. 울퉁불퉁한 호수의 넓이', setup:{grid:2,showTouch:false},
    story:`학교 앞 호수를 하늘에서 내려다본 모습이에요. 호수는 원도, 사각형도 아니라서 <b>넓이 공식이 없어요.</b><br>그래서 모눈종이 위에 올려놓고, <b>호수 안에 완전히 들어간 칸</b>(분홍색)의 넓이를 더해 보기로 했어요.<div class="tip">💡 그림 아래 버튼으로 모눈 크기를 2 m, 1 m, 0.5 m, 0.25 m로 모두 바꿔 보세요.</div>`,
@@ -1260,6 +1316,156 @@ const MISSIONS = [
    reveal:'S₁ = F(0) − F(−1) = 0 − (−5) = 5, S₂ = −(F(2) − F(0)) = 8 → 5 − 8 = −3' },
 ];
 
+let MISSIONS = MISSIONS_HIGH;   // 지금 학생 수준의 문항 목록 (상·중·하)
+/* 상 수준 문항의 숫자 정보(중 수준의 '과정 나누기'에 써요) */
+MISSIONS_HIGH.find(m=>m.id==='sign').meta={area:2};
+MISSIONS_HIGH.find(m=>m.id==='mix').meta={S1:2,S2:2};
+MISSIONS_HIGH.find(m=>m.id==='dir').meta={area:4};
+
+/* ====================== 수준: 상(전체) / 중(핵심 + 도움 장치) / 하(차근차근) ====================== */
+const LEVELS={
+  high:{name:'상', desc:'모든 탐구 15단계 · 설명 쓰기 4개'},
+  mid: {name:'중', desc:'핵심 탐구 12단계 + 도움 장치 · 설명 쓰기 2개'},
+  low: {name:'하', desc:'차근차근 13단계 · 고르기와 빈칸 위주 · 설명 쓰기 1개'},
+};
+const LEVEL_KO={high:'상',mid:'중',low:'하'}, LEVEL_EN={'상':'high','중':'mid','하':'low'};
+const MID_IDS=['pond1','rect2','approach','sign','mix','dir','def','areafn','squeeze','constC','calc','interp'];
+const MISSIONS_MID=MID_IDS.map(id=>MISSIONS_HIGH.find(m=>m.id===id));
+
+/* 중 수준 도움 장치: 같은 문제에 '과정 나누기 칸 · 부정적분 고르기 · 문장 틀 · 관찰 기록표 · 세 번째 힌트'를 더해요 */
+const H3=(m,h)=>({hints:[...m.hints,h]});
+const MID_TX={
+  pond1:m=>H3(m,'가장 큰 모눈(2 m)과 가장 작은 모눈(0.25 m)을 번갈아 눌러 파란 빈틈을 비교해 보세요.'),
+  rect2:m=>H3(m,'왼쪽 직사각형 넓이를 먼저 구하고, 오른쪽 직사각형 넓이를 구한 다음 더해요.'),
+  approach:m=>Object.assign({observe:'n'},H3(m,'관찰 기록표에서 n이 커질수록 넓이의 합이 어느 값 근처에 모이는지 보세요.')),
+  sign:m=>{ const a=m.meta.area, v=m.q.answer; return { q:{type:'multi', text:m.q.text.replace(' 의 값을 구해 보세요.',' 를 두 단계로 구해 보세요.'),
+      fields:[{label:'① 빨간 삼각형의 넓이 =',name:'넓이',answer:a},{label:'② 정적분 값 =',name:'정적분 값',answer:v}]},
+    hints:[...m.hints,'넓이는 항상 양수예요. 그다음 x축 아래인지 보고 정적분 값에 부호를 붙여요.'] }; },
+  mix:m=>{ const {S1,S2}=m.meta, v=m.q.answer; return { q:{type:'multi', text:m.q.text.replace(' 의 값을 구해 보세요.',' 를 세 단계로 구해 보세요.'),
+      fields:[{label:'① 위(파랑) 넓이 S₁ =',name:'S₁',answer:S1},{label:'② 아래(빨강) 넓이 S₂ =',name:'S₂',answer:S2},{label:'③ 정적분 = S₁ − S₂ =',name:'정적분 값',answer:v}]},
+    hints:[...m.hints,'삼각형 넓이 = 밑변 × 높이 ÷ 2. S₁과 S₂를 각각 구한 다음 위 − 아래를 계산해요.'] }; },
+  dir:m=>{ const a=m.meta.area, v=m.q.answer; return { q:{type:'multi', text:m.q.text.replace(' 의 값을 구해 보세요.',' 를 두 단계로 구해 보세요.'),
+      fields:[{label:'① 색칠된 부분의 넓이 =',name:'넓이',answer:a},{label:'② 정적분 값 (방향 생각하기) =',name:'정적분 값',answer:v}]},
+    hints:[...m.hints,'먼저 넓이를 구하고, 구간을 거꾸로(오른쪽 → 왼쪽) 훑으면 부호를 바꿔요.'] }; },
+  def:m=>({ q:Object.assign({},m.q,{frame:'높이가 음수이면 ______, a > b이면 ______, a = b이면 ______. 그래서 정적분은 ______.'}),
+    hints:[...m.hints,'문장 틀의 빈칸을 하나씩 채워 보세요. 각 경우에 넓이를 + / − / 0 중 무엇으로 계산했나요?'] }),
+  areafn:m=>H3(m,'보라색은 사다리꼴이에요: (윗변 + 아랫변) × 높이 ÷ 2.'),
+  squeeze:m=>Object.assign({observe:'dx'},H3(m,'관찰 기록표에서 Δx가 작아질수록 "ΔS ÷ Δx" 칸과 "f(x)" 칸을 비교해 보세요.')),
+  constC:m=>H3(m,'F(x) − F(0) = (x²/2 + x + C) − (0 + C) 에서 C는 어떻게 되나요?'),
+  calc:m=>({ q:{type:'multi', text:INT(0,2,'x² dx')+' 를 부정적분으로 구해 보세요.',
+      fields:[{type:'select',label:'① x²의 한 부정적분 F(x) =',name:'F(x)',options:['x³ ÷ 3','2x','x³'],answer:0},{label:'② F(2) − F(0) =',name:'F(2) − F(0)',answer:8/3,tol:0.01}]},
+    hints:[...m.hints,'보기의 F(x)를 미분해 보세요. 미분해서 x²이 되는 것이 부정적분이에요.'] }),
+  interp:m=>({ q:Object.assign({},m.q,{type:'multi', text:'① '+INT('−1','2','(3x² − 8x) dx')+' 를 부정적분으로 계산해 보세요.',
+      fields:[{type:'select',label:'F(x) =',name:'F(x)',options:['x³ − 4x²','6x − 8','3x³ − 8x²'],answer:0},{label:'F(2) − F(−1) =',name:'F(2) − F(−1)',answer:-3}],
+      hints:[...m.q.hints,'보기의 F(x)를 미분했을 때 3x² − 8x가 되는 것을 골라요.']}),
+    q2:Object.assign({},m.q2,{frame:'x축 위(−1부터 0까지)의 넓이는 ______, x축 아래(0부터 2까지)의 넓이는 ______이므로, −3은 ______.',
+      hints:[...m.q2.hints,'F(0) − F(−1)이 위 넓이, −(F(2) − F(0))이 아래 넓이예요.']}) }),
+};
+
+/* 하 수준: 쉬운 함수, 그림에 표시된 값, 빈칸 고르기 — 마지막만 서술형(문장 틀 + 낱말 카드) */
+const MISSIONS_LOW=[
+ { id:'l_pond', view:'shape', title:'1. 호수 넓이 어림하기', setup:{grid:2,showTouch:false}, unlockPond:true,
+   story:`학교 앞 호수예요. 원도 사각형도 아니라서 <b>넓이 공식이 없어요.</b><br>그래서 모눈 위에 올려놓고, 호수 안에 <b>완전히 들어간 칸</b>(분홍색)을 세어 보기로 했어요.<div class="tip">💡 지금은 한 변이 2 m인 모눈이에요. 한 칸의 넓이는 2 × 2 = 4 m²예요.</div>`,
+   q:{type:'multi', text:'분홍색 칸을 세고, 넓이의 합을 구해 보세요.',
+      fields:[{label:'① 분홍색 칸의 개수 =',name:'칸 수',answer:2},{label:'② 넓이의 합 (m²) =',name:'넓이의 합',answer:8}]},
+   hints:['그림에서 분홍색으로 칠해진 칸만 세어요.','(칸 수) × (한 칸 넓이 4 m²)'],
+   success:'맞아요! 이렇게 <b>넓이를 아는 작은 칸으로 나눠 더하면</b> 넓이를 어림할 수 있어요.',
+   reveal:'분홍 칸 2개 × 4 m² = 8 m²' },
+ { id:'l_gap', view:'shape', title:'2. 모눈을 작게 하면?', setup:{grid:2,showTouch:false}, needGrids:3,
+   story:`그림 아래 버튼으로 모눈을 <b>2 m → 1 m → 0.5 m</b>로 작게 바꿔 보세요. 호수 가장자리에 <b>파랗게 남는 빈틈</b>을 잘 보세요.`,
+   q:{type:'mc', text:'모눈을 작게 할수록 가장자리의 빈틈은 어떻게 되나요?', options:['점점 늘어난다','점점 줄어든다','그대로다'], answer:1},
+   hints:['2 m 모눈과 0.5 m 모눈을 번갈아 눌러 파란 부분을 비교해 보세요.','빈틈이 줄어들면 넓이의 합은 실제 넓이에 가까워질까요, 멀어질까요?'],
+   success:'맞아요! 작게 나눌수록 빈틈이 줄어서 <b>실제 넓이에 가까워져요.</b>',
+   reveal:'모눈이 작을수록 빈틈이 줄어든다.' },
+ { id:'l_rect1', title:'3. 직사각형 하나의 넓이', setup:{fi:fiOf('sq'),a:1,b:2,n:1,method:'right',showArea:true,rects:true}, hideSum:true, hideExact:true,
+   story:`곡선 <b>y = x²</b> 아래를 직사각형으로 채워 볼게요. 먼저 <b>하나만</b> 그려 봤어요.<div class="tip">💡 폭은 1부터 2까지이므로 1, 높이는 검은 점(x = 2)에서의 함숫값 f(2) = 2² 이에요.</div>`,
+   q:{type:'num', text:'파란 직사각형의 넓이는 얼마일까요?', answer:4, tol:0.001},
+   hints:['직사각형 넓이 = 폭 × 높이','폭 1, 높이 f(2) = 4 → 1 × 4 = ?'],
+   success:'맞아요, <b>4</b>예요! 직사각형 넓이 = 폭 × 높이(함숫값).',
+   reveal:'1 × f(2) = 1 × 4 = 4' },
+ { id:'l_rect2', title:'4. 직사각형 두 개로 어림하기', setup:{fi:fiOf('sq'),a:0,b:2,n:2,method:'right',showArea:true,rects:true}, hideSum:true, hideExact:true,
+   story:`이번엔 0부터 2까지를 <b>직사각형 2개</b>로 채웠어요. 각각의 폭은 1이에요.<div class="tip">💡 높이는 검은 점에서의 함숫값: 왼쪽 f(1) = 1, 오른쪽 f(2) = 4</div>`,
+   q:{type:'multi', text:'직사각형 넓이를 차례로 구해 보세요.',
+      fields:[{label:'왼쪽: 1 × 1 =',name:'왼쪽',answer:1},{label:'오른쪽: 1 × 4 =',name:'오른쪽',answer:4},{label:'합 =',name:'합',answer:5}]},
+   hints:['각 직사각형: 폭 × 높이','1 + 4 = ?'],
+   success:'맞아요! 직사각형 2개로 어림한 넓이는 <b>5</b>예요. 그런데 곡선 위로 튀어나온 부분이 있죠?',
+   reveal:'1 + 4 = 5' },
+ { id:'l_approach', title:'5. 직사각형을 늘려 보자', setup:{fi:fiOf('sq'),a:0,b:2,n:2,method:'right',showArea:true,rects:true}, needN:50, hideExact:true,
+   story:`<b>n 슬라이더</b>로 직사각형 개수를 50개, 200개까지 늘려 보세요. (▶ 버튼을 눌러도 돼요) 아래 <b>직사각형 넓이의 합</b>을 지켜보세요.`,
+   q:{type:'mc', text:'직사각형을 아주 많이 늘리면 넓이의 합은 어떻게 되나요?', options:['계속 커진다','약 2.67에 가까워진다','0이 된다'], answer:1},
+   hints:['n = 200일 때 넓이의 합을 읽어 보세요.','n을 늘릴수록 튀어나온 부분은 줄어들어요. 합은 어떤 값 근처에 모이나요?'],
+   success:'맞아요! 한없이 잘게 나눌 때 다가가는 넓이(약 2.67)를 '+INT(0,2,'x² dx')+' 로 쓰고 <b>정적분</b>이라고 해요.',
+   reveal:'n이 커질수록 넓이의 합은 약 2.67에 가까워진다.' },
+ { id:'l_sign1', title:'6. x축 아래에 있으면?', setup:{fi:fiOf('lin'),a:-2,b:0,n:4,method:'mid',rects:true,signed:true}, hideExact:true,
+   story:`그래프 <b>y = x</b>가 구간 [−2, 0]에서 <b>x축 아래</b>에 있어요. 빨간 직사각형들을 보세요.`,
+   q:{type:'multi', text:'빈칸에 알맞은 것을 골라 보세요.', template:'x축 아래 직사각형의 높이 f(x)는 {0}이고, 그래서 (높이) × (폭)은 {1}로 계산해요.',
+      fields:[{type:'select',name:'높이의 부호',options:['양수','음수'],answer:1},{type:'select',name:'넓이의 부호',options:['+','−'],answer:1}]},
+   hints:['x가 −2부터 0까지일 때 y = x의 값은 양수인가요, 음수인가요?','음수 × 양수는?'],
+   success:'맞아요! x축 아래의 넓이는 <b>−로 계산</b>해요. 이것이 정적분의 <b>부호</b>예요.',
+   reveal:'높이는 음수, 넓이는 −로 계산한다.' },
+ { id:'l_signcalc', title:'7. 정적분 값 구하기 (아래)', setup:{fi:fiOf('lin'),a:-2,b:0,rects:false,signed:true}, hideExact:true,
+   story:`빨간 삼각형의 넓이는 <b>2</b>예요. (밑변 2 × 높이 2 ÷ 2)<br>그런데 x축 <b>아래</b>에 있어요.`,
+   q:{type:'num', text:INT('−2','0','x dx')+' 의 값은?', answer:-2, tol:0.001},
+   special:{2:'🤔 넓이는 2가 맞아요! 그런데 x축 <b>아래</b>에 있으면 정적분 값은 어떻게 될까요?'},
+   hints:['넓이는 2예요.','x축 아래이므로 넓이에 −를 붙여요.'],
+   success:'맞아요, <b>−2</b>예요!', reveal:'넓이 2, x축 아래 → −2' },
+ { id:'l_mix', title:'8. 위와 아래가 함께', setup:{fi:fiOf('lin'),a:-2,b:2,rects:false,signed:true}, hideExact:true,
+   story:`이번엔 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 함께 있어요.<br>위 넓이 <b>S₁ = 2</b>, 아래 넓이 <b>S₂ = 2</b>예요.<div class="tip">💡 정적분 = (위 넓이) − (아래 넓이) = S₁ − S₂</div>`,
+   q:{type:'num', text:INT('−2','2','x dx')+' = S₁ − S₂ 의 값은?', answer:0, tol:0.001},
+   special:{4:'🤔 넓이를 모두 더했군요! 정적분은 위 넓이에서 아래 넓이를 <b>빼요.</b>'},
+   hints:['S₁ − S₂ = 2 − 2','같은 수끼리 빼면?'],
+   success:'맞아요, <b>0</b>이에요! 위와 아래 넓이가 같으면 서로 빠져서 0이 돼요.', reveal:'2 − 2 = 0' },
+ { id:'l_dir', title:'9. 거꾸로 가면?', setup:{fi:fiOf('lin1'),a:2,b:0,n:4,method:'right',rects:true,signed:true}, hideExact:true,
+   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로 <b>왼쪽으로</b> 거꾸로 가요. 화살표(←)와 색을 보세요.<div class="tip">💡 b 슬라이더를 2보다 오른쪽으로 옮기면 색이 어떻게 바뀌는지도 보세요.</div>`,
+   q:{type:'mc', text:'구간을 거꾸로(a = 2 → b = 0) 하면 정적분 값은 0부터 2까지일 때와 비교해 어떻게 되나요?', options:['똑같다','부호만 반대로 바뀐다','0이 된다'], answer:1},
+   hints:['거꾸로 가면 폭 Δx가 음수가 돼요.','넓이 크기는 같고, + 와 − 중 무엇이 바뀌나요?'],
+   success:'맞아요! 구간을 거꾸로 하면 정적분의 <b>부호가 바뀌어요.</b> 이것이 정적분의 <b>방향</b>이에요.', reveal:'부호만 반대로 바뀐다.' },
+ { id:'l_def', title:'10. 정적분의 뜻 정리', setup:{fi:fiOf('dec'),a:3,b:0,n:6,method:'mid',rects:true,signed:true}, hideExact:true, unlockExact:true,
+   story:`지금까지 알게 된 것을 정리해 볼게요. 그래프를 움직여 보며 확인해도 좋아요.`,
+   q:{type:'multi', text:'빈칸에 알맞은 말을 골라 문장을 완성해 보세요.', template:'정적분은 x축 위 넓이에서 x축 {0} 넓이를 {1} 값이다. 그리고 구간을 거꾸로 하면 부호가 {2}.',
+      fields:[{type:'select',name:'첫째 빈칸',options:['위','아래'],answer:1},{type:'select',name:'둘째 빈칸',options:['더한','뺀'],answer:1},{type:'select',name:'셋째 빈칸',options:['그대로다','바뀐다'],answer:1}]},
+   hints:['8단계에서 S₁과 S₂를 어떻게 계산했나요?','9단계에서 거꾸로 가면 무엇이 바뀌었나요?'],
+   success:'훌륭해요! 정적분은 <b>방향과 부호를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 보여요.',
+   reveal:'아래 / 뺀 / 바뀐다', onSolve:()=>{S.exactUnlocked=true} },
+ { id:'l_areafn', view:'area', title:'11. 넓이를 함수로 보기', setup:{af:'c2',ax:1,adxV:0,showC:false}, hideS:true,
+   story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 움직여 보세요.<div class="tip">💡 보라색은 직사각형이에요: 넓이 = 가로 x × 높이 2 → S(x) = 2x</div>`,
+   q:{type:'multi', text:'S(3)을 구하고, S(x) = 2x를 미분해 보세요.',
+      fields:[{label:'① S(3) =',name:'S(3)',answer:6},{type:'select',label:'② S(x) = 2x를 미분하면',name:'미분',options:['2 (= f(x)와 같다)','x²','0'],answer:0}]},
+   hints:['S(3) = 3 × 2','2x를 미분하면 기울기 2가 남아요. f(t) = 2와 비교해 보세요.'],
+   success:'맞아요! <b>넓이 함수 S(x)를 미분하면 원래 함수 f(x)</b>가 돼요. 즉 S(x)는 f(x)의 한 부정적분이에요.',
+   reveal:'S(3) = 6, S′(x) = 2 = f(x)' },
+ { id:'l_ftc', title:'12. 부정적분으로 정적분 계산', setup:{fi:fiOf('two_x'),a:0,b:2,rects:false,signed:true}, hideExact:true,
+   story:`그래프 <b>y = 2x</b> 아래 0부터 2까지의 넓이를 <b>부정적분</b>으로 구해 볼게요.<br>${INT('a','b','f(x) dx')} = <b>F(b) − F(a)</b> (F는 f의 한 부정적분)`,
+   q:{type:'multi', text:INT(0,2,'2x dx')+' 를 구해 보세요.',
+      fields:[{type:'select',label:'① 2x의 한 부정적분 F(x) =',name:'F(x)',options:['x²','2','2x²'],answer:0},{label:'② F(2) − F(0) =',name:'F(2) − F(0)',answer:4}]},
+   hints:['미분해서 2x가 되는 것을 골라요.','F(2) − F(0) = 2² − 0² = ?'],
+   success:'맞아요, <b>4</b>예요! 파란 삼각형 넓이(밑변 2 × 높이 4 ÷ 2 = 4)와 똑같죠? 부정적분으로 넓이를 구할 수 있어요.',
+   reveal:'F(x) = x², F(2) − F(0) = 4' },
+ { id:'l_interp', title:'13. 계산하고 설명하기', setup:{fi:fiOf('two_x'),a:-1,b:2,rects:false,signed:true}, hideExact:true,
+   story:`그래프 <b>y = 2x</b>예요. 구간 [−1, 2]에서 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 모두 있어요.`,
+   q:{type:'num', text:'① '+INT('−1','2','2x dx')+' 를 F(x) = x²로 계산해 보세요.', answer:3, tol:0.001,
+      hints:['F(2) − F(−1) = 2² − (−1)²','4 − 1 = ?'],
+      success:'맞아요, <b>3</b>이에요! 그런데 이 3은 그래프에서 무엇을 뜻할까요?'},
+   special:{5:'🤔 4 + 1 = 5는 넓이를 모두 더한 값이에요. F(2) − F(−1)로 다시 계산해 보세요.'},
+   q2:{type:'text', text:'② 구한 값 3이 무엇을 뜻하는지, 그래프의 넓이를 이용해 설명해 보세요.',
+      frame:'x축 위의 넓이는 ______, x축 아래의 넓이는 ______이다. 정적분 3은 ______ 넓이에서 ______ 넓이를 ______ 값이다.',
+      cards:['위','아래','넓이','뺀','4','1','4 − 1'],
+      rubric:[{name:'x축 위(파랑) 넓이 4를 찾았다', kw:['4','위','파란','파랑','S₁','S1']},
+              {name:'x축 아래(빨강) 넓이 1을 찾았다', kw:['1','아래','빨간','빨강','S₂','S2']},
+              {name:'3 = 4 − 1 (위 넓이에서 아래 넓이를 뺀 값)', kw:['4-1','4 - 1','4−1','4 − 1','뺀','빼','차']}],
+      need:2,
+      goal:'f(x) = 2x는 [−1, 0]에서 x축 아래, [0, 2]에서 x축 위에 있다. 위 넓이는 밑변 2 × 높이 4 ÷ 2 = 4, 아래 넓이는 밑변 1 × 높이 2 ÷ 2 = 1이므로, 정적분 3은 위 넓이 4에서 아래 넓이 1을 뺀 값(4 − 1)이다.',
+      hints:['그래프는 x = 0에서 x축과 만나요. 파란 삼각형(0~2)과 빨간 삼각형(−1~0)의 넓이를 각각 구해 보세요.','파란 넓이와 빨간 넓이로 3을 만들려면 어떻게 계산해야 할까요?'],
+      success:'🎉 완벽해요! 정적분 3은 <b>위 넓이 4에서 아래 넓이 1을 뺀 값</b>이에요.'},
+   hints:[], success:'', reveal:'' },
+];
+
+let LEVEL='high', LEVEL_MODE='choose';
+const SETS={high:MISSIONS_HIGH, mid:MISSIONS_MID, low:MISSIONS_LOW};
+const URL_LEVEL=['high','mid','low'].includes(new URLSearchParams(location.search).get('level')) ? new URLSearchParams(location.search).get('level') : '';
+function setLevel(l){ LEVEL=SETS[l]?l:'high'; MISSIONS=SETS[LEVEL]; }
+const fixedLevel=()=> URL_LEVEL || (LEVEL_MODE!=='choose' ? LEVEL_MODE : '');
+
 const idxOf=id=>MISSIONS.findIndex(m=>m.id===id);
 /* ---------- 코스: 전체(15단계) / 1차시(12단계: 서술 2개와 구간 나누기 생략) ----------
    단계 번호(index)는 두 코스에서 같게 유지해서, 기록·진행 상황이 섞이지 않아요. */
@@ -1283,19 +1489,19 @@ const variantNo=()=>{ if(!ME||ME.teacher) return 0; let h=0; for(const ch of Str
 const F1=x=>x*x/2+x;              // f(x) = x + 1 의 한 부정적분
 const VARIANTS={
   sign:v=>{ const L=[-3,-5,-4][v], w=-1-L, area=w*w/2, ans=-area;
-    return { setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?`},
+    return { meta:{area}, setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?`},
       q:{type:'num', text:INT(fmtN(L),'−1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 ${w}, 높이 ${w}예요.`,'높이가 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
       success:`맞아요, <b>${fmtN(ans)}</b>예요! 정적분은 <b>부호</b>를 가진 넓이예요.`,
       reveal:`삼각형 넓이 ${w} × ${w} ÷ 2 = ${fmtN(area)}, 높이가 음수이므로 <b>${fmtN(ans)}</b>` }; },
   mix:v=>{ const [a,b]=[[-3,1],[-3,2],[-4,1]][v], S1=(b+1)**2/2, S2=(-1-a)**2/2, ans=S1-S2;
-    return { setup:{a,b}, special:{[S1+S2]:'🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?'},
+    return { meta:{S1,S2}, setup:{a,b}, special:{[S1+S2]:'🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?'},
       q:{type:'num', text:INT(fmtN(a),fmtN(b),'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`파란 삼각형(−1부터 ${fmtN(b)}까지)의 넓이 S₁과 빨간 삼각형(${fmtN(a)}부터 −1까지)의 넓이 S₂를 각각 구해 보세요.`,`S₁ = ${fmtN(S1)}은 +로, S₂ = ${fmtN(S2)}는 −로 계산해요.`],
       success:`맞아요, <b>${fmtN(ans)}</b>이에요! 즉 `+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이). 교과서의 정적분과 같은 값이에요.',
       reveal:`S₁ = ${fmtN(S1)}, S₂ = ${fmtN(S2)} → S₁ − S₂ = <b>${fmtN(ans)}</b>` }; },
   dir:v=>{ const [a,b]=[[2,0],[3,1],[1,0]][v], area=F1(a)-F1(b), ans=-area;
-    return { setup:{a,b}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 ${a}에서 ${b}로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?`},
+    return { meta:{area}, setup:{a,b}, special:{[area]:`🤔 넓이는 ${fmtN(area)}가 맞아요! 그런데 ${a}에서 ${b}로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?`},
       story:`이번엔 <b>a = ${a}, b = ${b}</b>이에요. ${a}에서 ${b}로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (${b} − ${a}) ÷ n 이 <b>음수</b>가 돼요! 높이는 양수, 폭은 음수 → 넓이는 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
       q:{type:'num', text:INT(a,b,'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`색칠된 부분(${b}부터 ${a}까지)의 넓이는 사다리꼴: (${b+1} + ${a+1}) × ${a-b} ÷ 2 예요.`,'방향이 거꾸로(폭이 음수)라서 넓이를 −로 계산해요.'],
@@ -1311,17 +1517,18 @@ const VARIANTS={
 };
 /* 지금 학생에게 보여 줄 단계(자물쇠 숫자가 바뀐 경우 반영) */
 function missionFor(i){
-  const base=MISSIONS[i], f=VARY&&VARIANTS[base.id];
-  if(!f) return base;
-  const o=f(variantNo());
-  return Object.assign({},base,o,{setup:Object.assign({},base.setup,o.setup)});
+  let m=MISSIONS[i];
+  const f=VARY&&LEVEL!=='low'&&VARIANTS[m.id];
+  if(f){ const o=f(variantNo()); m=Object.assign({},m,o,{setup:Object.assign({},m.setup,o.setup)}); }
+  if(LEVEL==='mid'&&MID_TX[m.id]){ const o=MID_TX[m.id](m); m=Object.assign({},m,o); }
+  return m;
 }
 /* 거울의 방 다이얼에 들어갈 숫자 (5~8단계 답) */
-const dialDigits=()=>['sign','mix','dir','split'].filter(id=>isActive(idxOf(id))).map(id=>({id,txt:fmtN(missionFor(idxOf(id)).q.answer)}));
+const dialDigits=()=>(LEVEL==='low'?['l_signcalc','l_mix']:['sign','mix','dir','split']).filter(id=>idxOf(id)>=0&&isActive(idxOf(id))).map(id=>({id,txt:fmtN(missionFor(idxOf(id)).q.answer)}));
 /* 진행 상황은 학생(학번)별로 이 기기에 저장하고, 서버(스프레드시트)와도 맞춰요 */
 let ME=null;                       // {sid, name, teacher}
 let P={done:[],cur:0};
-const progKey=()=> 'defint1_prog_'+(ME?ME.sid:'guest');
+const progKey=()=> 'defint1_prog_'+(LEVEL==='high'?'':LEVEL+'_')+(ME?ME.sid:'guest');   // 수준마다 따로 저장 (상은 예전 기록과 이어져요)
 function loadProg(){try{return JSON.parse(localStorage.getItem(progKey()))||{done:[],cur:0}}catch(e){return {done:[],cur:0}}}
 function saveProg(){try{localStorage.setItem(progKey(),JSON.stringify(P))}catch(e){}}
 let tries=0, selOpt=null, hintsUsed=0;
@@ -1364,31 +1571,43 @@ function qboxHtml(m,q){
   let qhtml='';
   if(q.type==='num') qhtml=`<input type="text" id="ans" placeholder="답을 입력하세요 (예: 0.5, −2, 1/2)">`;
   if(q.type==='mc') qhtml=q.options.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(9312+i)} ${o}</button>`).join('');
-  if(q.type==='text') qhtml=`<textarea id="ans" placeholder="생각한 것을 자유롭게 써 보세요."></textarea>`;
+  if(q.type==='text') qhtml=(q.frame?`<div class="frame">✍ 문장 틀: ${q.frame}</div>`:'')+`<textarea id="ans" placeholder="${q.frame?'문장 틀을 참고해서 내 말로 써 보세요.':'생각한 것을 자유롭게 써 보세요.'}"></textarea>`+(q.cards?`<div class="wcards"><span class="small">낱말 카드(누르면 들어가요):</span>${q.cards.map(c=>`<button type="button" class="wcard">${c}</button>`).join('')}</div>`:'');
+  if(q.type==='multi') qhtml=multiHtml(q);
   return `<div class="q">❓ ${q.text}</div>${qhtml}`;
+}
+/* 여러 칸 문항: 숫자 칸과 고르기 칸. template가 있으면 문장 속 빈칸으로 보여 줘요 */
+function multiHtml(q){
+  const ctl=(f,i)=> f.type==='select'
+    ? `<select class="mfin" data-k="${i}"><option value="">고르기 ▾</option>${f.options.map((o,k)=>`<option value="${k}">${o}</option>`).join('')}</select>`
+    : `<input type="text" class="mfin" data-k="${i}" inputmode="decimal" placeholder="□">`;
+  if(q.template) return `<div class="mtemplate">${q.template.replace(/\{(\d+)\}/g,(s,k)=>ctl(q.fields[+k],+k))}</div>`;
+  return `<div class="mfields">${q.fields.map((f,i)=>`<label class="mf"><span>${f.label}</span>${ctl(f,i)}</label>`).join('')}</div>`;
 }
 function bindQ(m){
   CURQ=qOf(m,PART); selOpt=null; hintsUsed=0;
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); selOpt=+b.dataset.i;});
   const ans=$('ans'); if(ans&&CURQ.type==='num') ans.onkeydown=e=>{if(e.key==='Enter')submit(m)};
+  document.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{ const ta=$('ans'); if(!ta) return; const s=ta.selectionStart??ta.value.length, e=ta.selectionEnd??s; const w=b.textContent; ta.value=ta.value.slice(0,s)+w+' '+ta.value.slice(e); ta.focus(); const c=s+w.length+1; ta.setSelectionRange(c,c); });
+  document.querySelectorAll('input.mfin').forEach(inp=>inp.onkeydown=e=>{ if(e.key==='Enter') submit(m); });
 }
 function loadMission(){
   if(!isActive(P.cur)){ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; }
-  const m=missionFor(P.cur); tries=0; PART=0;
+  const m=missionFor(P.cur); tries=0; PART=0; CURM=m; OBS=new Map();
   Object.assign(S,{rects:true,signed:false,showArea:false,n:4,method:'right',showC:false});
   S.view=m.view||'graph'; Object.assign(S,m.setup); S.maxN=S.n; S.minDx=9;
   if(S.view==='shape') S.gridsSeen=new Set([S.grid]);
   S.cSeen=new Set([S.C]);
   const fresh=!P.done.includes(P.cur);
   S.hideSum=!!m.hideSum && fresh; S.hideS=!!m.hideS && fresh; S.hideExact=!!m.hideExact && fresh;
-  S.exactUnlocked=P.done.includes(idxOf('def'));
-  S.shapeTrue=P.done.includes(idxOf('pond1'));
+  S.exactUnlocked=MISSIONS.some((x,i)=>(x.unlockExact||x.id==='def')&&P.done.includes(i));
+  S.shapeTrue=MISSIONS.some((x,i)=>(x.unlockPond||x.id==='pond1')&&P.done.includes(i));
   refresh(); renderProg();
   const solvedAlready=P.done.includes(P.cur);
   $('mission').innerHTML=`
     <div class="mtitle">${dispTitle(P.cur)}</div>
     <div class="story">${m.story}</div>
+    ${m.observe?'<div class="obs"><b>📋 관찰 기록표</b> <span class="small">(움직이면 자동으로 기록돼요)</span><table id="obsT"></table></div>':''}
     <div id="donePart"></div>
     <div class="qbox">
       <div id="qArea">${qboxHtml(m,m.q)}</div>
@@ -1425,7 +1644,7 @@ function parseNum(s){
 const plain=h=>String(h||'').replace(/<br\s*\/?>/gi,' ').replace(/<details[\s\S]*?<\/details>/gi,'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();
 /* 학생의 답과 결과를 스프레드시트에 보내요 */
 function record(m, answer, result, feedback){
-  logEvent({index:P.cur, title:plain(m.title)+partTag(m), type:{num:'숫자',mc:'선택',text:'서술'}[CURQ.type]||CURQ.type,
+  logEvent({index:P.cur, title:plain(dispTitle(P.cur))+partTag(m), type:{num:'숫자',mc:'선택',text:'서술'}[CURQ.type]||CURQ.type,
     answer:String(answer||''), result, feedback:plain(feedback).slice(0,600), tries, hints:hintsUsed});
 }
 /* 맞혔을 때: 문항이 더 남았으면 다음 문항(②)으로, 아니면 단계 해결 */
@@ -1496,7 +1715,7 @@ function showLastChance(){
   $('fb').after(d);
 }
 function gameOver(m){
-  const at=P.cur, title=plain(MISSIONS[at].title)+partTag(m), MAX_WRONG=maxWrong();
+  const at=P.cur, title=plain(dispTitle(at))+partTag(m), MAX_WRONG=maxWrong();
   logEvent({index:at, title, type:'게임오버', answer:'', result:'게임오버', feedback:`'${title}'에서 ${MAX_WRONG}번 틀려 처음부터 다시 시작`, tries:'', hints:hintsUsed});
   P.done=[]; P.cur=ACT()[0]; P.wrong={}; P.lock={}; P.gameOvers=(P.gameOvers||0)+1; saveProg();
   const body = ESCAPE
@@ -1552,10 +1771,25 @@ async function submit(m){
       wrong(m,msg); record(m,raw,'오답',msg);
     }
   }
+  if(q.type==='multi'){
+    const els=[...document.querySelectorAll('.mfin')], vals=els.map(e=>e.value.trim());
+    if(vals.some(v=>v==='')){ showFb('info','빈칸을 모두 채워 볼까요?'); return; }
+    if(q.fields.some((f,i)=>f.type!=='select'&&isNaN(parseNum(vals[i])))){ showFb('info','숫자 칸에는 숫자나 분수(예: 0.5, −2, 1/2)를 써 주세요.'); return; }
+    const ok=q.fields.map((f,i)=> f.type==='select' ? Number(vals[i])===f.answer : Math.abs(parseNum(vals[i])-f.answer)<=(f.tol??0.001));
+    const shown=q.fields.map((f,i)=>(f.name||'')+': '+(f.type==='select'?f.options[Number(vals[i])]:vals[i])).join(' / ');
+    els.forEach((e,i)=>{ e.classList.toggle('ok',ok[i]); e.classList.toggle('no',!ok[i]); });
+    if(ok.every(Boolean)){ tries++; correct(m,shown,'정답',''); return; }
+    const good=q.fields.filter((f,i)=>ok[i]).map(f=>f.name), bad=q.fields.filter((f,i)=>!ok[i]).map(f=>f.name);
+    let msg=(good.length?`👍 <b>${good.join(', ')}</b>은(는) 맞았어요! `:'')+`🤔 <b>${bad.join(', ')}</b>을(를) 다시 생각해 볼까요?`;
+    const sp=m.special&&q.fields.length&&Object.keys(m.special).find(k=>q.fields.some((f,i)=>f.type!=='select'&&Math.abs(parseNum(vals[i])-Number(k))<1e-6&&!ok[i]));
+    if(sp) msg=m.special[sp];
+    wrong(m,msg); record(m,shown,'오답',msg); return;
+  }
   if(q.type==='mc'){
     if(selOpt===null){showFb('info','보기 중 하나를 골라 볼까요?');return}
     if(selOpt!==q.answer){
-      if(m.needGrids && S.gridsSeen.size<m.needGrids){showFb('info',`먼저 모눈 크기 버튼 4개를 모두 눌러 보면서 분홍색 칸 넓이의 합을 비교해 볼까요? (지금 ${S.gridsSeen.size}개 확인)`);return}
+      if(m.needN && S.maxN<m.needN){showFb('info',`먼저 n을 ${m.needN}개 이상으로 늘려 보면서 넓이의 합을 관찰해 볼까요?`);return}
+      if(m.needGrids && S.gridsSeen.size<m.needGrids){showFb('info',`먼저 모눈 크기 버튼을 ${m.needGrids}개 이상 눌러 보면서 그림을 비교해 볼까요? (지금 ${S.gridsSeen.size}개 확인)`);return}
       if(m.needSmallDx && S.minDx>m.needSmallDx){showFb('info','먼저 <b>Δx 슬라이더</b>를 0 가까이(왼쪽 끝 쪽으로) 줄여 보면서 오른쪽 값들을 비교해 볼까요?');return}
       if(m.needC && S.cSeen.size<m.needC){showFb('info','먼저 <b>C 슬라이더</b>를 여러 값으로 바꿔 보면서 F(x) − F(0)을 확인해 볼까요?');return}
     }
@@ -1598,15 +1832,15 @@ function ruleJudge(m,txt){
 let ESCAPE=false;
 const ESC_URL=/[?&]mode=escape\b/.test(location.search);
 const ROOMS=[
-  {icon:'🗺', name:'지도실',      ids:['pond1','pond2'],                 key:'📓', keyName:'연구 일지',
+  {icon:'🗺', name:'지도실',      ids:['pond1','pond2','l_pond','l_gap'], key:'📓', keyName:'연구 일지',
    intro:'등 뒤의 문은 스스로 잠겨 꼼짝도 하지 않는다.<br>노트에서 떨어진 쪽지: <i>"넓이의 비밀을 풀어야 문이 열린다."</i><br>연구소 안쪽으로 들어가 보자. 첫 번째 방은 호수 지도가 걸린 <b>지도실</b>이다.'},
-  {icon:'📐', name:'측량실',      ids:['rect2','approach'],              key:'🧩', keyName:'금고 번호 조각',
+  {icon:'📐', name:'측량실',      ids:['rect2','approach','l_rect1','l_rect2','l_approach'], key:'🧩', keyName:'금고 번호 조각',
    intro:'곡선으로 휘어진 벽이 있는 <b>측량실</b>.<br>공식이 없는 넓이를 재야 금고 번호 조각을 얻을 수 있다.'},
-  {icon:'🪞', name:'거울의 방',   ids:['sign','mix','dir','split','def'], key:'🔢', keyName:'다이얼 번호',
+  {icon:'🪞', name:'거울의 방',   ids:['sign','mix','dir','split','def','l_sign1','l_signcalc','l_mix','l_dir','l_def'], key:'🔢', keyName:'다이얼 번호',
    intro:'사방이 거울인 방. 이곳에서는 넓이에도 <b>방향과 부호</b>가 있다.<br>문에는 <b>다이얼 자물쇠</b>가 달려 있다.'},
-  {icon:'⚙', name:'기계실',      ids:['areafn','squeeze','ftc_text'],    key:'🔧', keyName:'기계 가동 열쇠',
+  {icon:'⚙', name:'기계실',      ids:['areafn','squeeze','ftc_text','l_areafn'], key:'🔧', keyName:'기계 가동 열쇠',
    intro:'거대한 <b>넓이 기계</b>가 멈춰 있다.<br>기계를 다시 움직여야 금고로 가는 길이 열린다.'},
-  {icon:'🔐', name:'마지막 금고', ids:['constC','calc','interp'],          key:'🗝', keyName:'출구 열쇠',
+  {icon:'🔐', name:'마지막 금고', ids:['constC','calc','interp','l_ftc','l_interp'], key:'🗝', keyName:'출구 열쇠',
    intro:'연구소 출구 앞을 가로막은 <b>마지막 금고</b>.<br>부정적분의 힘으로 열어야 탈출할 수 있다.'},
 ];
 const ESC_FLAVOR={
@@ -1625,9 +1859,13 @@ const ESC_FLAVOR={
   constC:'금고의 첫 다이얼은 속임수다. C를 아무리 돌려도…?',
   calc:'금고 두 번째 칸. 측량실에서 얻은 번호 조각의 정체는?',
   interp:'마지막 문. 계산하고, 그 뜻을 말해야 열린다.',
+  l_pond:'벽에 커다란 호수 지도가 걸려 있다. 모눈 렌즈로 칸을 세어 보자.', l_gap:'렌즈를 바꿔 끼우면 무엇이 달라질까?',
+  l_rect1:'곡선 벽 앞에 직사각형 블록 하나가 놓여 있다.', l_rect2:'블록이 두 개로 늘어났다. 넓이를 차례로 적어 보자.', l_approach:'블록을 잘게 쪼개면 번호 조각이 나타난다.',
+  l_sign1:'거울에 비친 직사각형은 거꾸로 서 있다.', l_signcalc:'첫 번째 다이얼. 아래쪽 넓이를 읽어라.', l_mix:'두 번째 다이얼. 위와 아래가 맞서 있다.', l_dir:'거울 속에서는 길이 거꾸로 흐른다.', l_def:'문 위의 문장에 빈칸이 있다. 알맞은 말을 채워라.',
+  l_areafn:'넓이 기계의 레버를 당겨 보자. 높이 2짜리 넓이가 쌓인다.', l_ftc:'금고 첫 칸: 부정적분의 열쇠를 골라라.', l_interp:'마지막 문. 계산하고, 그 뜻을 말해야 열린다.',
 };
 const roomOf=i=>ROOMS.findIndex(r=>r.ids.includes(MISSIONS[i].id));
-const roomIdx=r=>ROOMS[r].ids.map(idxOf).filter(isActive);
+const roomIdx=r=>ROOMS[r].ids.map(idxOf).filter(i=>i>=0&&isActive(i));
 const roomDone=r=>roomIdx(r).every(i=>P.done.includes(i));
 const hintWord=()=>ESCAPE?'📜 연구원의 쪽지':'💡 힌트';
 function fmtTime(ms){const s=Math.floor((ms||0)/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),ss=s%60;return (h?h+':'+String(m).padStart(2,'0'):String(m).padStart(2,'0'))+':'+String(ss).padStart(2,'0');}
@@ -1666,12 +1904,12 @@ function decorateEscape(m){
   if(!ESCAPE) return;
   const fl=ESC_FLAVOR[m.id]; if(fl) $('mission').querySelector('.story').insertAdjacentHTML('beforebegin',`<div class="esc-flavor">🔦 ${fl}</div>`);
   $('hintBtn').textContent='📜 연구원의 쪽지';
-  if(m.id==='def'){ // 거울의 방: 앞의 네 답이 다이얼 번호가 돼요
+  if(m.id==='def'||m.id==='l_def'){ // 거울의 방: 앞의 네 답이 다이얼 번호가 돼요
     const dig=dialDigits().map(d=>P.done.includes(idxOf(d.id))?d.txt:'?');
     $('mission').querySelector('.story').insertAdjacentHTML('afterend',`<div class="dial">${dig.map(d=>`<span>${d}</span>`).join('')}</div><div class="small" style="text-align:center;margin-bottom:6px">다이얼이 맞춰졌다! 하지만 문은 아직 열리지 않는다…</div>`);
   }
   if(roomOf(P.cur)===4){ // 마지막 금고: 모은 조각 보여 주기
-    const pieces=[]; if(P.done.includes(idxOf('approach'))) pieces.push('🧩 번호 조각 ≈ 2.67');
+    const pieces=[]; if(P.done.includes(idxOf('approach'))||P.done.includes(idxOf('l_approach'))) pieces.push('🧩 번호 조각 ≈ 2.67');
     if(roomDone(2)) pieces.push('🔢 다이얼 '+dialDigits().map(d=>d.txt).join(' · ')); if(roomDone(3)) pieces.push('🔧 기계 가동 완료');
     if(pieces.length) $('mission').querySelector('.story').insertAdjacentHTML('afterend',`<div class="vault">${pieces.map(p=>`<span>${p}</span>`).join('')}</div>`);
   }
@@ -1937,11 +2175,11 @@ function queue(){try{const v=localStorage.getItem(LOGQ); return v?JSON.parse(v):
 function setQueue(q){memQ=q.slice(-300); try{localStorage.setItem(LOGQ,JSON.stringify(memQ))}catch(e){}}
 function logEvent(ev){
   if(!ME||ME.teacher) return;                         // 선생님 체험은 기록하지 않아요
-  const q=queue(); q.push({action:'log',sid:ME.sid,name:ME.name,total:MISSIONS.length,event:ev,at:Date.now()}); setQueue(q); flushLogs();
+  const q=queue(); q.push({action:'log',sid:ME.sid,name:ME.name,level:LEVEL,total:MISSIONS.length,event:ev,at:Date.now()}); setQueue(q); flushLogs();
 }
 window.logGolf=(data)=>{
   if(!ME||ME.teacher) return;
-  const q=queue(); q.push({action:'golf',sid:ME.sid,name:ME.name,...data}); setQueue(q); flushLogs();
+  const q=queue(); q.push({action:'golf',sid:ME.sid,name:ME.name,level:LEVEL,...data}); setQueue(q); flushLogs();
 };
 let flushing=false;
 async function flushLogs(){
@@ -1975,23 +2213,33 @@ $('jumpBtn').onclick=()=>{
 };
 window.addEventListener('scroll',()=>{ if(document.body.classList.contains('in')) updateJump(); },{passive:true});
 
-function showGate(){
-  document.body.classList.remove('in');
-  $('gate').classList.remove('hide'); $('gSid').value=''; $('gName').value=''; $('gErr').textContent='';
-  $('whoChip').style.display='none'; setTimeout(()=>$('gSid').focus(),50);
+/* 입장 화면의 수준 고르기: 선생님이 수준을 정해 두면 고를 수 없어요 */
+let GATE_LV='';
+function renderGateLevel(){
+  const box=$('gLevel'), desc=$('gLevelDesc'), fx=fixedLevel(); if(!box) return;
+  if(fx){ GATE_LV=fx; box.innerHTML=`<div class="lvl-fixed">선생님이 정한 수준: <b>${LEVELS[fx].name}</b></div>`; desc.textContent=LEVELS[fx].desc; return; }
+  box.innerHTML='<div class="lvl-pick">'+['high','mid','low'].map(k=>`<button type="button" data-l="${k}" class="${GATE_LV===k?'on':''}">${LEVELS[k].name}<small>${k==='high'?'15단계':k==='mid'?'12단계 + 도움':'13단계 차근차근'}</small></button>`).join('')+'</div>';
+  desc.textContent=GATE_LV?LEVELS[GATE_LV].desc:'자신에게 맞는 수준을 골라 주세요. 수준마다 진행 기록이 따로 저장돼요.';
+  box.querySelectorAll('button').forEach(b=>b.onclick=()=>{ GATE_LV=b.dataset.l; renderGateLevel(); });
 }
-async function enter(sid,name,teacher){
-  ME={sid,name,teacher:!!teacher};
+function whoText(){ return ME.teacher?`👀 선생님 체험 · ${LEVELS[LEVEL].name}`:`👤 ${ME.sid} ${ME.name} · ${LEVELS[LEVEL].name}`; }
+function showGate(){  document.body.classList.remove('in');
+  $('gate').classList.remove('hide'); $('gSid').value=''; $('gName').value=''; $('gErr').textContent='';
+  $('whoChip').style.display='none'; if(!fixedLevel()) GATE_LV=''; renderGateLevel(); setTimeout(()=>$('gSid').focus(),50);
+}
+async function enter(sid,name,teacher,level){
+  setLevel(fixedLevel()||level||'high'); if(COURSE==='short'&&LEVEL!=='high') COURSE='full';
+  ME={sid,name,teacher:!!teacher,level:LEVEL};
   try{sessionStorage.setItem('defint1_me',JSON.stringify(ME))}catch(e){}
   $('gate').classList.add('hide'); document.body.classList.add('in');
-  $('whoChip').style.display=''; $('whoChip').textContent=teacher?'👀 선생님 체험':`👤 ${sid} ${name}`;
+  $('whoChip').style.display=''; $('whoChip').textContent=whoText();
   $('adminBtn').style.display=teacher?'':'none';   // 학생으로 들어오면 관리자 버튼을 숨겨요 (선생님 체험에서는 보임)
   P=loadProg(); if(P.cur>=MISSIONS.length) P.cur=0;
   if(ESCAPE) ESC_HOLD=true;   // 오프닝·안내가 끝난 뒤에 방 입장 카드를 보여 줘요
   loadMission();
   if(!teacher && serverUrl()){
     try{
-      const j=await api('studentLogin',{sid,name,total:MISSIONS.length});
+      const j=await api('studentLogin',{sid,name,level:LEVEL,total:MISSIONS.length});
       const merged=[...new Set([...P.done,...(j.done||[])])].filter(i=>i<MISSIONS.length).sort((a,b)=>a-b);
       if(merged.length!==P.done.length){ P.done=merged; saveProg(); renderProg(); updateGolfBtn(); }
       flushLogs();
@@ -2004,7 +2252,8 @@ $('gGo').onclick=()=>{
   const sid=$('gSid').value.trim().replace(/\s/g,''), name=$('gName').value.trim();
   if(!/^[0-9A-Za-z\-]{2,12}$/.test(sid)){ $('gErr').textContent='학번을 확인해 주세요. (숫자 2~12자리)'; $('gSid').focus(); return; }
   if(name.length<1||name.length>20||/[=+@<>]/.test(name)){ $('gErr').textContent='이름을 확인해 주세요.'; $('gName').focus(); return; }
-  enter(sid,name,false);
+  const lv=fixedLevel()||GATE_LV; if(!lv){ $('gErr').textContent='수준(상·중·하)을 골라 주세요.'; return; }
+  enter(sid,name,false,lv);
 };
 $('gName').onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)$('gGo').onclick()};
 $('gSid').onkeydown=e=>{if(e.key==='Enter')$('gName').focus()};
@@ -2048,16 +2297,26 @@ function updateBadge(){
   $('aiBadge').textContent=AI_ON?'AI 피드백 켜짐':'AI 피드백 꺼짐';
   $('aiBadge').classList.toggle('on',AI_ON); $('chatCard').style.display=AI_ON?'block':'none';
 }
-/* 선생님 설정(코스·자물쇠 숫자)을 적용해요. 주소의 ?course=short, ?vary=1 이 있으면 그쪽이 우선이에요. */
-function applyCourse(mode, vary){
-  const c=URLP.get('course')==='short'?'short':(URLP.get('course')==='full'?'full':(mode==='short'?'short':'full'));
+/* 선생님 설정(수준 고정·자물쇠 숫자)을 적용해요. 주소의 ?level=, ?course=short, ?vary=1 이 있으면 그쪽이 우선이에요. */
+function applyCourse(mode, vary, levelMode){
+  LEVEL_MODE=['high','mid','low'].includes(levelMode)?levelMode:'choose';
+  if(!$('gate').classList.contains('hide')) renderGateLevel();
+  const c=(URLP.get('course')==='short'&&LEVEL==='high')?'short':'full';
   const v=URLP.get('vary')==='1' || !!vary;
-  if(c===COURSE && v===VARY) return;
+  const fx=fixedLevel(), lvChange=!!(ME&&fx&&fx!==LEVEL);
+  if(c===COURSE && v===VARY && !lvChange) return;
   COURSE=c; VARY=v;
+  if(lvChange){
+    setLevel(fx); ME.level=LEVEL; try{sessionStorage.setItem('defint1_me',JSON.stringify(ME))}catch(e){}
+    P=loadProg(); if(P.cur>=MISSIONS.length) P.cur=0; $('whoChip').textContent=whoText();
+    if(!ME.teacher && serverUrl()) api('studentLogin',{sid:ME.sid,name:ME.name,level:LEVEL,total:MISSIONS.length}).then(j=>{
+      const merged=[...new Set([...P.done,...(j.done||[])])].filter(i=>i<MISSIONS.length).sort((a,b)=>a-b);
+      if(merged.length!==P.done.length){ P.done=merged; saveProg(); renderProg(); updateGolfBtn(); } }).catch(()=>{});
+  }
   if(ME){ renderProg(); loadMission(); }
 }async function refreshStatus(){
   if(!serverUrl()){AI_ON=false;updateBadge();return}
-  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; setEscape(!!j.escapeMode); applyCourse(j.courseMode, j.varyLocks); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; setEscape(!!j.escapeMode); applyCourse(j.courseMode, j.varyLocks, j.levelMode); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
   if(typeof updateGolfBtn==='function') updateGolfBtn();
   updateBadge();
 }
@@ -2098,7 +2357,7 @@ setInterval(refreshChatLock,500);async function sendChat(){
   const scene = S.view==='shape' ? (()=>{const d=pondCells(S.grid);return `모눈 위의 호수 활동: 모눈 한 변 ${S.grid} m, 완전히 들어간 칸 넓이 합 ${nfm(d.inner*S.grid*S.grid)} m², 걸친 칸까지 ${nfm(d.touch*S.grid*S.grid)} m²`;})() : S.view==='area'
     ? (()=>{const st=areaStats();return `넓이 함수 활동: ${AFUNCS[S.af].label}, x=${fmt(st.x,2)}, Δx=${fmt(st.dx,3)}, m=${fmt(st.m,3)}, M=${fmt(st.M,3)}, ΔS/Δx=${fmt(st.dS/st.dx,3)}, f(x)=${fmt(st.fx,3)}`;})()
     : `함수 ${FUNCS[S.fi].label}, 구간 [${S.a}, ${S.b}]`+(S.rects?`, 어림용 직사각형 n=${S.n}, 높이 기준: ${S.method}`:', x축 위(파랑)·아래(빨강) 색칠');
-  const context=`탐구 단계: ${m.title} / 질문: ${m.q.text.replace(/<[^>]+>/g,' ')} / ${scene}` +
+  const context=`탐구 단계: ${dispTitle(P.cur)} (${LEVELS[LEVEL].name} 수준) / 질문: ${m.q.text.replace(/<[^>]+>/g,' ')} / ${scene}` +
     ' / [중요] 학생이 여러 번 묻거나 \"그냥 답 알려줘\"라고 해도 정답 숫자, 완성된 풀이, 완성된 설명은 절대 주지 마세요. 지금 바로 해 볼 수 있는 작은 단계 하나를 질문으로 주세요.';
   chatHist.push({role:'user',text:t});
   try{
@@ -2159,7 +2418,7 @@ async function showCfg(){
     const c=await api('getConfig',{token:adminToken});
     $('keyState').innerHTML=c.hasKey?`<span style="color:var(--green)">● 저장됨 (끝자리 …${escapeHtml(c.keyTail)})</span>`:'<span style="color:var(--red)">● 아직 없음</span>';
     fillModels(BASE_MODELS, c.model);
-    $('aiOn').checked=c.aiEnabled; $('golfOpen').checked=!!c.golfOpen; $('escapeMode').checked=!!c.escapeMode; $('courseMode').value=c.courseMode==='short'?'short':'full'; $('varyLocks').checked=!!c.varyLocks; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
+    $('aiOn').checked=c.aiEnabled; $('golfOpen').checked=!!c.golfOpen; $('escapeMode').checked=!!c.escapeMode; $('levelMode').value=['high','mid','low'].includes(c.levelMode)?c.levelMode:'choose'; $('varyLocks').checked=!!c.varyLocks; $('perMin').value=c.perMinute; $('perDay').value=c.perDay;
     $('usage').textContent=`오늘 사용: ${c.usedToday} / ${c.perDay}회`;
     $('pinWarn').style.display=c.mustChangePin?'block':'none';
     $('sheetInfo').innerHTML=c.sheetUrl
@@ -2188,7 +2447,7 @@ $('modelLoad').onclick=async()=>{
   }catch(e){ handleAdminErr(e); }
 };
 async function saveCfg(extra={}){
-  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked, golfOpen:$('golfOpen').checked, escapeMode:$('escapeMode').checked, courseMode:$('courseMode').value, varyLocks:$('varyLocks').checked,
+  const data={token:adminToken, model:$('modelIn').value, aiEnabled:$('aiOn').checked, golfOpen:$('golfOpen').checked, escapeMode:$('escapeMode').checked, levelMode:$('levelMode').value, varyLocks:$('varyLocks').checked,
     perMinute:Number($('perMin').value)||undefined, perDay:Number($('perDay').value)||undefined, ...extra};
   const k=$('keyIn').value.trim(); if(k) data.key=k;
   const np=$('newPin').value.trim(); if(np) data.newPin=np;
@@ -2221,12 +2480,12 @@ $('resetProg').onclick=()=>{
   try{ Object.keys(localStorage).filter(k=>k.startsWith('defint1_prog_')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
   P={done:[],cur:0}; if(ME) loadMission(); cfgMsg('var(--muted)','이 기기의 진행 상황을 초기화했어요.');
 };
-$('teacherPreview').onclick=()=>{ modal.classList.remove('show'); enter('T','선생님',true); };
+$('teacherPreview').onclick=()=>{ modal.classList.remove('show'); enter('T','선생님',true,$('previewLevel').value); };
 
 
 /* ====================== 관리자: 반별 학습 현황 ======================
    반 = 학번의 둘째·셋째 자리 (예: 20812 → 8반). 5자리가 아닌 학번은 '기타'로 묶어요. */
-let DASH=null, dashCls='all', dashStep='', dashSid='', dashLatest=true; const dashSel=new Set();
+let DASH=null, dashLv='', dashCls='all', dashStep='', dashSid='', dashLatest=true; const dashSel=new Set();
 const clsOf=sid=>/^\d{5}$/.test(String(sid))?String(parseInt(String(sid).substr(1,2),10)):'기타';
 const clsName=c=>c==='all'?'전체':(c==='기타'?'기타':c+'반');
 const pct=(a,b)=>b?Math.round(a/b*100):0;
@@ -2239,8 +2498,21 @@ async function loadDash(){
     $('dBody').innerHTML=`<div class="card" style="color:var(--red)">❌ ${escapeHtml(e.message)}</div>`;
   }
 }
+/* 수준(상·중·하)마다 단계 구성이 달라서, 수준을 골라 그 수준의 학생·답변만 보여 줘요 */
 function renderDash(){
-  const N=MISSIONS.length;
+  const all=DASH, lvOf=x=>LEVEL_EN[x.level]||'high';
+  const cnt={high:0,mid:0,low:0}; (all.students||[]).forEach(s=>{ if(s.sid!=='T') cnt[lvOf(s)]++; });
+  if(!dashLv) dashLv=['high','mid','low'].reduce((a,b)=>cnt[b]>cnt[a]?b:a,'high');
+  const saveM=MISSIONS, saveC=COURSE, saveL=LEVEL;
+  DASH=Object.assign({},all,{students:(all.students||[]).filter(s=>lvOf(s)===dashLv), answers:(all.answers||[]).filter(a=>lvOf(a)===dashLv)});
+  LEVEL=dashLv; MISSIONS=SETS[dashLv]; COURSE='full';
+  try{ renderDashLevel(); } finally { DASH=all; MISSIONS=saveM; COURSE=saveC; LEVEL=saveL; }
+  const bar=document.createElement('div'); bar.className='dash-lv';
+  bar.innerHTML=['high','mid','low'].map(k=>`<button data-l="${k}" class="${k===dashLv?'on':''}">${LEVELS[k].name} 수준 (${cnt[k]}명)</button>`).join('');
+  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{ dashLv=b.dataset.l; dashCls='all'; dashStep=''; dashSid=''; dashSel.clear(); renderDash(); });
+  $('dTabs').prepend(bar);
+}
+function renderDashLevel(){  const N=MISSIONS.length;
   const studs=(DASH.students||[]).filter(s=>s.sid&&s.sid!=='T');
   const classes=[...new Set(studs.map(s=>clsOf(s.sid)))].sort((a,b)=>(a==='기타')-(b==='기타')||Number(a)-Number(b));
   if(dashCls!=='all'&&!classes.includes(dashCls)) dashCls='all';
@@ -2270,7 +2542,7 @@ function renderDash(){
   }
   // 단계별 달성률 막대
   h+=`<div class="card"><h3>${clsName(dashCls)} · 단계별 달성률</h3><div class="bars">`+
-    MISSIONS.map((m,i)=>{const p=pct(stepCnt[i],T);return `<span>${escapeHtml(m.title)}${isActive(i)?'':' <span class="small">(1차시 코스 생략)</span>'}</span><div class="bar"><i style="width:${p}%"></i></div><span><b>${p}%</b> (${stepCnt[i]}/${T}명)</span>`}).join('')+`</div></div>`;
+    MISSIONS.map((m,i)=>{const p=pct(stepCnt[i],T);return `<span>${escapeHtml(dispTitle(i))}${isActive(i)?'':' <span class="small">(1차시 코스 생략)</span>'}</span><div class="bar"><i style="width:${p}%"></i></div><span><b>${p}%</b> (${stepCnt[i]}/${T}명)</span>`}).join('')+`</div></div>`;
   // 학생별 진행표
   for(const s of [...dashSel]) if(!studs.some(x=>x.sid===s)) dashSel.delete(s);
   const selHere=list.filter(s=>dashSel.has(s.sid)).length, allHere=list.length>0&&selHere===list.length;
@@ -2300,7 +2572,7 @@ function renderDash(){
   const who=dashSid?` · ${escapeHtml(dashSid)} ${escapeHtml((list.find(s=>s.sid===dashSid)||{}).name||'')}`:'';
   h+=`<div class="card"><h3>${clsName(dashCls)}${who} · 학생 답변</h3>
     <div class="row" style="margin:0 0 10px">
-      <select id="dStep" style="width:auto"><option value="">모든 단계</option>${MISSIONS.map((m,i)=>`<option value="${i+1}" ${dashStep===String(i+1)?'selected':''}>${escapeHtml(m.title)}</option>`).join('')}</select>
+      <select id="dStep" style="width:auto"><option value="">모든 단계</option>${MISSIONS.map((m,i)=>`<option value="${i+1}" ${dashStep===String(i+1)?'selected':''}>${escapeHtml(dispTitle(i))}</option>`).join('')}</select>
       <label class="small"><input type="checkbox" id="dLatest" ${dashLatest?'checked':''}> 학생별 마지막 답만</label>
       ${dashSid?'<button class="ghost" id="dAllStud">학생 선택 해제</button>':''}
       <span class="small">${rows.length}건</span>
@@ -2783,7 +3055,7 @@ setEscape(false);   // 주소에 ?mode=escape가 있으면 바로 방탈출 모�
 refreshStatus();
 // 같은 브라우저 창에서 이미 입장했다면 이어서, 아니면 입장 화면부터
 (function(){ let me=null; try{me=JSON.parse(sessionStorage.getItem('defint1_me'))}catch(e){}
-  if(me&&me.sid) enter(me.sid,me.name,me.teacher); else showGate(); })();
+  if(me&&me.sid) enter(me.sid,me.name,me.teacher,me.level); else showGate(); })();
 </script>
 </body>
 </html>

@@ -16,9 +16,9 @@ const DEFAULTS = { model: 'gemini-3.8-flash', perMinute: 40, perDay: 1500, logsP
 const DEFAULT_PIN = '1234'; // 처음 한 번만 쓰여요. 로그인 후 반드시 바꾸세요.
 
 const SHEETS = {
-  progress: { name: '진행현황', header: ['학번', '이름', '처음 접속', '마지막 활동', '완료 단계 수'] },
-  answers:  { name: '답변기록', header: ['시각', '학번', '이름', '단계', '단계 제목', '문항 유형', '학생 답', '결과', '피드백', '시도 횟수', '힌트 사용'] },
-  golf:     { name: '골프기록', header: ['시각', '학번', '이름', '코스 번호', '총 타수', '기준 타수', '기준 대비', '홀별 타수'] },
+  progress: { name: '진행현황', header: ['학번', '이름', '수준', '처음 접속', '마지막 활동', '완료 단계 수'] },
+  answers:  { name: '답변기록', header: ['시각', '학번', '이름', '단계', '단계 제목', '문항 유형', '학생 답', '결과', '피드백', '시도 횟수', '힌트 사용', '수준'] },
+  golf:     { name: '골프기록', header: ['시각', '학번', '이름', '코스 번호', '총 타수', '기준 타수', '기준 대비', '홀별 타수', '수준'] },
 };
 
 const TEACHER_RULES = `당신은 고등학교 2학년 '미적분Ⅰ'에서 정적분을 처음 배우는 학생을 돕는 친절한 한국어 수학 선생님입니다.
@@ -80,7 +80,8 @@ function golfOpen_() { return props_().getProperty('GOLF_OPEN') === 'true'; } //
 function escapeMode_() { return props_().getProperty('ESCAPE_MODE') === 'true'; } // 방탈출 모드
 function courseMode_() { return props_().getProperty('COURSE_MODE') === 'short' ? 'short' : 'full'; } // 1차시 코스(short) / 전체 코스(full)
 function varyLocks_() { return props_().getProperty('VARY_LOCKS') === 'true'; } // 학생마다 다른 자물쇠 숫자
-function publicSettings_() { return { aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_(), courseMode: courseMode_(), varyLocks: varyLocks_() }; }
+function levelMode_() { const v = props_().getProperty('LEVEL_MODE'); return ['choose', 'high', 'mid', 'low'].indexOf(v) >= 0 ? v : 'choose'; } // 수준: 학생 선택 / 상·중·하 고정
+function publicSettings_() { return { aiEnabled: aiEnabled_(), golfOpen: golfOpen_(), escapeMode: escapeMode_(), courseMode: courseMode_(), varyLocks: varyLocks_(), levelMode: levelMode_() }; }
 
 function config_() {
   const key = getKey_();
@@ -100,6 +101,7 @@ function config_() {
     escapeMode: escapeMode_(),
     courseMode: courseMode_(),
     varyLocks: varyLocks_(),
+    levelMode: levelMode_(),
   };
 }
 
@@ -113,6 +115,7 @@ function saveConfig_(req) {
   if (typeof req.escapeMode === 'boolean') p.setProperty('ESCAPE_MODE', String(req.escapeMode));
   if (req.courseMode === 'short' || req.courseMode === 'full') p.setProperty('COURSE_MODE', req.courseMode);
   if (typeof req.varyLocks === 'boolean') p.setProperty('VARY_LOCKS', String(req.varyLocks));
+  if (['choose', 'high', 'mid', 'low'].indexOf(req.levelMode) >= 0) p.setProperty('LEVEL_MODE', req.levelMode);
   if (Number(req.perMinute) > 0) p.setProperty('PER_MINUTE', String(Math.min(300, Math.floor(req.perMinute))));
   if (Number(req.perDay) > 0) p.setProperty('PER_DAY', String(Math.min(20000, Math.floor(req.perDay))));
   if (typeof req.newPin === 'string' && req.newPin) {
@@ -176,12 +179,35 @@ function sheet_(def) {
     sh.appendRow(def.header);
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, def.header.length).setFontWeight('bold').setBackground('#e0e7ff');
+    return sh;
   }
+  migrate_(sh, def);
   return sh;
+}
+
+/** 예전 시트에 '수준' 열이 없으면 한 번만 추가해요. (예전 기록은 '상'으로 채워요) */
+function migrate_(sh, def) {
+  const cache = CacheService.getScriptCache(), ck = 'mig_' + def.name;
+  if (cache.get(ck)) return;
+  if (def === SHEETS.progress) {
+    if (sh.getRange(1, 3).getDisplayValue() !== '수준') {
+      sh.insertColumnAfter(2);
+      sh.getRange(1, 3).setValue('수준').setFontWeight('bold').setBackground('#e0e7ff');
+      if (sh.getLastRow() > 1) sh.getRange(2, 3, sh.getLastRow() - 1, 1).setValue('상');
+    }
+  } else {
+    const col = def.header.length; // 마지막 열이 '수준'
+    if (sh.getRange(1, col).getDisplayValue() !== '수준') {
+      sh.getRange(1, col).setValue('수준').setFontWeight('bold').setBackground('#e0e7ff');
+      if (sh.getLastRow() > 1) sh.getRange(2, col, sh.getLastRow() - 1, 1).setValue('상');
+    }
+  }
+  cache.put(ck, '1', 21600);
 }
 
 function cleanSid_(s) { s = String(s || '').trim(); if (!/^[0-9A-Za-z\-]{2,12}$/.test(s)) throw new Error('학번 형식이 올바르지 않아요.'); return s; }
 function cleanName_(s) { s = String(s || '').trim().replace(/[=+@]/g, ''); if (s.length < 1 || s.length > 20) throw new Error('이름을 확인해 주세요.'); return s; }
+function cleanLevel_(s) { return ({ high: '상', mid: '중', low: '하', '상': '상', '중': '중', '하': '하' })[String(s || '')] || '상'; }
 function safeCell_(s, n) { s = clip_(s, n); return /^[=+\-@]/.test(s) ? "'" + s : s; } // 수식으로 해석되지 않게
 
 function checkLogQuota_() {
@@ -192,38 +218,40 @@ function checkLogQuota_() {
   cache.put(k, String(n + 1), 120);
 }
 
-/** 진행현황에서 학생 행을 찾거나 만들어요. (잠금 안에서 호출) */
-function progressRow_(sh, sid, name, total) {
+/* 진행현황 열 위치: 1 학번, 2 이름, 3 수준, 4 처음 접속, 5 마지막 활동, 6 완료 단계 수, 7~ 단계별 */
+const P_LAST = 5, P_COUNT = 6;
+
+/** 진행현황에서 (학번, 수준) 행을 찾거나 만들어요. 수준마다 따로 기록해요. (잠금 안에서 호출) */
+function progressRow_(sh, sid, name, total, level) {
   total = Math.max(1, Math.min(40, Number(total) || 15));
-  // 단계 열 머리글 보장: 6열부터 '1단계', '2단계', …
-  const need = SHEETS.progress.header.length + total;
-  if (sh.getLastColumn() < need) {
+  const base = SHEETS.progress.header.length;
+  if (sh.getLastColumn() < base + total) {
     const heads = [];
     for (let i = 1; i <= total; i++) heads.push(i + '단계');
-    sh.getRange(1, SHEETS.progress.header.length + 1, 1, total).setValues([heads]).setFontWeight('bold').setBackground('#e0e7ff');
+    sh.getRange(1, base + 1, 1, total).setValues([heads]).setFontWeight('bold').setBackground('#e0e7ff');
   }
   const last = sh.getLastRow();
   if (last >= 2) {
-    const ids = sh.getRange(2, 1, last - 1, 1).getDisplayValues();
-    for (let i = 0; i < ids.length; i++) if (ids[i][0] === sid) return i + 2;
+    const ids = sh.getRange(2, 1, last - 1, 3).getDisplayValues();
+    for (let i = 0; i < ids.length; i++) if (ids[i][0] === sid && (ids[i][2] || '상') === level) return i + 2;
   }
   const now = new Date();
-  sh.appendRow([sid, name, now, now, 0]);
+  sh.appendRow([sid, name, level, now, now, 0]);
   sh.getRange(sh.getLastRow(), 1).setNumberFormat('@').setValue(sid);
   return sh.getLastRow();
 }
 
 function studentLogin_(req) {
   checkLogQuota_();
-  const sid = cleanSid_(req.sid), name = cleanName_(req.name), total = Number(req.total) || 15;
+  const sid = cleanSid_(req.sid), name = cleanName_(req.name), total = Number(req.total) || 15, level = cleanLevel_(req.level);
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
     const sh = sheet_(SHEETS.progress);
-    const row = progressRow_(sh, sid, name, total);
+    const row = progressRow_(sh, sid, name, total, level);
     const base = SHEETS.progress.header.length;
     const savedName = sh.getRange(row, 2).getDisplayValue();
     sh.getRange(row, 2).setValue(name);
-    sh.getRange(row, 4).setValue(new Date());
+    sh.getRange(row, P_LAST).setValue(new Date());
     const marks = sh.getRange(row, base + 1, 1, total).getDisplayValues()[0];
     const done = [];
     marks.forEach((v, i) => { if (v) done.push(i); });
@@ -233,7 +261,7 @@ function studentLogin_(req) {
 
 function logAnswer_(req) {
   checkLogQuota_();
-  const sid = cleanSid_(req.sid), name = cleanName_(req.name), ev = req.event || {};
+  const sid = cleanSid_(req.sid), name = cleanName_(req.name), ev = req.event || {}, level = cleanLevel_(req.level);
   const idx = Math.floor(Number(ev.index));
   const lock = LockService.getScriptLock(); lock.waitLock(10000);
   try {
@@ -241,45 +269,46 @@ function logAnswer_(req) {
     sheet_(SHEETS.answers).appendRow([
       now, "'" + sid, name, isFinite(idx) ? idx + 1 : '', safeCell_(ev.title, 60), safeCell_(ev.type, 20),
       safeCell_(ev.answer, 1000), safeCell_(ev.result, 20), safeCell_(ev.feedback, 600),
-      Number(ev.tries) || '', Number(ev.hints) || 0,
+      Number(ev.tries) || '', Number(ev.hints) || 0, level,
     ]);
     const sh = sheet_(SHEETS.progress);
-    const row = progressRow_(sh, sid, name, req.total);
-    sh.getRange(row, 4).setValue(now);
+    const row = progressRow_(sh, sid, name, req.total, level);
+    const base = SHEETS.progress.header.length;
+    const total = Math.max(1, Math.min(40, Number(req.total) || 15));
+    sh.getRange(row, P_LAST).setValue(now);
     if (ev.result === '게임오버') {
-      // 한 문제에서 3번 틀려 처음부터 다시: 단계 완료 표시를 모두 지워요 (답변기록은 그대로 남아요)
-      const total = Math.max(1, Math.min(40, Number(req.total) || 15));
-      sh.getRange(row, SHEETS.progress.header.length + 1, 1, total).clearContent();
-      sh.getRange(row, 5).setValue(0);
+      // 한 문제에서 여러 번 틀려 처음부터 다시: 단계 완료 표시를 모두 지워요 (답변기록은 그대로 남아요)
+      sh.getRange(row, base + 1, 1, total).clearContent();
+      sh.getRange(row, P_COUNT).setValue(0);
     }
     if (ev.result === '정답' || ev.result === '통과') {
       if (isFinite(idx) && idx >= 0 && idx < 40) {
-        const cell = sh.getRange(row, SHEETS.progress.header.length + 1 + idx);
+        const cell = sh.getRange(row, base + 1 + idx);
         if (!cell.getDisplayValue()) cell.setValue('✅ ' + Utilities.formatDate(now, 'Asia/Seoul', 'M/d HH:mm'));
       }
-      const total = Math.max(1, Math.min(40, Number(req.total) || 15));
-      const marks = sh.getRange(row, SHEETS.progress.header.length + 1, 1, total).getDisplayValues()[0];
-      sh.getRange(row, 5).setValue(marks.filter(v => v).length);
+      const marks = sh.getRange(row, base + 1, 1, total).getDisplayValues()[0];
+      sh.getRange(row, P_COUNT).setValue(marks.filter(v => v).length);
     }
   } finally { lock.releaseLock(); }
 }
 
 function logGolf_(req) {
   checkLogQuota_();
-  const sid = cleanSid_(req.sid), name = cleanName_(req.name);
+  const sid = cleanSid_(req.sid), name = cleanName_(req.name), level = cleanLevel_(req.level);
   const card = (Array.isArray(req.card) ? req.card : []).slice(0, 18).map(v => Number(v) || '-').join(', ');
   const rel = Number(req.strokes) - Number(req.par);
   sheet_(SHEETS.golf).appendRow([new Date(), "'" + sid, name, Number(req.code) || '', Number(req.strokes) || '', Number(req.par) || '',
-    isFinite(rel) ? (rel > 0 ? '+' + rel : String(rel)) : '', card]);
+    isFinite(rel) ? (rel > 0 ? '+' + rel : String(rel)) : '', card, level]);
 }
 
 /* ---------------- 교사용 현황 보고서 ----------------
- * 진행현황 전체와 최근 답변기록(최대 4000건)을 돌려줘요. 반 구분·달성률 계산은 앱에서 해요. */
+ * 진행현황 전체와 최근 답변기록(최대 4000건)을 돌려줘요. 반·수준 구분과 달성률 계산은 앱에서 해요. */
 function report_() {
   const ss = book_();
   const out = { students: [], answers: [], steps: 0, sheetUrl: ss.getUrl() };
   const ps = ss.getSheetByName(SHEETS.progress.name);
   if (ps && ps.getLastRow() >= 2) {
+    migrate_(ps, SHEETS.progress);
     const base = SHEETS.progress.header.length;
     const vals = ps.getRange(1, 1, ps.getLastRow(), ps.getLastColumn()).getDisplayValues();
     out.steps = Math.max(0, vals[0].length - base);
@@ -287,15 +316,16 @@ function report_() {
       const row = vals[r]; if (!row[0]) continue;
       const done = [];
       for (let i = 0; i < out.steps; i++) if (row[base + i]) done.push(i);
-      out.students.push({ sid: row[0], name: row[1], first: row[2], last: row[3], done: done });
+      out.students.push({ sid: row[0], name: row[1], level: row[2] || '상', first: row[3], last: row[4], done: done });
     }
   }
   const as = ss.getSheetByName(SHEETS.answers.name);
   if (as && as.getLastRow() >= 2) {
+    migrate_(as, SHEETS.answers);
     const n = as.getLastRow() - 1, take = Math.min(n, 4000);
     const vals = as.getRange(as.getLastRow() - take + 1, 1, take, SHEETS.answers.header.length).getDisplayValues();
     out.answers = vals.map(v => ({ t: v[0], sid: v[1], name: v[2], step: Number(v[3]) || 0, title: v[4], type: v[5],
-      answer: v[6], result: v[7], feedback: v[8], tries: v[9], hints: v[10] }));
+      answer: v[6], result: v[7], feedback: v[8], tries: v[9], hints: v[10], level: v[11] || '상' }));
   }
   return out;
 }
