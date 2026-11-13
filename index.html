@@ -549,6 +549,9 @@ body.escape .fl-note .mfin{background:#fff;color:#0f172a;border-color:#a16207;pa
 body.escape .fl-note .mfin.ok{border-color:#16a34a;background:#dcfce7}
 body.escape .fl-note .mfin.no{border-color:#ea580c;background:#ffedd5}#bootCover{position:fixed;inset:0;background:#000;z-index:2147483000;opacity:1;transition:opacity .4s}
 #bootCover.off{opacity:0;pointer-events:none}
+#bootCover{display:flex;align-items:center;justify-content:center}
+.boot-msg{color:#fbbf24;font-size:clamp(18px,3vw,24px);font-weight:700;letter-spacing:.04em;text-shadow:0 0 18px rgba(251,191,36,.45);animation:bootPulse 1.6s ease-in-out infinite}
+@keyframes bootPulse{0%,100%{opacity:.55}50%{opacity:1}}
 </style>
 </head>
 <body>
@@ -2133,7 +2136,7 @@ function playOpening(){
       ${[...Array(18)].map((_,i)=>`<span class="op-dust" style="left:${(i*13+5)%100}%;top:${60+(i*11)%40}%;animation-duration:${6+(i%5)}s;animation-delay:${-(i*0.9)}s"></span>`).join('')}
     </div>
     <div class="op-cap" id="opCap"></div>
-    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><p style="color:#fbbf24;font-size:clamp(14px,2.2vw,17px)">⚠ 한 자물쇠에서 3번(설명을 쓰는 자물쇠는 5번) 틀리면 처음으로! · 틀리면 15초 동안 다시 낼 수 없어요</p><button id="opStart">🔦 탈출 시작</button></div>
+    <div class="op-title"><h1>정적분 연구소 탈출</h1><p>넓이의 비밀을 풀어 잠긴 문을 열어라</p><p style="color:#fbbf24;font-size:clamp(14px,2.2vw,17px)">⚠ 한 자물쇠에서 3번(설명을 쓰는 자물쇠는 5번) 틀리면 처음으로! · 틀리면 15초 동안 다시 낼 수 없어요</p><p style="color:#fde68a;font-size:clamp(14px,2.2vw,17px)">✍ 공책을 준비하세요! 방을 나갈 때마다 얻는 <b>연구 일지</b>를 적어 두어야 마지막 출구를 열 수 있어요.</p><button id="opStart">🔦 탈출 시작</button></div>
     <button class="op-skip" id="opSkip">건너뛰기 ▶▶</button>`;
   document.body.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('on'));
@@ -2312,10 +2315,14 @@ function showGate(){  document.body.classList.remove('in');
 }
 /* 입장 직후 검은 화면: 서버 설정(방탈출 모드 여부)을 받고 오프닝이 시작될 때까지 문제를 가려요 */
 let STATUS_DONE=false, STATUS_P=null;
-function showCover(){ let c=$('bootCover'); if(!c){ c=document.createElement('div'); c.id='bootCover'; document.body.appendChild(c); } c.classList.remove('off'); }
+function showCover(){ let c=$('bootCover'); if(!c){ c=document.createElement('div'); c.id='bootCover'; c.innerHTML='<div class="boot-msg">🔐 방탈출 게임 준비 중…</div>'; document.body.appendChild(c); } c.classList.remove('off'); }
 function hideCover(){ const c=$('bootCover'); if(c) c.classList.add('off'); }
 async function enter(sid,name,teacher,level){
-  if(!STATUS_DONE && serverUrl()){ showCover(); await Promise.race([STATUS_P||Promise.resolve(), new Promise(r=>setTimeout(r,8000))]); }
+  if(!STATUS_DONE && serverUrl()){
+    let cached=null; try{cached=localStorage.getItem('defint1_esc')}catch(e){}
+    if(cached!==null) setEscape(cached==='1');   // 이 기기에서 지난번에 받은 설정으로 바로 시작 (서버 답은 나중에 다시 확인)
+    else { showCover(); await Promise.race([STATUS_P||Promise.resolve(), new Promise(r=>setTimeout(r,4000))]); }
+  }
   if(ESCAPE) showCover();
   setLevel(fixedLevel()||level||'high'); if(COURSE==='short'&&LEVEL!=='high') COURSE='full';
   ME={sid,name,teacher:!!teacher,level:LEVEL};
@@ -2406,7 +2413,7 @@ function applyCourse(mode, vary, levelMode){
   if(ME){ renderProg(); loadMission(); }
 }async function refreshStatus(){
   if(!serverUrl()){AI_ON=false;updateBadge();return}
-  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; setEscape(!!j.escapeMode); applyCourse(j.courseMode, j.varyLocks, j.levelMode); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
+  try{ const j=await api('status'); AI_ON=!!j.aiEnabled; GOLF_OPEN=!!j.golfOpen; try{localStorage.setItem('defint1_esc',j.escapeMode?'1':'0')}catch(e){} setEscape(!!j.escapeMode); applyCourse(j.courseMode, j.varyLocks, j.levelMode); }catch(e){ console.warn('AI 서버 연결 실패:',e.message); AI_ON=false; }
   STATUS_DONE=true;
   if(typeof updateGolfBtn==='function') updateGolfBtn();
   updateBadge();
