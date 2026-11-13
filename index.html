@@ -1365,7 +1365,7 @@ const MID_TX={
 /* 하 수준: 쉬운 함수, 그림에 표시된 값, 빈칸 고르기 — 마지막만 서술형(문장 틀 + 낱말 카드) */
 const MISSIONS_LOW=[
  { id:'l_pond', view:'shape', title:'1. 호수 넓이 어림하기', setup:{grid:2,showTouch:false}, unlockPond:true,
-   story:`학교 앞 호수예요. 원도 사각형도 아니라서 <b>넓이 공식이 없어요.</b><br>그래서 모눈 위에 올려놓고, 호수 안에 <b>완전히 들어간 칸</b>(분홍색)을 세어 보기로 했어요.<div class="tip">💡 지금은 한 변이 2 m인 모눈이에요. 한 칸의 넓이는 2 × 2 = 4 m²예요.</div>`,
+   story:`학교 앞 호수예요. 원도 사각형도 아니라서 <b>넓이 공식이 없어요.</b><br>그래서 모눈 위에 올려놓고, 호수 안에 <b>완전히 들어간 칸</b>(분홍색)을 세어 보기로 했어요. 모눈 한 칸은 <b>한 변이 2 m</b>인 정사각형이에요.`,
    q:{type:'multi', text:'분홍색 칸을 세고, 넓이의 합을 구해 보세요.',
       fields:[{label:'① 분홍색 칸의 개수 =',name:'칸 수',answer:2},{label:'② 넓이의 합 (m²) =',name:'넓이의 합',answer:8}]},
    hints:['그림에서 분홍색으로 칠해진 칸만 세어요.','(칸 수) × (한 칸 넓이 4 m²)'],
@@ -1378,15 +1378,15 @@ const MISSIONS_LOW=[
    success:'맞아요! 작게 나눌수록 빈틈이 줄어서 <b>실제 넓이에 가까워져요.</b>',
    reveal:'모눈이 작을수록 빈틈이 줄어든다.' },
  { id:'l_rect1', title:'3. 직사각형 하나의 넓이', setup:{fi:fiOf('sq'),a:1,b:2,n:1,method:'right',showArea:true,rects:true}, hideSum:true, hideExact:true,
-   story:`곡선 <b>y = x²</b> 아래를 직사각형으로 채워 볼게요. 먼저 <b>하나만</b> 그려 봤어요.<div class="tip">💡 폭은 1부터 2까지이므로 1, 높이는 검은 점(x = 2)에서의 함숫값 f(2) = 2² 이에요.</div>`,
+   story:`곡선 <b>y = x²</b> 아래를 직사각형으로 채워 볼게요. 먼저 <b>하나만</b> 그려 봤어요.`,
    q:{type:'num', text:'파란 직사각형의 넓이는 얼마일까요?', answer:4, tol:0.001},
    hints:['직사각형 넓이 = 폭 × 높이','폭 1, 높이 f(2) = 4 → 1 × 4 = ?'],
    success:'맞아요, <b>4</b>예요! 직사각형 넓이 = 폭 × 높이(함숫값).',
    reveal:'1 × f(2) = 1 × 4 = 4' },
  { id:'l_rect2', title:'4. 직사각형 두 개로 어림하기', setup:{fi:fiOf('sq'),a:0,b:2,n:2,method:'right',showArea:true,rects:true}, hideSum:true, hideExact:true,
-   story:`이번엔 0부터 2까지를 <b>직사각형 2개</b>로 채웠어요. 각각의 폭은 1이에요.<div class="tip">💡 높이는 검은 점에서의 함숫값: 왼쪽 f(1) = 1, 오른쪽 f(2) = 4</div>`,
+   story:`이번엔 0부터 2까지를 <b>직사각형 2개</b>로 채웠어요. 각각의 폭은 1이에요.`,
    q:{type:'multi', text:'직사각형 넓이를 차례로 구해 보세요.',
-      fields:[{label:'왼쪽: 1 × 1 =',name:'왼쪽',answer:1},{label:'오른쪽: 1 × 4 =',name:'오른쪽',answer:4},{label:'합 =',name:'합',answer:5}]},
+      fields:[{label:'왼쪽 직사각형의 넓이 =',name:'왼쪽',answer:1},{label:'오른쪽 직사각형의 넓이 =',name:'오른쪽',answer:4},{label:'두 넓이의 합 =',name:'합',answer:5}]},
    hints:['각 직사각형: 폭 × 높이','1 + 4 = ?'],
    success:'맞아요! 직사각형 2개로 어림한 넓이는 <b>5</b>예요. 그런데 곡선 위로 튀어나온 부분이 있죠?',
    reveal:'1 + 4 = 5' },
@@ -1410,13 +1410,13 @@ const MISSIONS_LOW=[
    hints:['넓이는 2예요.','x축 아래이므로 넓이에 −를 붙여요.'],
    success:'맞아요, <b>−2</b>예요!', reveal:'넓이 2, x축 아래 → −2' },
  { id:'l_mix', title:'8. 위와 아래가 함께', setup:{fi:fiOf('lin'),a:-2,b:2,rects:false,signed:true}, hideExact:true,
-   story:`이번엔 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 함께 있어요.<br>위 넓이 <b>S₁ = 2</b>, 아래 넓이 <b>S₂ = 2</b>예요.<div class="tip">💡 정적분 = (위 넓이) − (아래 넓이) = S₁ − S₂</div>`,
-   q:{type:'num', text:INT('−2','2','x dx')+' = S₁ − S₂ 의 값은?', answer:0, tol:0.001},
+   story:`이번엔 x축 <b>위</b>(파랑)와 <b>아래</b>(빨강)가 함께 있어요.<br>위 넓이 <b>S₁ = 2</b>, 아래 넓이 <b>S₂ = 2</b>예요.`,
+   q:{type:'num', text:INT('−2','2','x dx')+' 의 값은?', answer:0, tol:0.001},
    special:{4:'🤔 넓이를 모두 더했군요! 정적분은 위 넓이에서 아래 넓이를 <b>빼요.</b>'},
    hints:['S₁ − S₂ = 2 − 2','같은 수끼리 빼면?'],
    success:'맞아요, <b>0</b>이에요! 위와 아래 넓이가 같으면 서로 빠져서 0이 돼요.', reveal:'2 − 2 = 0' },
  { id:'l_dir', title:'9. 거꾸로 가면?', setup:{fi:fiOf('lin1'),a:2,b:0,n:4,method:'right',rects:true,signed:true}, hideExact:true,
-   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로 <b>왼쪽으로</b> 거꾸로 가요. 화살표(←)와 색을 보세요.<div class="tip">💡 b 슬라이더를 2보다 오른쪽으로 옮기면 색이 어떻게 바뀌는지도 보세요.</div>`,
+   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로 <b>왼쪽으로</b> 거꾸로 가요. 화살표(←)와 색을 보세요.`,
    q:{type:'mc', text:'구간을 거꾸로(a = 2 → b = 0) 하면 정적분 값은 0부터 2까지일 때와 비교해 어떻게 되나요?', options:['똑같다','부호만 반대로 바뀐다','0이 된다'], answer:1},
    hints:['거꾸로 가면 폭 Δx가 음수가 돼요.','넓이 크기는 같고, + 와 − 중 무엇이 바뀌나요?'],
    success:'맞아요! 구간을 거꾸로 하면 정적분의 <b>부호가 바뀌어요.</b> 이것이 정적분의 <b>방향</b>이에요.', reveal:'부호만 반대로 바뀐다.' },
@@ -1428,7 +1428,7 @@ const MISSIONS_LOW=[
    success:'훌륭해요! 정적분은 <b>방향과 부호를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 보여요.',
    reveal:'아래 / 뺀 / 바뀐다', onSolve:()=>{S.exactUnlocked=true} },
  { id:'l_areafn', view:'area', title:'11. 넓이를 함수로 보기', setup:{af:'c2',ax:1,adxV:0,showC:false}, hideS:true,
-   story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 움직여 보세요.<div class="tip">💡 보라색은 직사각형이에요: 넓이 = 가로 x × 높이 2 → S(x) = 2x</div>`,
+   story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 움직여 보세요.`,
    q:{type:'multi', text:'S(3)을 구하고, S(x) = 2x를 미분해 보세요.',
       fields:[{label:'① S(3) =',name:'S(3)',answer:6},{type:'select',label:'② S(x) = 2x를 미분하면',name:'미분',options:['2 (= f(x)와 같다)','x²','0'],answer:0}]},
    hints:['S(3) = 3 × 2','2x를 미분하면 기울기 2가 남아요. f(t) = 2와 비교해 보세요.'],
@@ -1617,7 +1617,7 @@ function loadMission(){
         <button class="ghost" id="revealBtn" style="display:none">풀이 보기</button>
         <button class="sec" id="nextBtn" style="display:${solvedAlready?'inline-block':'none'}">${nextAct(P.cur)>=0?'다음 단계 ▶':'처음부터 다시'}</button>
       </div>
-      <div class="hintline" id="hintLine">${solvedAlready?'✅ 이미 해결한 단계예요. 다시 풀어 봐도 좋아요.':'먼저 혼자 생각해 보고, 막히면 힌트를 눌러요.'}</div>
+      <div class="hintline" id="hintLine">${solvedAlready?'✅ 이미 해결한 단계예요. 다시 풀어 봐도 좋아요.':(LEVEL==='low'?'먼저 혼자 생각해 보세요. 한 번 틀리면 힌트가 열려요.':'먼저 혼자 생각해 보고, 막히면 힌트를 눌러요.')}</div>
     </div>
     <div class="fb" id="fb"></div>`;
   bindQ(m);
@@ -1631,7 +1631,7 @@ function loadMission(){
   $('nextBtn').onclick=()=>{ const nx=nextAct(P.cur); P.cur = nx>=0 ? nx : ACT()[0]; saveProg(); loadMission(); };
   showChances(); refreshLockUI();
   if(ESCAPE) $('nextBtn').textContent=nextAct(P.cur)>=0?(roomOf(nextAct(P.cur))!==roomOf(P.cur)?'🚪 다음 방으로 ▶':'다음 자물쇠 ▶'):'처음 방으로';
-  decorateEscape(m);
+  decorateEscape(m); updHintBtn();
 }
 function showFb(kind,html){const fb=$('fb');fb.className='fb show '+kind;fb.innerHTML=html;}
 function parseNum(s){
@@ -1654,7 +1654,7 @@ function correct(m, answer, result, fbHtml){
   if(P.wrong) delete P.wrong[lockKey()]; if(P.lock) delete P.lock[lockKey()]; saveProg();
   if(m.q2 && PART===0){
     $('donePart').innerHTML=`<div class="fb show good" style="margin-top:10px">✅ ${successOf(m)}</div>`;
-    PART=1; tries=0; $('qArea').innerHTML=qboxHtml(m,m.q2); bindQ(m);
+    PART=1; tries=0; $('qArea').innerHTML=qboxHtml(m,m.q2); bindQ(m); updHintBtn();
     $('fb').className='fb'; $('fb').innerHTML=''; $('revealBtn').style.display='none';
     showChances(); refreshLockUI();
     return;
@@ -1732,10 +1732,18 @@ function showStuckHelp(){
     ① ${ESCAPE?'📜 연구원의 쪽지':'💡 힌트'}를 다시 읽고, 그래프를 직접 움직여 보기<br>
     ② ${AI_ON?'🤖 AI 도우미에게 <b>"어디서부터 생각해야 해요?"</b>라고 물어보기<br>③ ':''}그래도 어려우면 <b>선생님께 손을 들어</b> 물어보기`;
   $('fb').after(d);
-}function wrong(m, msg){
-  tries++;
+}/* 하 수준: 힌트는 한 번 틀린 뒤에만 열려요 (처음부터 실마리를 주지 않아요) */
+const hintGated=()=>LEVEL==='low';
+function updHintBtn(){
+  const b=$('hintBtn'); if(!b) return;
+  if(!hintGated()){ b.disabled=false; b.textContent=hintWord(); return; }
+  const on=tries>0||wrongNow()>0||P.done.includes(P.cur);
+  b.disabled=!on; b.textContent=on?hintWord():'🔒 '+hintWord().replace(/^\S+\s/,'')+' (틀리면 열려요)';
+}
+function wrong(m, msg){  tries++;
   const hs=hintsOf(m), h=hs.length?hs[Math.min(tries-1,hs.length-1)]:'';
-  showFb('bad', msg + (h?'<br>'+(ESCAPE?'📜 ':'💡 ')+h:''));
+  if(hintGated()){ const first=!tries||tries===1; showFb('bad', msg + (first?'<br><span class="small">'+hintWord()+' 버튼이 열렸어요. 막히면 눌러 보세요.</span>':'')); updHintBtn(); }
+  else showFb('bad', msg + (h?'<br>'+(ESCAPE?'📜 ':'💡 ')+h:''));
   if(ESCAPE){ const qb=document.querySelector('.qbox'); qb.classList.remove('esc-shake'); void qb.offsetWidth; qb.classList.add('esc-shake'); }
   afterWrong(m);
 }
