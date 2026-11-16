@@ -546,6 +546,7 @@ body.escape .lvl-desc{color:#94a3b8}
 .mtemplate{margin:8px 0;font-size:15px;line-height:2.4}
 .mfin{font:inherit;padding:5px 8px;border-radius:8px;border:2px solid #cbd5e1;background:#fff;color:#0f172a;width:auto;min-width:72px;max-width:180px}
 input.mfin{width:90px}
+input.mfin.mword{width:72px;min-width:0;line-height:1.3;padding:3px 6px;text-align:center}
 .mfin.ok{border-color:#16a34a;background:#f0fdf4}
 .mfin.no{border-color:#f97316;background:#fff7ed}
 .obs{margin:10px 0;padding:8px 10px;border-radius:10px;background:#f1f5f9;color:#334155;font-size:13px}
@@ -657,7 +658,8 @@ body.escape #vizSlot>section.card{background:linear-gradient(180deg,#111827,#0f1
       <span id="dirLegend" style="display:none;color:#b45309;font-weight:700">← 방향: b &lt; a 라서 폭 Δx가 음수</span>
     </div>
     <div class="legend" id="legendRect">
-      <span><i style="background:var(--blue-soft);border:1px solid var(--blue)"></i>직사각형</span>
+      <span id="lgRect"><i style="background:var(--blue-soft);border:1px solid var(--blue)"></i>직사각형</span>
+      <span id="lgTri" style="display:none"><i style="border:2px dashed #ea580c;background:transparent"></i>직각삼각형</span>
       <span><i style="background:rgba(124,58,237,.18)"></i>실제 영역</span>
     </div>
     <div class="legend" id="legendArea">
@@ -873,7 +875,7 @@ body.escape #vizSlot>section.card{background:linear-gradient(180deg,#111827,#0f1
           <option value="mid">모두 중수로 고정 · 12단계 + 도움 장치</option>
           <option value="low">모두 입문자로 고정 · 16단계 차근차근</option>
         </select>
-        <div class="small" style="margin-top:2px">고수: 전체 15단계 · 중수: 핵심 12단계 + 관찰 기록표·과정 나누기·문장 틀·힌트 3개 · 입문자: 따로 만든 16단계(고르기·빈칸 위주, 마지막에 서술형 1개). 수준마다 진행 기록이 따로 저장되고, 시트에는 상·중·하로 기록돼요.</div></div>
+        <div class="small" style="margin-top:2px">고수: 전체 15단계 · 중수: 핵심 12단계 + 관찰 기록표·과정 나누기·문장 틀·힌트 3개 · 입문자: 따로 만든 16단계(고르기·빈칸 채우기, 마지막은 낱말 카드로 문장 완성). 수준마다 진행 기록이 따로 저장되고, 시트에는 상·중·하로 기록돼요.</div></div>
       <div class="field"><label><input type="checkbox" id="varyLocks"> 🔢 학생마다 다른 자물쇠 숫자 (5~8단계)</label>
         <div class="small" style="margin-top:2px">켜면 부호·위아래·방향·구간 나누기 단계의 구간과 답이 학번에 따라 세 가지 중 하나로 바뀌어요. 친구 답을 그대로 옮겨 적기 어려워요.</div></div>
       <div class="field"><label><input type="checkbox" id="escapeMode"> 🔐 방탈출 모드 〈정적분 연구소 탈출〉</label>
@@ -1054,7 +1056,7 @@ function draw(){
   ctx.strokeStyle='#7c3aed'; ctx.lineWidth=3; ctx.beginPath();
   for(let i=0;i<=600;i++){const x=xmin+(xmax-xmin)*i/600,y=f(x); i?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y));}
   ctx.stroke();
-  if(S.guide==='tri' && S.a!==S.b){ const fb=f(S.b); ctx.setLineDash([7,5]); ctx.strokeStyle='#ea580c'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(X(S.a),Y(0)); ctx.lineTo(X(S.b),Y(fb)); ctx.lineTo(X(S.b),Y(0)); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#c2410c'; ctx.font='bold 13px sans-serif'; ctx.textAlign='right'; ctx.fillText('삼각형',X(S.a+(S.b-S.a)*0.55)-6,Y(fb*0.55)-6); }
+  if(S.guide==='tri' && S.a!==S.b){ const fb=f(S.b); ctx.setLineDash([7,5]); ctx.strokeStyle='#ea580c'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(X(S.a),Y(0)); ctx.lineTo(X(S.b),Y(fb)); ctx.lineTo(X(S.b),Y(0)); ctx.closePath(); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle='#c2410c'; ctx.font='bold 13px sans-serif'; ctx.textAlign='right'; ctx.fillText('직각삼각형',X(S.a+(S.b-S.a)*0.55)-6,Y(fb*0.55)-6); }
   ctx.setLineDash([5,4]); ctx.strokeStyle='#0f172a'; ctx.lineWidth=1;
   [[S.a,'a'],[S.b,'b']].forEach(([x,t])=>{ctx.beginPath();ctx.moveTo(X(x),T);ctx.lineTo(X(x),H-B);ctx.stroke();
     ctx.fillStyle='#0f172a';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText(t,X(x),T+14);});
@@ -1084,6 +1086,9 @@ function drawArea(){
   const fillUnder=(a,b,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(X(a),Y(0));
     for(let i=0;i<=160;i++){const t=a+(b-a)*i/160;ctx.lineTo(X(t),Y(f(t)));} ctx.lineTo(X(b),Y(0));ctx.closePath();ctx.fill();};
   if(st.x>0) fillUnder(0,st.x,'rgba(124,58,237,.28)');
+  // Δx를 다루지 않는 단계(넓이를 함수로 보기 등)에서는 ΔS와 높이 m, M인 직사각형을 그리지 않아요
+  let showDx=true; try{ const g=CURG(); showDx=S.explore||!(g&&g.ui)||g.ui.includes('adx'); }catch(e){}
+  if(showDx){
   fillUnder(st.x,st.x+st.dx,'rgba(16,185,129,.45)');
   // 높이 m, M인 직사각형 (점선)
   ctx.setLineDash([6,4]); ctx.lineWidth=2;
@@ -1093,6 +1098,7 @@ function drawArea(){
   [[st.M,'M'],[st.m,'m']].forEach(([v,t],i)=>{ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(X(st.x),Y(v));ctx.stroke();
     ctx.fillStyle='#92400e';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText(t,L+4,Y(v)+(i?14:-4));});
   ctx.setLineDash([]);
+  }
   ctx.strokeStyle='#334155'; ctx.lineWidth=1.6;
   ctx.beginPath();ctx.moveTo(L,Y(0));ctx.lineTo(W-R,Y(0));ctx.stroke();
   ctx.beginPath();ctx.moveTo(X(0),T);ctx.lineTo(X(0),H-B);ctx.stroke();
@@ -1100,7 +1106,7 @@ function drawArea(){
   for(let i=0;i<=400;i++){const t=xmin+(xmax-xmin)*i/400; i?ctx.lineTo(X(t),Y(f(t))):ctx.moveTo(X(t),Y(f(t)));}
   ctx.stroke();
   ctx.fillStyle='#0f172a';ctx.font='bold 15px sans-serif';ctx.textAlign='center';
-  ctx.fillText('x',X(st.x),H-B+34>H?H-4:H-B+34); if(st.dx>0.15) ctx.fillText('x+Δx',X(st.x+st.dx),H-4);
+  ctx.fillText('x',X(st.x),H-B+34>H?H-4:H-B+34); if(showDx&&st.dx>0.15) ctx.fillText('x+Δx',X(st.x+st.dx),H-4);
   if(st.x>0.4){ctx.fillStyle='#4c1d95';ctx.font='bold 17px sans-serif';ctx.fillText('S(x)',X(st.x/2),Y(f(st.x/2)/2)+6);}
   drawCurveLabel(ctx,AFUNCS[S.af].label,f,{X,Y,xmin,xmax,L,R,T,B,W,H});
 }
@@ -1124,7 +1130,7 @@ function refreshArea(){
   drawArea(); updateObserve();
 }
 $('cRng').oninput=e=>{S.C=+e.target.value;S.cSeen.add(S.C);touch('C');refresh()};
-$('axRng').oninput=e=>{S.ax=Math.min(+e.target.value,AX_MAX-0.02);touch('ax');refresh()};
+$('axRng').oninput=e=>{S.ax=Math.min(+e.target.value,AX_MAX-0.02);touch('ax'); if(Math.abs(S.ax-1)<0.03) S.seenX1=true; if(Math.abs(S.ax-3)<0.03) S.seenX3=true; refresh()};
 $('adxRng').oninput=e=>{S.adxV=+e.target.value;touch('adx');refresh()};
 
 /* ====================== ① 넓이를 구하는 아이디어: 모눈 위의 호수 ======================
@@ -1226,6 +1232,7 @@ function refresh(){
   $('legendArea').style.display=area?'':'none';
   $('legendSigned').style.display=(!area&&S.signed)?'':'none';
   $('legendRect').style.display=(!area&&!S.signed)?'':'none';
+  $('lgRect').style.display=S.rects?'':'none'; $('lgTri').style.display=S.guide==='tri'?'':'none';
   document.querySelectorAll('.rectOnly').forEach(el=>el.style.display=(!area&&S.rects)?'':'none');
   if(area){ refreshArea(); applyUI(); return; }
   $('fSel').value=S.fi; $('mSel').value=S.method;
@@ -1261,6 +1268,9 @@ $('animBtn').onclick=()=>{
 /* ====================== 탐구 미션 ====================== */
 const INT = (a,b,body)=>`<span class="formula"><span class="int">∫</span><span class="lim"><span>${b}</span><span>${a}</span></span>${body}</span>`;
 const REF_BOX=`<details style="margin-top:8px"><summary class="small" style="cursor:pointer">📎 참고: 식으로 쓰면</summary><div class="fbox" style="margin-top:6px"><div class="formula">${'<span class="int">∫</span><span class="lim"><span>b</span><span>a</span></span>'}f(x) dx = lim<sub>n→∞</sub> Σ<sub>k=1</sub><sup>n</sup> f(x<sub>k</sub>)·Δx</div><div class="small">(Δx = (b − a) ÷ n, x<sub>k</sub> = a + kΔx) — 이 식은 참고로만 보고, '한없이 잘게 나눌 때 다가가는 넓이'라는 뜻을 기억하세요.</div></div></details>`;
+/* 6단계(위와 아래) 이야기: 구간의 끝 a, b와 정적분 기호를 함께 안내해요 */
+const MIX_STORY=(a,b)=>{ const A=a<0?'−'+(-a):String(a), B=b<0?'−'+(-b):String(b);
+  return `그래프는 f(x) = x + 1이에요. 구간의 시작(아랫끝)을 <b>a</b>, 끝(윗끝)을 <b>b</b>라 하고, 이 구간의 정적분을 ${INT('a','b','f(x) dx')} 로 나타내요.<br>지금은 <b>a = ${A}, b = ${B}</b>이므로 ${INT(A,B,'(x + 1) dx')} 예요.<br>x축 위(파랑, +)와 아래(빨강, −)가 함께 있어요. 위 부분의 넓이를 S₁, 아래 부분의 넓이를 S₂라 하면, ${INT('a','b','f(x) dx')} 는 둘을 부호대로 더한 값이에요.`; };
 const MISSIONS_HIGH = [
  /* ---------- ① 넓이를 구하는 아이디어 ---------- */
  { id:'pond1', view:'shape', title:'1. 울퉁불퉁한 호수의 넓이', setup:{grid:2,showTouch:false},
@@ -1299,21 +1309,21 @@ const MISSIONS_HIGH = [
 
  /* ---------- ③ 방향과 부호를 가진 넓이 ---------- */
  { id:'sign', title:'5. 부호: x축 아래의 직사각형', setup:{fi:fiOf('lin1'),a:-3,b:-1,n:8,method:'mid',rects:true,signed:true}, hideExact:true, hideSum:true,
-   story:`이번엔 그래프가 <b>x축 아래</b>에 있어요. 직사각형의 <b>높이 f(x)가 음수</b>예요.<br>그러면 (높이) × (폭)도 음수! 그래서 x축 아래의 넓이는 <b>음수로 계산</b>돼요. 빨간색이 −로 계산되는 부분이에요.`,
+   story:`이번엔 그래프가 <b>x축 아래</b>에 있어요. 직사각형마다 <b>함숫값 f(x)가 음수</b>예요.<br>정적분에서는 직사각형 하나를 <b>(함숫값 f(x)) × (폭 Δx)</b>로 계산하니까, 이 값도 음수! 그래서 x축 아래의 넓이는 <b>음수로 계산</b>돼요. 빨간색이 −로 계산되는 부분이에요.`,
    q:{type:'num', text:INT('−3','−1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:-2, tol:0.001},
-   hints:['먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 2, 높이 2예요.','높이가 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
+   hints:['먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 2, 높이 2예요.','함숫값이 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
    success:'맞아요, <b>−2</b>예요! 정적분은 <b>부호</b>를 가진 넓이예요.',
-   reveal:'삼각형 넓이 2, 높이가 음수이므로 <b>−2</b>' },
+   reveal:'삼각형 넓이 2, 함숫값이 음수이므로 <b>−2</b>' },
 
  { id:'mix', title:'6. 위와 아래가 함께 있으면?', setup:{fi:fiOf('lin1'),a:-3,b:1,n:8,method:'mid',rects:false,signed:true}, hideExact:true, hideSum:true,
-   story:`x축 위(파랑, +)와 아래(빨강, −)가 함께 있어요. 위 부분의 넓이를 S₁, 아래 부분의 넓이를 S₂라 하면, 정적분은 둘을 부호대로 더한 값이에요.`,
+   story:MIX_STORY(-3,1),
    q:{type:'num', text:INT('−3','1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:0, tol:0.001},
    hints:['파란 삼각형(−1부터 1까지)의 넓이 S₁과 빨간 삼각형(−3부터 −1까지)의 넓이 S₂를 각각 구해 보세요.','S₁ = 2는 +로, S₂ = 2는 −로 계산해요. (+2) + (−2) = ?'],
    success:'맞아요, <b>0</b>이에요! 즉 '+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이).',
    reveal:'S₁ = 2, S₂ = 2 → S₁ − S₂ = <b>0</b>' },
 
  { id:'dir', title:'7. 방향: 거꾸로 훑으면?', setup:{fi:fiOf('lin1'),a:2,b:0,n:4,method:'right',rects:true,signed:true}, hideExact:true, hideSum:true,
-   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (0 − 2) ÷ n 이 <b>음수</b>가 돼요! 높이는 양수, 폭은 음수 → 넓이는 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
+   story:`이번엔 <b>a = 2, b = 0</b>이에요. 2에서 0으로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (0 − 2) ÷ n 이 <b>음수</b>가 돼요! 함숫값은 양수, 폭은 음수 → (함숫값) × (폭)은 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
    q:{type:'num', text:INT(2,0,'(x + 1) dx')+' 의 값을 구해 보세요.', answer:-4, tol:0.001},
    hints:['색칠된 부분(0부터 2까지)의 넓이는 사다리꼴: (1 + 3) × 2 ÷ 2 예요.','방향이 거꾸로(폭이 음수)라서 넓이를 −로 계산해요.'],
    success:'맞아요, <b>−4</b>예요! 정적분은 <b>방향</b>을 가진 넓이라서 '+INT('b','a','f(x) dx')+' = −'+INT('a','b','f(x) dx')+' 예요.',
@@ -1327,16 +1337,16 @@ const MISSIONS_HIGH = [
    reveal:'7.5 − 1.5 = <b>6</b>' },
 
  { id:'def', title:'9. 정적분을 내 말로 정의하기', setup:{fi:fiOf('dec'),a:3,b:0,n:6,method:'mid',rects:true,signed:true}, hideExact:true,
-   story:`지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 높이가 음수인 부분도 있죠?<br>a, b, n을 바꿔 보며 지금까지 알게 된 것을 정리해 보세요.`,
-   q:{type:'text', text:'정적분 '+INT('a','b','f(x) dx')+' 가 "방향과 부호를 가진 넓이"라는 것을 설명해 보세요. 다음 중 두 가지 이상을 써 보세요.<br>ⓐ 그래프가 x축 아래에 있을 때(f(x) &lt; 0), '+INT('a','b','f(x) dx')+' 는 어떻게 계산될까요?<br>ⓑ a &gt; b일 때, '+INT('a','b','f(x) dx')+' 와 '+INT('b','a','f(x) dx')+' 는 어떤 관계일까요?<br>ⓒ a = b일 때, '+INT('a','a','f(x) dx')+' 의 값은?',
-      rubric:[{name:'부호: 그래프가 x축 아래(f(x) < 0)이면 ∫ₐᵇ f(x)dx 에서 그 넓이가 −로 계산된다', kw:['아래','음수','부호','마이너스']},
-              {name:'방향: a > b이면 폭 Δx가 음수라서 ∫ₐᵇ f(x)dx = −∫ᵇₐ f(x)dx (부호가 바뀐다)', kw:['방향','거꾸로','폭','Δx','반대','왼쪽','a>b','a > b','b<a']},
-              {name:'a = b이면 폭이 없어서 ∫ₐᵃ f(x)dx = 0이다', kw:[], all:[['같','a=b','a = b','폭이 0','폭이 없','폭 0'],['0']]}],
+   story:`지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 함숫값이 음수인(x축 아래) 부분도 있죠?<br>a, b, n을 바꿔 보며 지금까지 알게 된 것을 정리해 보세요.`,
+   q:{type:'text', text:'정적분 '+INT('a','b','f(x) dx')+' 가 "방향과 부호를 가진 넓이"라는 것을 설명해 보세요. 다음 중 두 가지 이상을 써 보세요.<br>ⓐ a &lt; b이고 그래프가 x축 아래에 있을 때(f(x) &lt; 0), '+INT('a','b','f(x) dx')+' 는 어떻게 계산될까요?<br>ⓑ 아랫끝과 윗끝을 바꾼 '+INT('b','a','f(x) dx')+' 는 '+INT('a','b','f(x) dx')+' 와 어떤 관계일까요?<br>ⓒ a = b일 때, '+INT('a','a','f(x) dx')+' 의 값은? 그 까닭을 <b>폭</b>을 써서 설명해 보세요.',
+      rubric:[{name:'부호: a < b이고 그래프가 x축 아래(f(x) < 0)이면 ∫ₐᵇ f(x)dx 에서 그 넓이가 −로 계산된다', kw:['아래','음수','부호','마이너스']},
+              {name:'방향: 아랫끝과 윗끝을 바꾸면 부호가 바뀐다 (∫ₐᵇ f(x)dx = −∫ᵇₐ f(x)dx)', kw:['방향','거꾸로','반대','바꾸','바꿔','바뀐','바뀌','−∫','-∫']},
+              {name:'a = b이면 폭(b − a)이 0이라서 ∫ₐᵃ f(x)dx = 0이다', kw:[], all:[['폭','b − a','b-a','b - a','Δx'],['0','없']]}],
       need:2,
-      goal:'정적분 ∫ₐᵇ f(x)dx 는 잘게 나눈 직사각형 넓이(높이 f(x) × 폭 Δx)의 합이 다가가는 값이다. 그래프가 x축 아래(f(x) < 0)이면 그 넓이가 음수로 계산되고, a > b이면 폭 Δx가 음수라서 ∫ₐᵇ f(x)dx = −∫ᵇₐ f(x)dx 로 부호가 바뀌고, a = b이면 폭이 0이라 ∫ₐᵃ f(x)dx = 0이다.'},
-   hints:['직사각형 하나의 넓이는 (높이) × (폭)이에요. 높이가 음수가 되는 때는 언제였나요?','폭 Δx = (b − a) ÷ n이 음수가 되는 때는 언제였나요? 0이 되는 때는요?'],
+      goal:'정적분 ∫ₐᵇ f(x)dx 는 잘게 나눈 직사각형의 (함숫값 f(x) × 폭 Δx)의 합이 다가가는 값이다. a < b일 때 그래프가 x축 아래(f(x) < 0)이면 그 넓이가 음수로 계산된다. 아랫끝과 윗끝을 바꾸면 폭 Δx의 부호가 바뀌므로 a, b의 크기와 상관없이 ∫ₐᵇ f(x)dx = −∫ᵇₐ f(x)dx 이다. a = b이면 폭 b − a가 0이므로 ∫ₐᵃ f(x)dx = 0이다.'},
+   hints:['직사각형 하나는 (함숫값 f(x)) × (폭 Δx)로 계산해요. 함숫값이 음수가 되는 때는 언제였나요?','폭 Δx = (b − a) ÷ n이에요. a와 b를 바꾸면 폭은 어떻게 되나요? a = b이면 폭은 얼마인가요?'],
    success:'훌륭해요! 정적분은 <b>방향(적분 구간)과 부호(함숫값)를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 공개됐어요. 여러 경우를 바꿔 가며 확인해 보세요.',
-   reveal:'그래프가 x축 아래이면 그 넓이를 −로 계산하고, a &gt; b이면 '+INT('a','b','f(x) dx')+' = −'+INT('b','a','f(x) dx')+' (폭이 음수라 부호가 바뀜), a = b이면 '+INT('a','a','f(x) dx')+' = 0 (폭이 0).',
+   reveal:'a &lt; b일 때 그래프가 x축 아래이면 그 넓이를 −로 계산하고, 아랫끝과 윗끝을 바꾸면 '+INT('a','b','f(x) dx')+' = −'+INT('b','a','f(x) dx')+' (폭의 부호가 바뀜), a = b이면 폭 b − a가 0이므로 '+INT('a','a','f(x) dx')+' = 0.',
    onSolve:()=>{S.exactUnlocked=true} },
 
  /* ---------- ④ 적분과 미분의 관계 ---------- */
@@ -1409,7 +1419,7 @@ MISSIONS_HIGH.find(m=>m.id==='dir').meta={area:4};
 const LEVELS={
   high:{name:'고수', desc:'모든 탐구 15단계 · 설명 쓰기 4개'},
   mid: {name:'중수', desc:'핵심 탐구 12단계 + 도움 장치 · 설명 쓰기 2개'},
-  low: {name:'입문자', desc:'차근차근 16단계 · 고르기와 빈칸 위주 · 설명 쓰기 1개'},
+  low: {name:'입문자', desc:'차근차근 16단계 · 고르기와 빈칸 채우기'},
 };
 const LEVEL_KO={high:'상',mid:'중',low:'하'}, LEVEL_EN={'상':'high','중':'mid','하':'low'};
 const MID_IDS=['pond1','rect2','approach','sign','mix','dir','def','areafn','squeeze','constC','calc','interp'];
@@ -1430,7 +1440,7 @@ const MID_TX={
   dir:m=>{ const a=m.meta.area, v=m.q.answer; return { q:{type:'multi', text:m.q.text.replace(' 의 값을 구해 보세요.',' 를 두 단계로 구해 보세요.'),
       fields:[{label:'① 색칠된 부분의 넓이 =',name:'넓이',answer:a},{label:'② 정적분 값 (방향 생각하기) =',name:'정적분 값',answer:v}]},
     hints:[...m.hints,'먼저 넓이를 구하고, 구간을 거꾸로(오른쪽 → 왼쪽) 훑으면 부호를 바꿔요.'] }; },
-  def:m=>({ q:Object.assign({},m.q,{frame:'그래프가 x축 아래인 부분은 '+INT('a','b','f(x) dx')+' 에서 ______로 계산하고, a &gt; b이면 '+INT('a','b','f(x) dx')+' 는 '+INT('b','a','f(x) dx')+' 와 부호가 ______. a = b이면 '+INT('a','a','f(x) dx')+' = ______. 그래서 정적분은 ______.'}),
+  def:m=>({ q:Object.assign({},m.q,{frame:'a &lt; b일 때 그래프가 x축 아래인 부분은 '+INT('a','b','f(x) dx')+' 에서 ______로 계산하고, 아랫끝과 윗끝을 바꾼 '+INT('b','a','f(x) dx')+' 는 '+INT('a','b','f(x) dx')+' 와 부호가 ______. a = b이면 폭 b − a가 ______이므로 '+INT('a','a','f(x) dx')+' = ______. 그래서 정적분은 ______.'}),
     hints:[...m.hints,'문장 틀의 빈칸을 하나씩 채워 보세요. 각 경우에 넓이를 + / − / 0 중 무엇으로 계산했나요?'] }),
   areafn:m=>H3(m,'보라색은 사다리꼴이에요: (윗변 + 아랫변) × 높이 ÷ 2.'),
   squeeze:m=>Object.assign({observe:'dx'},H3(m,'관찰 기록표에서 Δx가 작아질수록 "ΔS ÷ Δx" 칸과 "f(x)" 칸을 비교해 보세요.')),
@@ -1445,7 +1455,7 @@ const MID_TX={
       hints:[...m.q2.hints,'F(0) − F(−1)이 위 넓이, −(F(2) − F(0))이 아래 넓이예요.']}) }),
 };
 
-/* 하 수준: 쉬운 함수, 그림에 표시된 값, 빈칸 고르기 — 마지막만 서술형(문장 틀 + 낱말 카드) */
+/* 하 수준: 쉬운 함수, 그림에 표시된 값, 빈칸 고르기 — 마지막은 낱말 카드로 빈칸 채우기 */
 const MISSIONS_LOW=[
  { id:'l_pond', view:'shape', title:'1. 호수 넓이 어림하기', setup:{grid:2,showTouch:false}, unlockPond:true,
    story:`학교 앞 호수예요. 원도 사각형도 아니라서 <b>넓이 공식이 없어요.</b><br>그래서 모눈 위에 올려놓고, 호수 안에 <b>완전히 들어간 칸</b>(분홍색)을 세어 보기로 했어요. 모눈 한 칸은 <b>한 변이 2 m</b>인 정사각형이에요.`,
@@ -1456,20 +1466,24 @@ const MISSIONS_LOW=[
    reveal:'분홍 칸 2개 × 4 m² = 8 m²' },
  { id:'l_gap', view:'shape', title:'2. 모눈을 작게 하면?', setup:{grid:2,showTouch:false}, needGrids:3,
    story:`그림 아래 버튼으로 모눈을 <b>2 m → 1 m → 0.5 m</b>로 작게 바꿔 보세요. 호수 가장자리에 <b>파랗게 남는 빈틈</b>을 잘 보세요.`,
-   q:{type:'mc', text:'모눈을 작게 할수록 가장자리의 빈틈은 어떻게 되나요?', options:['점점 늘어난다','점점 줄어든다','그대로다'], answer:1},
-   hints:['2 m 모눈과 0.5 m 모눈을 번갈아 눌러 파란 부분을 비교해 보세요.','빈틈이 줄어들면 넓이의 합은 실제 넓이에 가까워질까요, 멀어질까요?'],
-   success:'맞아요! 작게 나눌수록 빈틈이 줄어서 <b>실제 넓이에 가까워져요.</b>',
-   reveal:'모눈이 작을수록 빈틈이 줄어든다.' },
+   q:{type:'mc', text:'① 모눈을 작게 할수록 가장자리의 빈틈은 어떻게 되나요?', options:['점점 늘어난다','점점 줄어든다','그대로다'], answer:1,
+      hints:['2 m 모눈과 0.5 m 모눈을 번갈아 눌러 파란 부분을 비교해 보세요.','모눈이 작아질수록 파랗게 남는 부분이 많아지나요, 적어지나요?'],
+      success:'맞아요! 모눈을 작게 할수록 <b>빈틈이 줄어들어요.</b> 그러면 분홍색 칸 넓이의 합은 어떻게 될까요?'},
+   q2:{type:'mc', text:'② 모눈의 크기를 한없이 작게 하면, 분홍색 칸 넓이의 합은 어떻게 될까요?', options:['점점 줄어들어 0에 가까워진다','실제 호수 넓이에 한없이 가까워진다','한없이 커진다','실제 호수 넓이보다 커진다'], answer:1,
+      hints:['빈틈이 줄어들면 분홍색 칸이 호수를 더 많이 채워요. 채우지 못한 부분은 어떻게 되나요?','분홍색 칸은 호수 안에만 있어요. 그러니 분홍색 칸 넓이의 합은 실제 넓이보다 커질 수 있을까요?'],
+      success:'맞아요! 모눈을 한없이 작게 하면 빈틈이 한없이 줄어들어서, 분홍색 칸 넓이의 합은 <b>실제 넓이에 한없이 가까워져요.</b>'},
+   hints:[], success:'',
+   reveal:'① 모눈이 작을수록 빈틈이 줄어든다. ② 모눈을 한없이 작게 하면 넓이의 합은 실제 넓이에 한없이 가까워진다.' },
  { id:'l_cmp', title:'3. 곡선 아래 넓이는 얼마쯤?', setup:{fi:fiOf('sq'),a:0,b:2,rects:false,showArea:true,guide:'tri'}, hideSum:true, hideExact:true,
-   story:`이번엔 곡선 <b>y = x²</b> 아래, x = 0부터 x = 2까지의 넓이(보라색)를 구하고 싶어요. 그런데 곡선이라서 <b>넓이 공식이 없어요.</b><br>그래프에 세 점 (0, 0), (2, 0), (2, 4)를 잇는 <b>삼각형</b>을 점선으로 함께 그려 두었어요.`,
-   q:{type:'multi', text:'삼각형의 넓이를 구하고, 곡선 아래 넓이와 비교해 보세요.',
-      fields:[{label:'① 삼각형의 넓이 =',name:'삼각형의 넓이',answer:4},{type:'select',label:'② 곡선 아래 넓이(보라색)는 삼각형의 넓이보다',name:'비교',options:['작다','같다','크다'],answer:0}]},
-   hints:['삼각형의 넓이 = 밑변 × 높이 ÷ 2. 밑변과 높이를 그래프에서 읽어 보세요.','보라색 곡선이 점선(삼각형의 빗변)보다 위에 있나요, 아래에 있나요?'],
+   story:`이번엔 곡선 <b>y = x²</b> 아래, x = 0부터 x = 2까지의 넓이(보라색)를 구하고 싶어요. 그런데 곡선이라서 <b>넓이 공식이 없어요.</b><br>그래프에 세 점 (0, 0), (2, 0), (2, 4)를 잇는 <b>직각삼각형</b>을 점선으로 함께 그려 두었어요.`,
+   q:{type:'multi', text:'직각삼각형의 넓이를 구하고, 곡선 아래 넓이와 비교해 보세요.',
+      fields:[{label:'① 직각삼각형의 넓이 =',name:'직각삼각형의 넓이',answer:4},{type:'select',label:'② 곡선 아래 넓이(보라색)는 직각삼각형의 넓이보다',name:'비교',options:['작다','같다','크다'],answer:0}]},
+   hints:['직각삼각형의 넓이 = 밑변 × 높이 ÷ 2. 밑변과 높이를 그래프에서 읽어 보세요.','보라색 곡선이 점선(직각삼각형의 빗변)보다 위에 있나요, 아래에 있나요?'],
    success:'맞아요! 곡선 아래 넓이는 <b>4보다 작아요.</b> 그런데 정확히 얼마일까요?',
-   reveal:'삼각형 넓이 = 2 × 4 ÷ 2 = 4, 곡선이 빗변보다 아래에 있으므로 곡선 아래 넓이는 4보다 작다.' },
+   reveal:'직각삼각형 넓이 = 2 × 4 ÷ 2 = 4, 곡선이 빗변보다 아래에 있으므로 곡선 아래 넓이는 4보다 작다.' },
  { id:'l_how', title:'4. 공식이 없으면 어떻게 할까?', setup:{fi:fiOf('sq'),a:0,b:2,rects:false,showArea:true}, hideSum:true, hideExact:true,
-   story:`곡선 아래 넓이는 삼각형 넓이 4보다 작다는 것을 알았어요.<br>하지만 곡선이라서 공식으로는 <b>정확한 값</b>을 구할 수 없어요.`,
-   q:{type:'mc', text:'곡선 아래 넓이를 더 정확하게 구하려면 어떻게 하면 좋을까요?', options:['삼각형 넓이 4를 그대로 답으로 쓴다','넓이를 아는 작은 도형으로 잘게 나누어 채우고 더한다','곡선을 직선으로 바꾸어 그린다'], answer:1},
+   story:`곡선 아래 넓이는 직각삼각형 넓이 4보다 작다는 것을 알았어요.<br>하지만 곡선이라서 공식으로는 <b>정확한 값</b>을 구할 수 없어요.`,
+   q:{type:'mc', text:'곡선 아래 넓이를 더 정확하게 구하려면 어떻게 하면 좋을까요?', options:['직각삼각형 넓이 4를 그대로 답으로 쓴다','넓이를 아는 작은 도형으로 잘게 나누어 채우고 더한다','곡선을 직선으로 바꾸어 그린다'], answer:1},
    hints:['1~2단계에서 공식이 없는 호수의 넓이는 어떻게 구했나요?','모눈을 작게 할수록 빈틈이 줄어 실제 넓이에 가까워졌어요.'],
    success:'맞아요! 호수처럼 곡선 아래도 <b>넓이를 아는 작은 도형(세로로 긴 직사각형)</b>으로 잘게 나누어 채워 볼 거예요.',
    reveal:'넓이를 아는 작은 도형으로 잘게 나누어 채우고 더한다.' },
@@ -1494,12 +1508,12 @@ const MISSIONS_LOW=[
    success:'맞아요, <b>4</b>예요! 넓이 공식이 있는 도형이면 정적분 값을 바로 구할 수 있어요.',
    reveal:'밑변 2, 높이 f(2) = 4 → 2 × 4 ÷ 2 = 4' },
  { id:'l_sign1', title:'8. x축 아래에 있으면?', setup:{fi:fiOf('lin'),a:-2,b:0,n:4,method:'mid',rects:true,signed:true}, hideExact:true, hideSum:true,
-   story:`그래프 <b>y = x</b>가 구간 [−2, 0]에서 <b>x축 아래</b>에 있어요. 빨간 직사각형들을 보세요.`,
-   q:{type:'multi', text:'빈칸에 알맞은 것을 골라 보세요.', template:'x축 아래 직사각형의 높이 f(x)는 {0}이고, 그래서 (높이) × (폭)은 {1}로 계산해요.',
-      fields:[{type:'select',name:'높이의 부호',options:['양수','음수'],answer:1},{type:'select',name:'넓이의 부호',options:['+','−'],answer:1}]},
+   story:`그래프 <b>y = x</b>가 구간 [−2, 0]에서 <b>x축 아래</b>에 있어요. 빨간 직사각형들을 보세요.<br>정적분에서는 직사각형 하나를 <b>(함숫값 f(x)) × (폭)</b>으로 계산해요. 직사각형의 길이는 그대로 두고, 함숫값의 <b>부호</b>까지 함께 곱하는 거예요.`,
+   q:{type:'multi', text:'빈칸에 알맞은 것을 골라 보세요.', template:'x축 아래에서 함숫값 f(x)는 {0}이고, 그래서 (함숫값 f(x)) × (폭)은 {1}로 계산해요.',
+      fields:[{type:'select',name:'함숫값의 부호',options:['양수','음수'],answer:1},{type:'select',name:'넓이의 부호',options:['+','−'],answer:1}]},
    hints:['x가 −2부터 0까지일 때 y = x의 값은 양수인가요, 음수인가요?','음수 × 양수는?'],
    success:'맞아요! x축 아래의 넓이는 <b>−로 계산</b>해요. 이것이 정적분의 <b>부호</b>예요.',
-   reveal:'높이는 음수, 넓이는 −로 계산한다.' },
+   reveal:'함숫값 f(x)는 음수, (함숫값) × (폭)은 −로 계산한다.' },
  { id:'l_signcalc', title:'9. 정적분 값 구하기 (아래)', setup:{fi:fiOf('lin'),a:-2,b:0,rects:false,signed:true}, hideExact:true,
    story:`그래프 <b>y = x</b>와 x축 사이, x = −2부터 x = 0까지의 부분(빨간 삼각형)이에요.`,
    q:{type:'num', text:INT('−2','0','x dx')+' 의 값은?', answer:-2, tol:0.001},
@@ -1535,12 +1549,14 @@ const MISSIONS_LOW=[
    success:'훌륭해요! 정적분은 <b>방향과 부호를 가진 넓이</b>예요. 이제 그래프 아래에 <b>정적분 값</b>이 보여요.',
    reveal:'아래 / 뺀 / 바뀐다 / 0이다', onSolve:()=>{S.exactUnlocked=true} },
  { id:'l_areafn', view:'area', title:'14. 넓이를 함수로 보기', setup:{af:'c2',ax:1,adxV:0,showC:false}, hideS:true,
-   story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 움직여 보세요.`,
-   q:{type:'multi', text:'S(3)을 구하고, S(x) = 2x를 미분해 보세요.',
-      fields:[{label:'① S(3) =',name:'S(3)',answer:6},{type:'select',label:'② S(x) = 2x를 미분하면',name:'미분',options:['2','x²','0'],answer:0}]},
-   hints:['S(3) = 3 × 2','2x를 미분하면 기울기 2가 남아요. f(t) = 2와 비교해 보세요.'],
+   story:`높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. <b>x의 위치</b> 슬라이더를 1, 2, 3으로 움직여 보세요.`,
+   q:{type:'multi', text:'S(1), S(3)을 구하고, S(x)를 x의 식으로 나타낸 다음 미분해 보세요.',
+      fields:[{label:'① S(1) =',name:'S(1)',answer:2},{label:'② S(3) =',name:'S(3)',answer:6},
+              {type:'select',label:'③ 보라색 직사각형의 가로는 x, 세로는 2이므로 S(x) =',name:'S(x)',options:['x²','2x','x + 2'],answer:1},
+              {type:'select',label:'④ S(x)를 미분하면 S′(x) =',name:'미분',options:['2','x²','0'],answer:0}]},
+   hints:['보라색은 직사각형이에요. 넓이 = 가로 × 세로이고, 세로는 항상 2예요. S(1) = 1 × 2','S(1) = 2, S(2) = 4, S(3) = 6 … S(x)는 x의 몇 배인가요? 2x를 미분하면 기울기 2가 남아요.'],
    success:'맞아요! <b>넓이 함수 S(x)를 미분하면 원래 함수 f(x)</b>가 돼요. 즉 S(x)는 f(x)의 한 부정적분이에요.',
-   reveal:'S(3) = 6, S′(x) = 2 = f(x)' },
+   reveal:'S(1) = 2, S(3) = 6, S(x) = x × 2 = 2x, S′(x) = 2 = f(x)' },
  { id:'l_ftc', title:'15. 부정적분으로 정적분 계산', setup:{fi:fiOf('two_x'),a:0,b:2,rects:false,signed:true}, hideExact:true,
    story:`그래프 <b>y = 2x</b> 아래 0부터 2까지의 넓이를 <b>부정적분</b>으로 구해 볼게요.<br>14단계에서 넓이 함수 S(x)는 f의 한 부정적분이었어요. 그래서 0부터 2까지의 넓이는 S(2) − S(0)이고, 다른 부정적분 F를 써도 상수 C는 빼면서 사라져요.<br>${INT('a','b','f(x) dx')} = <b>F(b) − F(a)</b> (F는 f의 한 부정적분)`,
    q:{type:'multi', text:INT(0,2,'2x dx')+' 를 구해 보세요.',
@@ -1554,15 +1570,14 @@ const MISSIONS_LOW=[
       hints:['F(2) − F(−1) = 2² − (−1)²','4 − 1 = ?'],
       success:'맞아요, <b>3</b>이에요! 그런데 이 3은 그래프에서 무엇을 뜻할까요?'},
    special:{5:'🤔 4 + 1 = 5는 넓이를 모두 더한 값이에요. F(2) − F(−1)로 다시 계산해 보세요.'},
-   q2:{type:'text', text:'② 구한 값 3이 무엇을 뜻하는지, 그래프의 넓이를 이용해 설명해 보세요.',
-      frame:'x축 위의 넓이는 ______, x축 아래의 넓이는 ______이다. 정적분 3은 ______ 넓이에서 ______ 넓이를 ______ 값이다.',
+   q2:{type:'multi', text:'② 구한 값 3이 무엇을 뜻하는지, 빈칸을 채워 문장을 완성해 보세요. (낱말 카드를 누르면 빈칸에 들어가요. 직접 써도 돼요)',
+      template:'x축 위(파랑)의 넓이는 {0}, x축 아래(빨강)의 넓이는 {1}이다. 정적분 3은 x축 {2} 넓이에서 x축 {3} 넓이를 {4} 값이다. 즉 3 = {5}',
+      fields:[{type:'word',name:'위의 넓이',answers:['4']},{type:'word',name:'아래의 넓이',answers:['1']},
+              {type:'word',name:'셋째 빈칸',answers:['위']},{type:'word',name:'넷째 빈칸',answers:['아래']},
+              {type:'word',name:'다섯째 빈칸',answers:['뺀']},{type:'word',name:'마지막 빈칸',answers:['4 − 1']}],
       cards:['위','아래','넓이','뺀','4','1','4 − 1'],
-      rubric:[{name:'x축 위(파랑) 넓이 4를 찾았다', kw:[], all:[['위','파란','파랑','S₁','S1'],['4']]},
-              {name:'x축 아래(빨강) 넓이 1을 찾았다', kw:[], all:[['아래','빨간','빨강','S₂','S2'],['1']]},
-              {name:'3 = 4 − 1 (위 넓이에서 아래 넓이를 뺀 값)', kw:['4-1','4 - 1','4−1','4 − 1','뺀','빼','차']}],
-      need:2,
       goal:'f(x) = 2x는 [−1, 0]에서 x축 아래, [0, 2]에서 x축 위에 있다. 위 넓이는 밑변 2 × 높이 4 ÷ 2 = 4, 아래 넓이는 밑변 1 × 높이 2 ÷ 2 = 1이므로, 정적분 3은 위 넓이 4에서 아래 넓이 1을 뺀 값(4 − 1)이다.',
-      hints:['그래프는 x = 0에서 x축과 만나요. 파란 삼각형(0~2)과 빨간 삼각형(−1~0)의 넓이를 각각 구해 보세요.','파란 넓이와 빨간 넓이로 3을 만들려면 어떻게 계산해야 할까요?'],
+      hints:['그래프는 x = 0에서 x축과 만나요. 파란 삼각형(0~2)과 빨간 삼각형(−1~0)의 넓이를 각각 구해 보세요.','파란 넓이와 빨간 넓이로 3을 만들려면 어떻게 계산해야 할까요? 낱말 카드 중 쓰이지 않는 것도 있어요.'],
       success:'🎉 완벽해요! 정적분 3은 <b>위 넓이 4에서 아래 넓이 1을 뺀 값</b>이에요.'},
    hints:[], success:'', reveal:'' },
 ];
@@ -1598,20 +1613,20 @@ const F1=x=>x*x/2+x;              // f(x) = x + 1 의 한 부정적분
 const josa=(x,a,b)=>'013678'.includes(String(fmtN(x)).slice(-1))?a:b;
 const VARIANTS={
   sign:v=>{ const L=[-3,-5,-4][v], w=-1-L, area=w*w/2, ans=-area;
-    return { meta:{area}, setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}${josa(area,'이','가')} 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?`},
+    return { meta:{area}, setup:{a:L,b:-1}, special:{[area]:`🤔 넓이는 ${fmtN(area)}${josa(area,'이','가')} 맞아요! 그런데 함숫값 f(x)가 <b>음수</b>라면 (함숫값) × (폭)은?`},
       q:{type:'num', text:INT(fmtN(L),'−1','(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
-      hints:[`먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 ${w}, 높이 ${w}예요.`,'높이가 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
+      hints:[`먼저 빨간 삼각형의 넓이를 구해 보세요. 밑변 ${w}, 높이 ${w}예요.`,'함숫값이 음수라서 넓이가 음수로 계산돼요. 넓이에 −를 붙이면?'],
       success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 정적분은 <b>부호</b>를 가진 넓이예요.`,
-      reveal:`삼각형 넓이 ${w} × ${w} ÷ 2 = ${fmtN(area)}, 높이가 음수이므로 <b>${fmtN(ans)}</b>` }; },
+      reveal:`삼각형 넓이 ${w} × ${w} ÷ 2 = ${fmtN(area)}, 함숫값이 음수이므로 <b>${fmtN(ans)}</b>` }; },
   mix:v=>{ const [a,b]=[[-3,1],[-3,2],[-4,1]][v], S1=(b+1)**2/2, S2=(-1-a)**2/2, ans=S1-S2;
-    return { meta:{S1,S2}, setup:{a,b}, special:{[S1+S2]:'🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?'},
+    return { meta:{S1,S2}, setup:{a,b}, story:MIX_STORY(a,b), special:{[S1+S2]:'🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?'},
       q:{type:'num', text:INT(fmtN(a),fmtN(b),'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`파란 삼각형(−1부터 ${fmtN(b)}까지)의 넓이 S₁과 빨간 삼각형(${fmtN(a)}부터 −1까지)의 넓이 S₂를 각각 구해 보세요.`,`S₁ = ${fmtN(S1)}${josa(S1,'은','는')} +로, S₂ = ${fmtN(S2)}${josa(S2,'은','는')} −로 계산해요.`],
       success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 즉 `+INT('a','b','f(x) dx')+' = <b>S₁ − S₂</b> (위 넓이 − 아래 넓이).',
       reveal:`S₁ = ${fmtN(S1)}, S₂ = ${fmtN(S2)} → S₁ − S₂ = <b>${fmtN(ans)}</b>` }; },
   dir:v=>{ const [a,b]=[[2,0],[3,1],[1,0]][v], area=F1(a)-F1(b), ans=-area;
     return { meta:{area}, setup:{a,b}, special:{[area]:`🤔 넓이는 ${fmtN(area)}${josa(area,'이','가')} 맞아요! 그런데 ${a}에서 ${b}로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?`},
-      story:`이번엔 <b>a = ${a}, b = ${b}</b>이에요. ${a}에서 ${b}로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (${b} − ${a}) ÷ n 이 <b>음수</b>가 돼요! 높이는 양수, 폭은 음수 → 넓이는 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
+      story:`이번엔 <b>a = ${a}, b = ${b}</b>이에요. ${a}에서 ${b}로, <b>왼쪽으로</b> 훑어 가요.<br>그러면 직사각형 하나의 폭 Δx = (b − a) ÷ n = (${b} − ${a}) ÷ n 이 <b>음수</b>가 돼요! 함숫값은 양수, 폭은 음수 → (함숫값) × (폭)은 음수.<div class="tip">💡 b 슬라이더를 a보다 오른쪽·왼쪽으로 옮겨 보며 색이 어떻게 바뀌는지 보세요.</div>`,
       q:{type:'num', text:INT(a,b,'(x + 1) dx')+' 의 값을 구해 보세요.', answer:ans, tol:0.001},
       hints:[`색칠된 부분(${b}부터 ${a}까지)의 넓이는 사다리꼴: (${b+1} + ${a+1}) × ${a-b} ÷ 2 예요.`,'방향이 거꾸로(폭이 음수)라서 넓이를 −로 계산해요.'],
       success:`맞아요, <b>${fmtN(ans)}</b>${josa(ans,'이에요','예요')}! 정적분은 <b>방향</b>을 가진 넓이라서 `+INT('b','a','f(x) dx')+' = −'+INT('a','b','f(x) dx')+' 예요.',
@@ -1686,13 +1701,14 @@ function qboxHtml(m,q){
   if(q.type==='num') qhtml=`<div class="numrow"><input type="text" id="ans" placeholder="답을 입력하세요 (예: 0.5, −2, 1/2)"><button type="button" class="sgn" title="부호 바꾸기">+/−</button></div>`;
   if(q.type==='mc') qhtml=q.options.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(9312+i)} ${o}</button>`).join('');
   if(q.type==='text') qhtml=(q.frame?`<div class="frame">✍ 문장 틀: ${q.frame}</div>`:'')+`<textarea id="ans" placeholder="${q.frame?'문장 틀을 참고해서 내 말로 써 보세요.':'생각한 것을 자유롭게 써 보세요.'}"></textarea>`+(q.cards?`<div class="wcards"><span class="small">낱말 카드(누르면 들어가요):</span>${q.cards.map(c=>`<button type="button" class="wcard">${c}</button>`).join('')}</div>`:'');
-  if(q.type==='multi') qhtml=multiHtml(q);
+  if(q.type==='multi') qhtml=multiHtml(q)+(q.cards?`<div class="wcards"><span class="small">낱말 카드(누르면 빈칸에 들어가요):</span>${q.cards.map(c=>`<button type="button" class="wcard">${c}</button>`).join('')}</div>`:'');
   return `<div class="q">❓ ${q.text}</div>${qhtml}`;
 }
 /* 여러 칸 문항: 숫자 칸과 고르기 칸. template가 있으면 문장 속 빈칸으로 보여 줘요 */
 function multiHtml(q){
   const ctl=(f,i)=> f.type==='select'
     ? `<select class="mfin" data-k="${i}"><option value="">고르기 ▾</option>${f.options.map((o,k)=>`<option value="${k}">${o}</option>`).join('')}</select>`
+    : f.type==='word' ? `<input type="text" class="mfin mword" data-k="${i}" placeholder="□" autocomplete="off">`
     : `<span class="numwrap"><input type="text" class="mfin" data-k="${i}" inputmode="decimal" placeholder="□"><button type="button" class="sgn" title="부호 바꾸기">+/−</button></span>`;
   if(q.template) return `<div class="mtemplate">${q.template.replace(/\{(\d+)\}/g,(s,k)=>ctl(q.fields[+k],+k))}</div>`;
   return `<div class="mfields">${q.fields.map((f,i)=>`<label class="mf"><span>${f.label}</span>${ctl(f,i)}</label>`).join('')}</div>`;
@@ -1702,7 +1718,15 @@ function bindQ(m){
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); selOpt=+b.dataset.i;});
   const ans=$('ans'); if(ans&&CURQ.type==='num') ans.onkeydown=e=>{if(e.key==='Enter')submit(m)};
-  document.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{ const ta=$('ans'); if(!ta) return; const s=ta.selectionStart??ta.value.length, e=ta.selectionEnd??s; const w=b.textContent; ta.value=ta.value.slice(0,s)+w+' '+ta.value.slice(e); ta.focus(); const c=s+w.length+1; ta.setSelectionRange(c,c); });
+  // 빈칸 채우기(낱말 칸): 마지막으로 누른 빈칸(없으면 첫 빈 칸)에 낱말 카드를 넣고 다음 빈 칸으로 넘어가요
+  const words=[...document.querySelectorAll('input.mword')]; let lastWord=null;
+  words.forEach(inp=>inp.addEventListener('focus',()=>{ lastWord=inp; }));
+  if(words.length) document.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{
+    const t=(lastWord&&words.includes(lastWord))?lastWord:(words.find(x=>!x.value.trim())||words[words.length-1]);
+    t.value=b.textContent; t.classList.remove('ok','no');
+    const i=words.indexOf(t), nx=words.slice(i+1).find(x=>!x.value.trim())||words.find(x=>!x.value.trim())||words[i+1];
+    lastWord=nx||null; if(nx) nx.focus(); });
+  else document.querySelectorAll('.wcard').forEach(b=>b.onclick=()=>{ const ta=$('ans'); if(!ta) return; const s=ta.selectionStart??ta.value.length, e=ta.selectionEnd??s; const w=b.textContent; ta.value=ta.value.slice(0,s)+w+' '+ta.value.slice(e); ta.focus(); const c=s+w.length+1; ta.setSelectionRange(c,c); });
   document.querySelectorAll('input.mfin').forEach(inp=>inp.onkeydown=e=>{ if(e.key==='Enter') submit(m); });
   // +/− 버튼: 앞에 −를 붙이거나 떼요 (태블릿 숫자 키패드에는 − 키가 없어요)
   document.querySelectorAll('.qbox .sgn').forEach(b=>b.onclick=()=>{ const inp=b.previousElementSibling; if(!inp) return;
@@ -1723,7 +1747,7 @@ const GUIDE={
   sign:{ ui:[] }, mix:{ ui:[] },
   dir:{ todo:[{t:'b 슬라이더를 a보다 오른쪽으로 옮겨 색 보기',ok:S=>S.bRight},{t:'다시 b를 a보다 왼쪽으로 옮겨 색과 화살표(←) 보기',ok:S=>S.bRight&&S.b<S.a}], ui:['b'] },
   split:{ todo:[{t:'a, b 슬라이더로 문제에 나온 세 구간을 차례로 만들어 보기',ok:S=>S.ab&&S.ab.size>=3}], ui:['a','b'] },
-  def:{ sit:'지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 높이가 음수인 부분도 있죠?',
+  def:{ sit:'지금 그래프는 y = −x + 1이고, a = 3, b = 0으로 <b>거꾸로</b> 되어 있어요. 함숫값이 음수인(x축 아래) 부분도 있죠?',
     todo:[{t:'b를 a보다 크게 만들어 보기',ok:S=>S.bRight},{t:'b를 a보다 작게 만들어 보기',ok:S=>S.bLeft},{t:'a와 b를 같게 만들어 보기',ok:S=>S.abEq}], ui:['a','b','n'] },
   areafn:{ chip:'S', hideChips:['sq','ratio','fx'], sit:'0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요. x가 정해지면 넓이도 하나로 정해지니까, S(x)는 <b>x에 대한 함수</b>예요. S(x) = '+INT(0,'x','f(t) dt')+' 로 나타내요.',
     todo:[{t:'x의 위치 슬라이더를 움직여 보라색 넓이 보기',ok:S=>S.touch&&S.touch.has('ax')},{t:'x를 3에 맞춰 보기',ok:S=>Math.abs(S.ax-3)<0.03}], ui:['ax'] },
@@ -1744,7 +1768,7 @@ const GUIDE={
     todo:[{t:'a와 b를 점점 가깝게 움직여 보기',ok:S=>S.touch&&(S.touch.has('a')||S.touch.has('b'))},{t:'다시 a와 b를 둘 다 1로 맞추기',ok:S=>S.touch&&(S.touch.has('a')||S.touch.has('b'))&&S.a===1&&S.b===1}], ui:['a','b'] },
   l_def:{ sit:'지금까지 알게 된 것을 정리해 볼게요.', todo:[{t:'(필요하면) a, b를 바꿔 보며 확인하기'}], ui:['a','b'] },
   l_areafn:{ chip:'S', hideChips:['sq','ratio','fx'], sit:'높이가 <b>2</b>인 그래프 f(t) = 2예요. 0부터 x까지의 넓이(보라색)를 <b>S(x)</b>라고 해요.',
-    todo:[{t:'x의 위치 슬라이더를 움직여 보기',ok:S=>S.touch&&S.touch.has('ax')}], ui:['ax'] },
+    todo:[{t:'x를 1에 맞춰 보기',ok:S=>S.seenX1},{t:'x를 3에 맞춰 보기',ok:S=>S.seenX3},{t:'보라색 도형의 가로와 세로 살펴보기'}], ui:['ax'] },
   l_ftc:{ ui:[] }, l_interp:{ ui:[] },
 };
 const CURG=()=>CURM?GUIDE[CURM.id]:null;
@@ -1784,7 +1808,7 @@ function loadMission(){  if(!isActive(P.cur)){ const nx=nextAct(P.cur); P.cur = 
   Object.assign(S,{rects:true,signed:false,showArea:false,n:4,method:'right',showC:false,guide:'',hideAB:false});
   S.view=m.view||'graph'; Object.assign(S,m.setup); S.maxN=S.n; S.minDx=9;
   if(S.view==='shape') S.gridsSeen=new Set([S.grid]);
-  S.cSeen=new Set([S.C]); S.touch=new Set(); S.ab=new Set(); S.bLeft=false; S.bRight=false; S.abEq=false; S.explore=false;
+  S.cSeen=new Set([S.C]); S.touch=new Set(); S.ab=new Set(); S.bLeft=false; S.bRight=false; S.abEq=false; S.explore=false; S.seenX1=false; S.seenX3=false;
   parkViz();
   const fresh=!P.done.includes(P.cur);
   S.hideSum=!!m.hideSum && fresh; S.hideS=!!m.hideS && fresh; S.hideExact=!!m.hideExact && fresh;
@@ -1957,7 +1981,7 @@ async function submit(m){
       if(id==='rect2'&&is(3)) msg='🤔 높이를 x값 그대로(1과 2) 썼나요? 높이는 x가 아니라 f(x) = x² 이에요.';
       if(id==='approach'&&v>2.55&&v<2.8) msg='🤔 아주 가까워요! n을 더 크게 하면 어떤 수에 다가가나요? 소수 둘째 자리까지 생각해 보세요.';
       if(id==='approach'&&is(S.maxN)) msg='🤔 그건 n의 값이에요. 우리가 볼 것은 직사각형 넓이의 합이에요.';
-      if(!m.special&&id==='sign'&&is(2)) msg='🤔 넓이는 2가 맞아요! 그런데 높이 f(x)가 <b>음수</b>라면 (높이) × (폭)은?';
+      if(!m.special&&id==='sign'&&is(2)) msg='🤔 넓이는 2가 맞아요! 그런데 함숫값 f(x)가 <b>음수</b>라면 (함숫값) × (폭)은?';
       if(!m.special&&id==='mix'&&is(4)) msg='🤔 넓이를 모두 +로 더했군요! 빨간 부분은 +일까요, −일까요?';
       if(!m.special&&id==='dir'&&is(4)) msg='🤔 넓이는 4가 맞아요! 그런데 2에서 0으로 거꾸로 가면 폭 Δx는 양수일까요, 음수일까요?';
       if(!m.special&&id==='split'&&is(9)) msg='🤔 두 값을 더했군요. [0, 3] = [0, 1] + [1, 3] 이에요. 구하는 것은 [1, 3]이에요.';
@@ -1974,14 +1998,15 @@ async function submit(m){
   if(q.type==='multi'){
     const els=[...document.querySelectorAll('.mfin')], vals=els.map(e=>e.value.trim());
     if(vals.some(v=>v==='')){ showFb('info','빈칸을 모두 채워 볼까요?'); return; }
-    if(q.fields.some((f,i)=>f.type!=='select'&&isNaN(parseNum(vals[i])))){ showFb('info','숫자 칸에는 숫자나 분수(예: 0.5, −2, 1/2)를 써 주세요.'); return; }
-    const ok=q.fields.map((f,i)=> f.type==='select' ? Number(vals[i])===f.answer : Math.abs(parseNum(vals[i])-f.answer)<=(f.tol??0.001));
+    if(q.fields.some((f,i)=>f.type!=='select'&&f.type!=='word'&&isNaN(parseNum(vals[i])))){ showFb('info','숫자 칸에는 숫자나 분수(예: 0.5, −2, 1/2)를 써 주세요.'); return; }
+    const wnorm=v=>String(v).replace(/\s+/g,'').replace(/[-–]/g,'−');
+    const ok=q.fields.map((f,i)=> f.type==='select' ? Number(vals[i])===f.answer : f.type==='word' ? f.answers.map(wnorm).includes(wnorm(vals[i])) : Math.abs(parseNum(vals[i])-f.answer)<=(f.tol??0.001));
     const shown=q.fields.map((f,i)=>(f.name||'')+': '+(f.type==='select'?f.options[Number(vals[i])]:vals[i])).join(' / ');
     els.forEach((e,i)=>{ e.classList.toggle('ok',ok[i]); e.classList.toggle('no',!ok[i]); });
     if(ok.every(Boolean)){ tries++; correct(m,shown,'정답',''); return; }
     const good=q.fields.filter((f,i)=>ok[i]).map(f=>f.name), bad=q.fields.filter((f,i)=>!ok[i]).map(f=>f.name);
     let msg=(good.length?`👍 <b>${good.join(', ')}</b>은(는) 맞았어요! `:'')+`🤔 <b>${bad.join(', ')}</b>을(를) 다시 생각해 볼까요?`;
-    const sp=m.special&&q.fields.length&&Object.keys(m.special).find(k=>q.fields.some((f,i)=>f.type!=='select'&&Math.abs(parseNum(vals[i])-Number(k))<1e-6&&!ok[i]));
+    const sp=m.special&&q.fields.length&&Object.keys(m.special).find(k=>q.fields.some((f,i)=>f.type!=='select'&&f.type!=='word'&&Math.abs(parseNum(vals[i])-Number(k))<1e-6&&!ok[i]));
     if(sp) msg=m.special[sp];
     wrong(m,msg); record(m,shown,'오답',msg); return;
   }
@@ -2962,7 +2987,7 @@ const MAIN_TOUR=[
   {el:'#gridBtns', title:'모눈 크기 바꾸기',
    body:'모눈 크기를 바꾸면 칸 넓이의 합이 어떻게 달라지는지 비교해 보세요. 🤔 언제 실제 넓이에 가장 가까워질까요?'},
   {el:'#cv', title:'그래프 화면',
-   body:'<b style="color:#2563eb">파란색</b>은 +로, <b style="color:#dc2626">빨간색</b>은 −로 계산되는 넓이예요. 높이가 음수이거나, 구간을 거꾸로 훑으면(폭이 음수) 빨간색이 돼요.'},
+   body:'<b style="color:#2563eb">파란색</b>은 +로, <b style="color:#dc2626">빨간색</b>은 −로 계산되는 넓이예요. 함숫값이 음수(x축 아래)이거나, 구간을 거꾸로 훑으면(폭이 음수) 빨간색이 돼요.'},
   {el:'#ctrlMain', title:'조작판',
    body:'단계마다 <b>필요한 조작만</b> 보여요. <b>👉 여기를 움직여요</b> 표시가 붙은 것을 움직여 보세요.<br>단계를 해결하면 <b>🔧 더 탐구하기</b>로 함수·구간 등 모든 조작을 열 수 있어요.'},
   {el:'#readMain', title:'정적분 값',
